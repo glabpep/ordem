@@ -8,31 +8,48 @@
         <style>
             :root { --primary: #004a99; --secondary: #28a745; --danger: #dc3545; --bg: #f4f7f9; }
             body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
+            
             .container { max-width: 900px; margin: auto; background: white; min-height: 100vh; padding: 15px; box-sizing: border-box; padding-bottom: 220px; }
+            
             h1 { color: var(--primary); text-align: center; font-size: 1.6rem; margin-bottom: 5px; }
             .subtitle { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+
+            /* Card de Alerta Inicial */
+            .info-alert-card { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 12px; margin-bottom: 20px; position: relative; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            .close-alert { position: absolute; top: 10px; right: 10px; cursor: pointer; font-weight: bold; font-size: 1.2rem; }
+
             .frete-card { background: #fff; border: 2px solid var(--primary); padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+            
             .table-container { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; }
             table { width: 100%; border-collapse: collapse; background: white; min-width: 400px; }
             th { background: var(--primary); color: white; padding: 12px 8px; text-align: left; font-size: 0.85rem; }
             td { padding: 12px 8px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+            
             .status-disponivel { color: var(--secondary); font-weight: bold; }
             .status-espera { color: var(--danger); font-weight: bold; background: #fff5f5; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--danger); display: inline-block; }
+
             .input-style { padding: 12px; border: 1px solid #ccc; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 16px; }
             .btn-add { background: var(--secondary); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
             .btn-add:disabled { background: #eee; color: #999; cursor: not-allowed; }
+
+            /* Painel Carrinho */
             .cart-panel { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); color: white; padding: 15px; border-radius: 20px 20px 0 0; z-index: 1000; display: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto; }
             @media (min-width: 768px) { .cart-panel { width: 400px; left: auto; right: 20px; bottom: 20px; border-radius: 20px; } }
+            
             .cart-list { margin: 10px 0; max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 5px; }
             .cart-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; align-items: center; }
             .btn-remove { background: #ff4444; border: none; color: white; cursor: pointer; font-weight: bold; border-radius: 4px; padding: 2px 8px; margin-left: 10px; }
+
             .coupon-section { display: flex; gap: 5px; margin: 10px 0; }
             .coupon-input { flex: 1; padding: 8px; border-radius: 5px; border: none; font-size: 0.8rem; color: #333; }
             .btn-coupon { background: #ffeb3b; color: #333; border: none; padding: 8px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
+
             .ship-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #ffeb3b; margin-top: 5px; font-weight: bold; }
             .total-row { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin: 5px 0; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }
             .discount-line { display: none; justify-content: space-between; color: #ffeb3b; font-size: 0.9rem; margin-bottom: 5px; }
+            
             .btn-checkout-final { background: white; color: var(--primary); border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 5px; }
+
             .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: auto; }
             .modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 500px; border-radius: 15px; box-sizing: border-box; }
             .form-group { margin-bottom: 12px; }
@@ -43,6 +60,11 @@
     <div class="container">
         <h1>🧪 G-LAB PEPTIDES</h1>
         <p class="subtitle">Estoque Atualizado e Pedidos Online</p>
+
+        <div id="main-info-alert" class="info-alert-card">
+            <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
+            <strong>Aviso importante:</strong> Os produtos são envasados em forma sólida, assim não necessitam de refrigeração para manter as propriedades. O produto deve ser diluído em solução bacteriostática (vendida à parte). <br><strong>NOME DA SOLUÇÃO:</strong> Bacteriostic Water.
+        </div>
         
         <div class="frete-card">
             <strong>🚚 1. Informe seu CEP para o Frete</strong>
@@ -785,27 +807,13 @@
 
         function aplicarCupom() {
             const code = document.getElementById('coupon-code').value.trim().toUpperCase();
+            if(code === 'BRUNA5') cupomAtivo = { nome: 'BRUNA5', desc: 0.05 };
+            else if(code === 'DANI5') cupomAtivo = { nome: 'DANI5', desc: 0.05 };
+            else if(code === 'GILMARA5') cupomAtivo = { nome: 'GILMARA5', desc: 0.05 };
+            else if(code === 'DAFNE10') cupomAtivo = { nome: 'DAFNE10', desc: 0.10 };
+            else { cupomAtivo = null; alert("Cupom inválido."); }
             
-            if(code === 'BRUNA5') {
-                cupomAtivo = { nome: 'BRUNA5', desc: 0.05 };
-                alert("Cupom BRUNA5 aplicado! 5% de desconto.");
-            }
-            else if(code === 'DANI5') {
-                cupomAtivo = { nome: 'DANI5', desc: 0.05 };
-                alert("Cupom DANI5 aplicado! 5% de desconto.");
-            } 
-            else if(code === 'GILMARA5') {
-                cupomAtivo = { nome: 'GILMARA5', desc: 0.05 };
-                alert("Cupom GILMARA5 aplicado! 5% de desconto.");
-            }
-            else if(code === 'DAFNE10') {
-                cupomAtivo = { nome: 'DAFNE10', desc: 0.10 };
-                alert("Cupom DAFNE10 aplicado! 10% de desconto.");
-            }
-            else {
-                cupomAtivo = null;
-                alert("Cupom inválido.");
-            }
+            if(cupomAtivo) alert("Cupom " + cupomAtivo.nome + " aplicado!");
             atualizarInterface();
         }
 
@@ -857,30 +865,45 @@
             atualizarInterface();
         }
 
-        function abrirCheckout() { 
-            document.getElementById('modalCheckout').style.display = 'block'; 
-        }
+        function abrirCheckout() { document.getElementById('modalCheckout').style.display = 'block'; }
         function fecharCheckout() { document.getElementById('modalCheckout').style.display = 'none'; }
 
         function enviarPedido() {
-            const n = document.getElementById('f_nome').value;
-            const e = document.getElementById('f_end').value;
-            const t = document.getElementById('f_tel').value;
-            const p = document.getElementById('f_pgto').value;
-            if(!n || !e || !t) { alert("Preencha os campos obrigatórios!"); return; }
+            const dados = {
+                n: document.getElementById('f_nome').value,
+                e: document.getElementById('f_end').value,
+                nu: document.getElementById('f_num').value,
+                co: document.getElementById('f_comp').value,
+                ci: document.getElementById('f_cidade').value,
+                es: document.getElementById('f_estado').value,
+                ce: document.getElementById('cep-destino').value,
+                t: document.getElementById('f_tel').value,
+                p: document.getElementById('f_pgto').value
+            };
+
+            if(!dados.n || !dados.e || !dados.t) { alert("Preencha Nome, Endereço e WhatsApp!"); return; }
 
             let subtotalItens = 0;
             carrinho.forEach(i => subtotalItens += i.preco);
             let desc = cupomAtivo ? subtotalItens * cupomAtivo.desc : 0;
 
-            let msg = "*NOVO PEDIDO G-LAB*%0A%0A*CLIENTE:* " + n + "%0A*WhatsApp:* " + t + "%0A*PAGAMENTO:* " + p + "%0A%0A*ITENS:*%0A";
+            let msg = "*NOVO PEDIDO G-LAB*%0A%0A";
+            msg += "*DADOS DO CLIENTE:*%0A";
+            msg += "• *Nome:* " + dados.n + "%0A";
+            msg += "• *WhatsApp:* " + dados.t + "%0A";
+            msg += "• *End:* " + dados.e + ", " + dados.nu + " (" + dados.co + ")%0A";
+            msg += "• *Cidade:* " + dados.ci + "-" + dados.es + "%0A";
+            msg += "• *CEP:* " + (dados.ce || "Não informado") + "%0A";
+            msg += "• *Pagamento:* " + dados.p + "%0A%0A";
+
+            msg += "*ITENS DO PEDIDO:*%0A";
             carrinho.forEach(i => { msg += "• " + i.nome + " (" + i.espec + ") - R$ " + i.preco.toFixed(2) + "%0A"; });
             
-            if(cupomAtivo) msg += "%0A🏷️ *CUPOM APLICADO:* " + cupomAtivo.nome + " (-R$ " + desc.toFixed(2) + ")";
+            if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + desc.toFixed(2) + ")";
             if(freteV > 0) msg += "%0A🚚 *FRETE:* " + freteD;
-            else msg += "%0A🚚 *FRETE:* Não calculado/Retirada";
+            else msg += "%0A🚚 *FRETE:* Retirada/A calcular";
             
-            msg += "%0A*TOTAL GERAL: R$ " + (subtotalItens - desc + freteV).toFixed(2) + "*";
+            msg += "%0A%0A*TOTAL GERAL: R$ " + (subtotalItens - desc + freteV).toFixed(2) + "*";
             window.open("https://wa.me/554188643910?text=" + msg, '_blank');
         }
     </script>
