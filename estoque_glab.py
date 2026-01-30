@@ -50,48 +50,33 @@ def gerar_site_vendas_completo():
         <style>
             :root {{ --primary: #004a99; --secondary: #28a745; --danger: #dc3545; --bg: #f4f7f9; }}
             body {{ font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; }}
-            
             .container {{ max-width: 900px; margin: auto; background: white; min-height: 100vh; padding: 15px; box-sizing: border-box; padding-bottom: 220px; }}
-            
             h1 {{ color: var(--primary); text-align: center; font-size: 1.6rem; margin-bottom: 5px; }}
             .subtitle {{ text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 20px; }}
-
-            /* Card de Alerta Inicial */
             .info-alert-card {{ background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 12px; margin-bottom: 20px; position: relative; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }}
             .close-alert {{ position: absolute; top: 10px; right: 10px; cursor: pointer; font-weight: bold; font-size: 1.2rem; }}
-
             .frete-card {{ background: #fff; border: 2px solid var(--primary); padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }}
-            
             .table-container {{ overflow-x: auto; border-radius: 8px; border: 1px solid #eee; }}
             table {{ width: 100%; border-collapse: collapse; background: white; min-width: 400px; }}
             th {{ background: var(--primary); color: white; padding: 12px 8px; text-align: left; font-size: 0.85rem; }}
             td {{ padding: 12px 8px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }}
-            
             .status-disponivel {{ color: var(--secondary); font-weight: bold; }}
             .status-espera {{ color: var(--danger); font-weight: bold; background: #fff5f5; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--danger); display: inline-block; }}
-
             .input-style {{ padding: 12px; border: 1px solid #ccc; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 16px; }}
             .btn-add {{ background: var(--secondary); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }}
             .btn-add:disabled {{ background: #eee; color: #999; cursor: not-allowed; }}
-
-            /* Painel Carrinho */
             .cart-panel {{ position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); color: white; padding: 15px; border-radius: 20px 20px 0 0; z-index: 1000; display: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto; }}
             @media (min-width: 768px) {{ .cart-panel {{ width: 400px; left: auto; right: 20px; bottom: 20px; border-radius: 20px; }} }}
-            
             .cart-list {{ margin: 10px 0; max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 5px; }}
             .cart-item {{ display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; align-items: center; }}
             .btn-remove {{ background: #ff4444; border: none; color: white; cursor: pointer; font-weight: bold; border-radius: 4px; padding: 2px 8px; margin-left: 10px; }}
-
             .coupon-section {{ display: flex; gap: 5px; margin: 10px 0; }}
             .coupon-input {{ flex: 1; padding: 8px; border-radius: 5px; border: none; font-size: 0.8rem; color: #333; }}
             .btn-coupon {{ background: #ffeb3b; color: #333; border: none; padding: 8px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 0.8rem; }}
-
             .ship-row {{ display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #ffeb3b; margin-top: 5px; font-weight: bold; }}
             .total-row {{ display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin: 5px 0; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }}
             .discount-line {{ display: none; justify-content: space-between; color: #ffeb3b; font-size: 0.9rem; margin-bottom: 5px; }}
-            
             .btn-checkout-final {{ background: white; color: var(--primary); border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 5px; }}
-
             .modal {{ display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: auto; }}
             .modal-content {{ background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 500px; border-radius: 15px; box-sizing: border-box; }}
             .form-group {{ margin-bottom: 12px; }}
@@ -105,14 +90,14 @@ def gerar_site_vendas_completo():
 
         <div id="main-info-alert" class="info-alert-card">
             <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
-            <strong>Aviso importante:</strong> Os produtos são envasados em forma sólida, assim não necessitam de refrigeração para manter as propriedades. O produto deve ser diluído em solução bacteriostática (vendida à parte). <br><strong>NOME DA SOLUÇÃO:</strong> Bacteriostic Water.
+            <strong>Aviso importante:</strong> Os produtos são envasados em forma sólida, assim não necessitam de refrigeração para manter as propriedades. O produto deve ser diluído em solução bacteriostática (vendida à parte). Após diluição manter refrigerado!. <br><strong>NOME DA SOLUÇÃO:</strong> Bacteriostic Water.
         </div>
         
         <div class="frete-card">
-            <strong>🚚 1. Informe seu CEP para o Frete</strong>
+            <strong>🚚 1. Informe seu CEP para Localizar Região</strong>
             <div style="display: flex; gap: 8px;">
                 <input type="tel" id="cep-destino" class="input-style" style="flex: 1;" placeholder="00000-000">
-                <button onclick="calcularFrete()" class="btn-add" style="width: auto; padding: 0 15px;">Calcular</button>
+                <button id="btn-calc" onclick="calcularFrete()" class="btn-add" style="width: auto; padding: 0 15px;">Localizar</button>
             </div>
             <div id="resultado-frete" style="margin-top:12px; font-size: 0.95rem; line-height: 1.4; color: var(--primary); font-weight: bold;"></div>
         </div>
@@ -222,6 +207,15 @@ def gerar_site_vendas_completo():
         let freteD = "";
         let cupomAtivo = null;
 
+        // Mapeamento Oficial de Estados por Região
+        const REGIOES = {{
+            'SUL': ['PR', 'SC', 'RS'],
+            'SUDESTE': ['SP', 'RJ', 'MG', 'ES'],
+            'CENTRO-OESTE': ['DF', 'GO', 'MT', 'MS'],
+            'NORTE': ['AM', 'RR', 'AP', 'PA', 'TO', 'RO', 'AC'],
+            'NORDESTE': ['BA', 'SE', 'AL', 'PE', 'PB', 'RN', 'CE', 'PI', 'MA']
+        }};
+
         function adicionar(id) {{
             const p = PRODUTOS.find(x => x.id === id);
             if(p) {{
@@ -250,7 +244,6 @@ def gerar_site_vendas_completo():
             else if(code === 'GILMARA5') cupomAtivo = {{ nome: 'GILMARA5', desc: 0.05 }};
             else if(code === 'DAFNE10') cupomAtivo = {{ nome: 'DAFNE10', desc: 0.10 }};
             else {{ cupomAtivo = null; alert("Cupom inválido."); }}
-            
             if(cupomAtivo) alert("Cupom " + cupomAtivo.nome + " aplicado!");
             atualizarInterface();
         }}
@@ -260,14 +253,12 @@ def gerar_site_vendas_completo():
             const panel = document.getElementById('cart-panel');
             panel.style.display = carrinho.length > 0 ? 'block' : 'none';
             document.getElementById('cart-count').innerText = carrinho.length;
-            
             list.innerHTML = '';
             let subtotalItens = 0;
             carrinho.forEach(item => {{
                 subtotalItens += item.preco;
                 list.innerHTML += `<div class="cart-item"><span>${{item.nome}}</span><span>R$ ${{item.preco.toFixed(2)}} <button class="btn-remove" onclick="remover(${{item.uid}})">×</button></span></div>`;
             }});
-            
             let valorDesconto = 0;
             if(cupomAtivo) {{
                 valorDesconto = subtotalItens * cupomAtivo.desc;
@@ -277,7 +268,6 @@ def gerar_site_vendas_completo():
             }} else {{
                 document.getElementById('discount-row').style.display = 'none';
             }}
-
             const shipContainer = document.getElementById('ship-info-container');
             if(freteV > 0) {{
                 shipContainer.style.display = 'flex';
@@ -285,22 +275,62 @@ def gerar_site_vendas_completo():
             }} else {{
                 shipContainer.style.display = 'none';
             }}
-
             const totalFinal = (subtotalItens - valorDesconto) + freteV;
             document.getElementById('total-val').innerText = totalFinal.toLocaleString('pt-BR', {{minimumFractionDigits: 2}});
         }}
 
-        function calcularFrete() {{
-            const cep = document.getElementById('cep-destino').value.replace(/\D/g, '');
-            if(cep.length !== 8) {{ alert("CEP Inválido"); return; }}
-            const r = parseInt(cep.substring(0,1));
-            if(r === 8) {{ freteV = 90.00; freteD = "SUL R$ 90,00 (5 DIAS)"; }}
-            else if([0,1,2,3].includes(r)) {{ freteV = 115.00; freteD = "SUDESTE R$ 115,00 (5 DIAS)"; }}
-            else if([4,5,6].includes(r)) {{ freteV = 145.00; freteD = "NORDESTE R$ 145,00 (8 DIAS)"; }}
-            else if(r === 7) {{ freteV = 125.00; freteD = "CENTRO OESTE R$ 125,00 (5 DIAS)"; }}
-            else if(r === 9) {{ freteV = 145.00; freteD = "NORTE R$ 145,00 (8 DIAS)"; }}
-            document.getElementById('resultado-frete').innerText = "✅ " + freteD;
-            atualizarInterface();
+        async function calcularFrete() {{
+            const inputCep = document.getElementById('cep-destino').value.replace(/\D/g, '');
+            const btn = document.getElementById('btn-calc');
+            const res = document.getElementById('resultado-frete');
+
+            if(inputCep.length !== 8) {{ alert("Por favor, digite um CEP válido com 8 dígitos."); return; }}
+
+            btn.disabled = true;
+            btn.innerText = "...";
+
+            try {{
+                // Consulta oficial ao WebService de CEP para identificar o ESTADO exato
+                const response = await fetch(`https://viacep.com.br/ws/${{inputCep}}/json/`);
+                const data = await response.json();
+
+                if(data.erro) {{
+                    alert("CEP não encontrado. Verifique os números.");
+                    btn.disabled = false;
+                    btn.innerText = "Localizar";
+                    return;
+                }}
+
+                const uf = data.uf.toUpperCase();
+                
+                // Mapeia a UF para a Região e define valor/prazo exatos conforme sua instrução
+                if(REGIOES['SUL'].includes(uf)) {{
+                    freteV = 90.00;
+                    freteD = "SUL R$ 90,00 (3 a 6 dias úteis)";
+                }} 
+                else if(REGIOES['SUDESTE'].includes(uf) || REGIOES['CENTRO-OESTE'].includes(uf)) {{
+                    freteV = 110.00;
+                    freteD = "SUDESTE/CENTRO-OESTE R$ 110,00 (5 a 8 dias úteis)";
+                }}
+                else {{
+                    freteV = 140.00;
+                    freteD = "NORTE/NORDESTE R$ 140,00 (8 a 12 dias úteis)";
+                }}
+
+                // Preenche dados no modal de checkout para agilizar
+                document.getElementById('f_cidade').value = data.localidade;
+                document.getElementById('f_estado').value = uf;
+                document.getElementById('f_end').value = data.logradouro;
+
+                res.innerText = "✅ " + data.localidade + "-" + uf + ": " + freteD;
+                atualizarInterface();
+
+            }} catch (error) {{
+                alert("Erro ao consultar CEP. Verifique sua conexão.");
+            }} finally {{
+                btn.disabled = false;
+                btn.innerText = "Localizar";
+            }}
         }}
 
         function abrirCheckout() {{ document.getElementById('modalCheckout').style.display = 'block'; }}
@@ -318,13 +348,10 @@ def gerar_site_vendas_completo():
                 t: document.getElementById('f_tel').value,
                 p: document.getElementById('f_pgto').value
             }};
-
             if(!dados.n || !dados.e || !dados.t) {{ alert("Preencha Nome, Endereço e WhatsApp!"); return; }}
-
             let subtotalItens = 0;
             carrinho.forEach(i => subtotalItens += i.preco);
             let desc = cupomAtivo ? subtotalItens * cupomAtivo.desc : 0;
-
             let msg = "*NOVO PEDIDO G-LAB*%0A%0A";
             msg += "*DADOS DO CLIENTE:*%0A";
             msg += "• *Nome:* " + dados.n + "%0A";
@@ -333,14 +360,11 @@ def gerar_site_vendas_completo():
             msg += "• *Cidade:* " + dados.ci + "-" + dados.es + "%0A";
             msg += "• *CEP:* " + (dados.ce || "Não informado") + "%0A";
             msg += "• *Pagamento:* " + dados.p + "%0A%0A";
-
             msg += "*ITENS DO PEDIDO:*%0A";
             carrinho.forEach(i => {{ msg += "• " + i.nome + " (" + i.espec + ") - R$ " + i.preco.toFixed(2) + "%0A"; }});
-            
             if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + desc.toFixed(2) + ")";
             if(freteV > 0) msg += "%0A🚚 *FRETE:* " + freteD;
             else msg += "%0A🚚 *FRETE:* Retirada/A calcular";
-            
             msg += "%0A%0A*TOTAL GERAL: R$ " + (subtotalItens - desc + freteV).toFixed(2) + "*";
             window.open("https://wa.me/554188643910?text=" + msg, '_blank');
         }}
@@ -352,7 +376,7 @@ def gerar_site_vendas_completo():
     caminho_saida = os.path.join(diretorio_atual, 'index.html')
     with open(caminho_saida, 'w', encoding='utf-8') as f:
         f.write(html_template)
-    print(f"Sucesso! Versão final com alerta informativo e dados de entrega completos gerada.")
+    print(f"Sucesso! Código gerado com localização via API e valores atualizados.")
 
 if __name__ == "__main__":
     gerar_site_vendas_completo()
