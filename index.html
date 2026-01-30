@@ -8,44 +8,31 @@
         <style>
             :root { --primary: #004a99; --secondary: #28a745; --danger: #dc3545; --bg: #f4f7f9; }
             body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
-            
             .container { max-width: 900px; margin: auto; background: white; min-height: 100vh; padding: 15px; box-sizing: border-box; padding-bottom: 220px; }
-            
             h1 { color: var(--primary); text-align: center; font-size: 1.6rem; margin-bottom: 5px; }
             .subtitle { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 20px; }
-
             .frete-card { background: #fff; border: 2px solid var(--primary); padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-            
             .table-container { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; }
             table { width: 100%; border-collapse: collapse; background: white; min-width: 400px; }
             th { background: var(--primary); color: white; padding: 12px 8px; text-align: left; font-size: 0.85rem; }
             td { padding: 12px 8px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
-            
             .status-disponivel { color: var(--secondary); font-weight: bold; }
             .status-espera { color: var(--danger); font-weight: bold; background: #fff5f5; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--danger); display: inline-block; }
-
             .input-style { padding: 12px; border: 1px solid #ccc; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 16px; }
             .btn-add { background: var(--secondary); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
             .btn-add:disabled { background: #eee; color: #999; cursor: not-allowed; }
-
-            /* Painel Carrinho */
             .cart-panel { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); color: white; padding: 15px; border-radius: 20px 20px 0 0; z-index: 1000; display: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto; }
             @media (min-width: 768px) { .cart-panel { width: 400px; left: auto; right: 20px; bottom: 20px; border-radius: 20px; } }
-            
             .cart-list { margin: 10px 0; max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 5px; }
             .cart-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; align-items: center; }
             .btn-remove { background: #ff4444; border: none; color: white; cursor: pointer; font-weight: bold; border-radius: 4px; padding: 2px 8px; margin-left: 10px; }
-
             .coupon-section { display: flex; gap: 5px; margin: 10px 0; }
-            .coupon-input { flex: 1; padding: 8px; border-radius: 5px; border: none; font-size: 0.8rem; }
+            .coupon-input { flex: 1; padding: 8px; border-radius: 5px; border: none; font-size: 0.8rem; color: #333; }
             .btn-coupon { background: #ffeb3b; color: #333; border: none; padding: 8px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
-
             .ship-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #ffeb3b; margin-top: 5px; font-weight: bold; }
             .total-row { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin: 5px 0; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }
             .discount-line { display: none; justify-content: space-between; color: #ffeb3b; font-size: 0.9rem; margin-bottom: 5px; }
-            
             .btn-checkout-final { background: white; color: var(--primary); border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 5px; }
-
             .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: auto; }
             .modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 500px; border-radius: 15px; box-sizing: border-box; }
             .form-group { margin-bottom: 12px; }
@@ -731,7 +718,7 @@
         </div>
         
         <div id="discount-row" class="discount-line">
-            <span>Desconto (BRUNA5 -5%):</span>
+            <span>Desconto (<span id="discount-name"></span>):</span>
             <span>- R$ <span id="discount-val">0.00</span></span>
         </div>
 
@@ -773,7 +760,7 @@
         let carrinho = [];
         let freteV = 0;
         let freteD = "";
-        let descontoAtivo = false;
+        let cupomAtivo = null;
 
         function adicionar(id) {
             const p = PRODUTOS.find(x => x.id === id);
@@ -798,11 +785,25 @@
 
         function aplicarCupom() {
             const code = document.getElementById('coupon-code').value.trim().toUpperCase();
+            
             if(code === 'BRUNA5') {
-                descontoAtivo = true;
-                alert("Cupom BRUNA5 aplicado! 5% de desconto nos itens.");
-            } else {
-                descontoAtivo = false;
+                cupomAtivo = { nome: 'BRUNA5', desc: 0.05 };
+                alert("Cupom BRUNA5 aplicado! 5% de desconto.");
+            }
+            else if(code === 'DANI5') {
+                cupomAtivo = { nome: 'DANI5', desc: 0.05 };
+                alert("Cupom DANI5 aplicado! 5% de desconto.");
+            } 
+            else if(code === 'GILMARA5') {
+                cupomAtivo = { nome: 'GILMARA5', desc: 0.05 };
+                alert("Cupom GILMARA5 aplicado! 5% de desconto.");
+            }
+            else if(code === 'DAFNE10') {
+                cupomAtivo = { nome: 'DAFNE10', desc: 0.10 };
+                alert("Cupom DAFNE10 aplicado! 10% de desconto.");
+            }
+            else {
+                cupomAtivo = null;
                 alert("Cupom inválido.");
             }
             atualizarInterface();
@@ -815,16 +816,17 @@
             document.getElementById('cart-count').innerText = carrinho.length;
             
             list.innerHTML = '';
-            let sub = 0;
+            let subtotalItens = 0;
             carrinho.forEach(item => {
-                sub += item.preco;
+                subtotalItens += item.preco;
                 list.innerHTML += `<div class="cart-item"><span>${item.nome}</span><span>R$ ${item.preco.toFixed(2)} <button class="btn-remove" onclick="remover(${item.uid})">×</button></span></div>`;
             });
             
             let valorDesconto = 0;
-            if(descontoAtivo) {
-                valorDesconto = sub * 0.05;
+            if(cupomAtivo) {
+                valorDesconto = subtotalItens * cupomAtivo.desc;
                 document.getElementById('discount-row').style.display = 'flex';
+                document.getElementById('discount-name').innerText = cupomAtivo.nome + " -" + (cupomAtivo.desc * 100) + "%";
                 document.getElementById('discount-val').innerText = valorDesconto.toFixed(2);
             } else {
                 document.getElementById('discount-row').style.display = 'none';
@@ -838,7 +840,7 @@
                 shipContainer.style.display = 'none';
             }
 
-            const totalFinal = (sub - valorDesconto) + freteV;
+            const totalFinal = (subtotalItens - valorDesconto) + freteV;
             document.getElementById('total-val').innerText = totalFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2});
         }
 
@@ -867,18 +869,18 @@
             const p = document.getElementById('f_pgto').value;
             if(!n || !e || !t) { alert("Preencha os campos obrigatórios!"); return; }
 
-            let sub = 0;
-            carrinho.forEach(i => sub += i.preco);
-            let desc = descontoAtivo ? sub * 0.05 : 0;
+            let subtotalItens = 0;
+            carrinho.forEach(i => subtotalItens += i.preco);
+            let desc = cupomAtivo ? subtotalItens * cupomAtivo.desc : 0;
 
             let msg = "*NOVO PEDIDO G-LAB*%0A%0A*CLIENTE:* " + n + "%0A*WhatsApp:* " + t + "%0A*PAGAMENTO:* " + p + "%0A%0A*ITENS:*%0A";
             carrinho.forEach(i => { msg += "• " + i.nome + " (" + i.espec + ") - R$ " + i.preco.toFixed(2) + "%0A"; });
             
-            if(descontoAtivo) msg += "%0A🏷️ *CUPOM APLICADO:* BRUNA5 (-R$ " + desc.toFixed(2) + ")";
+            if(cupomAtivo) msg += "%0A🏷️ *CUPOM APLICADO:* " + cupomAtivo.nome + " (-R$ " + desc.toFixed(2) + ")";
             if(freteV > 0) msg += "%0A🚚 *FRETE:* " + freteD;
             else msg += "%0A🚚 *FRETE:* Não calculado/Retirada";
             
-            msg += "%0A*TOTAL GERAL: R$ " + (sub - desc + freteV).toFixed(2) + "*";
+            msg += "%0A*TOTAL GERAL: R$ " + (subtotalItens - desc + freteV).toFixed(2) + "*";
             window.open("https://wa.me/554188643910?text=" + msg, '_blank');
         }
     </script>
