@@ -7,7 +7,7 @@ def gerar_site_vendas_completo():
     
     # Busca o arquivo de dados
     arquivo_dados = None
-    for nome in ['stock_2901.xlsx', 'stock_2901.xlsx - Plan1.csv']:
+    for nome in ['stock_0202.xlsx', 'stock_2901.xlsx - Plan1.csv']:
         caminho = os.path.join(diretorio_atual, nome)
         if os.path.exists(caminho):
             arquivo_dados = caminho
@@ -39,7 +39,7 @@ def gerar_site_vendas_completo():
         print(f"Erro ao ler os dados: {e}")
         return
 
-    # Início do HTML
+    # Início do HTML (Note o uso de chaves duplas {{ }} para CSS e JS)
     html_template = f"""
     <!DOCTYPE html>
     <html lang="pt-br">
@@ -124,7 +124,9 @@ def gerar_site_vendas_completo():
         is_available = "DISPONÍVEL" in estoque_status
         status_class = "status-disponivel" if is_available else "status-espera"
         btn_disabled = "" if is_available else "disabled"
+        simbolo = "+" if is_available else "✖"
         
+        # Aqui usamos chaves simples para as variáveis do loop Python
         html_template += f"""
                     <tr>
                         <td><strong>{produto}</strong><br><small style="color:#666">{espec}</small></td>
@@ -132,7 +134,7 @@ def gerar_site_vendas_completo():
                         <td style="white-space: nowrap;">R$ {preco:,.2f}</td>
                         <td>
                             <button onclick="adicionar({idx})" {btn_disabled} class="btn-add">
-                                { "+" if is_available else "✖" }
+                                {simbolo}
                             </button>
                         </td>
                     </tr>
@@ -207,7 +209,6 @@ def gerar_site_vendas_completo():
         let freteD = "";
         let cupomAtivo = null;
 
-        // Mapeamento Oficial de Estados por Região
         const REGIOES = {{
             'SUL': ['PR', 'SC', 'RS'],
             'SUDESTE': ['SP', 'RJ', 'MG', 'ES'],
@@ -226,6 +227,7 @@ def gerar_site_vendas_completo():
 
         function remover(uid) {{
             carrinho = carrinho.filter(x => x.uid !== uid);
+            if (carrinho.length === 0) removerFrete();
             atualizarInterface();
         }}
 
@@ -234,6 +236,9 @@ def gerar_site_vendas_completo():
             freteD = "";
             document.getElementById('resultado-frete').innerText = "";
             document.getElementById('cep-destino').value = "";
+            document.getElementById('f_cidade').value = "";
+            document.getElementById('f_estado').value = "";
+            document.getElementById('f_end').value = "";
             atualizarInterface();
         }}
 
@@ -290,7 +295,6 @@ def gerar_site_vendas_completo():
             btn.innerText = "...";
 
             try {{
-                // Consulta oficial ao WebService de CEP para identificar o ESTADO exato
                 const response = await fetch(`https://viacep.com.br/ws/${{inputCep}}/json/`);
                 const data = await response.json();
 
@@ -303,7 +307,6 @@ def gerar_site_vendas_completo():
 
                 const uf = data.uf.toUpperCase();
                 
-                // Mapeia a UF para a Região e define valor/prazo exatos conforme sua instrução
                 if(REGIOES['SUL'].includes(uf)) {{
                     freteV = 90.00;
                     freteD = "SUL R$ 90,00 (3 a 6 dias úteis)";
@@ -317,7 +320,6 @@ def gerar_site_vendas_completo():
                     freteD = "NORTE/NORDESTE R$ 140,00 (8 a 12 dias úteis)";
                 }}
 
-                // Preenche dados no modal de checkout para agilizar
                 document.getElementById('f_cidade').value = data.localidade;
                 document.getElementById('f_estado').value = uf;
                 document.getElementById('f_end').value = data.logradouro;
@@ -333,7 +335,17 @@ def gerar_site_vendas_completo():
             }}
         }}
 
-        function abrirCheckout() {{ document.getElementById('modalCheckout').style.display = 'block'; }}
+        function abrirCheckout() {{ 
+            const inputCep = document.getElementById('cep-destino').value.replace(/\D/g, '');
+            
+            if(!inputCep || freteV === 0) {{
+                alert("Para o seguimento, você deve informar o CEP e clicar em 'Localizar' para calcular o frete!");
+                document.getElementById('cep-destino').focus();
+                return;
+            }}
+            document.getElementById('modalCheckout').style.display = 'block'; 
+        }}
+        
         function fecharCheckout() {{ document.getElementById('modalCheckout').style.display = 'none'; }}
 
         function enviarPedido() {{
@@ -348,10 +360,13 @@ def gerar_site_vendas_completo():
                 t: document.getElementById('f_tel').value,
                 p: document.getElementById('f_pgto').value
             }};
+            
             if(!dados.n || !dados.e || !dados.t) {{ alert("Preencha Nome, Endereço e WhatsApp!"); return; }}
+            
             let subtotalItens = 0;
             carrinho.forEach(i => subtotalItens += i.preco);
-            let desc = cupomAtivo ? subtotalItens * cupomAtivo.desc : 0;
+            let descTotal = cupomAtivo ? subtotalItens * cupomAtivo.desc : 0;
+            
             let msg = "*NOVO PEDIDO G-LAB*%0A%0A";
             msg += "*DADOS DO CLIENTE:*%0A";
             msg += "• *Nome:* " + dados.n + "%0A";
@@ -360,12 +375,26 @@ def gerar_site_vendas_completo():
             msg += "• *Cidade:* " + dados.ci + "-" + dados.es + "%0A";
             msg += "• *CEP:* " + (dados.ce || "Não informado") + "%0A";
             msg += "• *Pagamento:* " + dados.p + "%0A%0A";
+            
             msg += "*ITENS DO PEDIDO:*%0A";
-            carrinho.forEach(i => {{ msg += "• " + i.nome + " (" + i.espec + ") - R$ " + i.preco.toFixed(2) + "%0A"; }});
-            if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + desc.toFixed(2) + ")";
+            carrinho.forEach(i => {{ 
+                let precoFinalItem = i.preco;
+                let linhaItem = "• " + i.nome + " (" + i.espec + ") - R$ " + i.preco.toFixed(2);
+                
+                if(cupomAtivo) {{
+                    let descontoItem = i.preco * cupomAtivo.desc;
+                    precoFinalItem = i.preco - descontoItem;
+                    linhaItem += " - COM DESCONTO (" + (cupomAtivo.desc * 100) + "%) R$ " + precoFinalItem.toFixed(2);
+                }}
+                msg += linhaItem + "%0A"; 
+            }});
+
+            if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + descTotal.toFixed(2) + ") (DESCONTO TOTAL DO PEDIDO)";
+            
             if(freteV > 0) msg += "%0A🚚 *FRETE:* " + freteD;
             else msg += "%0A🚚 *FRETE:* Retirada/A calcular";
-            msg += "%0A%0A*TOTAL GERAL: R$ " + (subtotalItens - desc + freteV).toFixed(2) + "*";
+            
+            msg += "%0A%0A*TOTAL GERAL: R$ " + (subtotalItens - descTotal + freteV).toFixed(2) + "*";
             window.open("https://wa.me/554188643910?text=" + msg, '_blank');
         }}
     </script>
@@ -376,7 +405,7 @@ def gerar_site_vendas_completo():
     caminho_saida = os.path.join(diretorio_atual, 'index.html')
     with open(caminho_saida, 'w', encoding='utf-8') as f:
         f.write(html_template)
-    print(f"Sucesso! Código gerado com localização via API e valores atualizados.")
+    print(f"Sucesso! Código gerado com correções de visual e novas funcionalidades.")
 
 if __name__ == "__main__":
     gerar_site_vendas_completo()
