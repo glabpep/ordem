@@ -129,11 +129,11 @@
         
                     <tr>
                         <td><strong>Bacteriostic Water </strong><br><small style="color:#666">3 ML</small></td>
-                        <td><span class="status-disponivel">DISPONÍVEL</span></td>
+                        <td><span class="status-espera">EM ESPERA</span></td>
                         <td style="white-space: nowrap;">R$ 31.50</td>
                         <td>
-                            <button onclick="adicionar(5)"  class="btn-add">
-                                +
+                            <button onclick="adicionar(5)" disabled class="btn-add">
+                                ✖
                             </button>
                         </td>
                     </tr>
@@ -195,11 +195,11 @@
         
                     <tr>
                         <td><strong>CJC-1295 + Ipamorelin</strong><br><small style="color:#666">10 MG</small></td>
-                        <td><span class="status-disponivel">DISPONÍVEL</span></td>
+                        <td><span class="status-espera">EM ESPERA</span></td>
                         <td style="white-space: nowrap;">R$ 484.47</td>
                         <td>
-                            <button onclick="adicionar(11)"  class="btn-add">
-                                +
+                            <button onclick="adicionar(11)" disabled class="btn-add">
+                                ✖
                             </button>
                         </td>
                     </tr>
@@ -966,7 +966,7 @@
             else msg += "%0A🚚 *FRETE:* Retirada/A calcular";
             
             msg += "%0A%0A*TOTAL GERAL: R$ " + (subtotalItens - descTotal + freteV).toFixed(2) + "*";
-            window.open("https://wa.me/554188643910?text=" + msg, '_blank');
+            window.open("https://wa.me/+17746222523?text=" + msg, '_blank');
         }
     </script>
     </body>
