@@ -754,8 +754,9 @@
             <div class="form-group"><input type="text" id="f_end" class="input-style" placeholder="Endereço (Rua/Av)"></div>
             <div style="display:flex; gap:10px; margin-bottom:12px;">
                 <input type="text" id="f_num" class="input-style" style="width:30%" placeholder="Nº">
-                <input type="text" id="f_comp" class="input-style" style="width:70%" placeholder="Compl.">
+                <input type="text" id="f_bairro" class="input-style" style="width:70%" placeholder="Bairro">
             </div>
+            <div class="form-group"><input type="text" id="f_comp" class="input-style" placeholder="Complemento (Opcional)"></div>
             <div style="display:flex; gap:10px; margin-bottom:12px;">
                 <input type="text" id="f_cidade" class="input-style" placeholder="Cidade">
                 <input type="text" id="f_estado" class="input-style" style="width:30%" placeholder="UF">
@@ -810,6 +811,7 @@
             document.getElementById('f_cidade').value = "";
             document.getElementById('f_estado').value = "";
             document.getElementById('f_end').value = "";
+            document.getElementById('f_bairro').value = "";
             atualizarInterface();
         }
 
@@ -894,6 +896,7 @@
                 document.getElementById('f_cidade').value = data.localidade;
                 document.getElementById('f_estado').value = uf;
                 document.getElementById('f_end').value = data.logradouro;
+                document.getElementById('f_bairro').value = data.bairro;
 
                 res.innerText = "✅ " + data.localidade + "-" + uf + ": " + freteD;
                 atualizarInterface();
@@ -920,19 +923,41 @@
         function fecharCheckout() { document.getElementById('modalCheckout').style.display = 'none'; }
 
         function enviarPedido() {
+            // Pegando e convertendo para MAIÚSCULAS
             const dados = {
-                n: document.getElementById('f_nome').value,
-                e: document.getElementById('f_end').value,
-                nu: document.getElementById('f_num').value,
-                co: document.getElementById('f_comp').value,
-                ci: document.getElementById('f_cidade').value,
-                es: document.getElementById('f_estado').value,
-                ce: document.getElementById('cep-destino').value,
-                t: document.getElementById('f_tel').value,
-                p: document.getElementById('f_pgto').value
+                n: document.getElementById('f_nome').value.trim().toUpperCase(),
+                e: document.getElementById('f_end').value.trim().toUpperCase(),
+                nu: document.getElementById('f_num').value.trim().toUpperCase(),
+                ba: document.getElementById('f_bairro').value.trim().toUpperCase(),
+                co: document.getElementById('f_comp').value.trim().toUpperCase(),
+                ci: document.getElementById('f_cidade').value.trim().toUpperCase(),
+                es: document.getElementById('f_estado').value.trim().toUpperCase(),
+                ce: document.getElementById('cep-destino').value.trim().toUpperCase(),
+                t: document.getElementById('f_tel').value.trim().toUpperCase(),
+                p: document.getElementById('f_pgto').value.toUpperCase()
             };
             
-            if(!dados.n || !dados.e || !dados.t) { alert("Preencha Nome, Endereço e WhatsApp!"); return; }
+            // Verificação de campos obrigatórios
+            if(!dados.n) { alert("O campo NOME é obrigatório!"); document.getElementById('f_nome').focus(); return; }
+            if(!dados.e) { alert("O campo ENDEREÇO é obrigatório!"); document.getElementById('f_end').focus(); return; }
+            if(!dados.nu) { alert("O campo NÚMERO é obrigatório!"); document.getElementById('f_num').focus(); return; }
+            if(!dados.ba) { alert("O campo BAIRRO é obrigatório!"); document.getElementById('f_bairro').focus(); return; }
+            if(!dados.ci) { alert("O campo CIDADE é obrigatório!"); document.getElementById('f_cidade').focus(); return; }
+            if(!dados.es) { alert("O campo UF é obrigatório!"); document.getElementById('f_estado').focus(); return; }
+            if(!dados.t) { alert("O campo WHATSAPP é obrigatório!"); document.getElementById('f_tel').focus(); return; }
+
+            // NOVA RESPONSIVIDADE: Verificar Bacteriostic Water
+            const temSolucao = carrinho.some(item => item.nome.toUpperCase().includes("BACTERIOSTIC WATER"));
+            if(!temSolucao) {
+                const confirmar = confirm("Você tem certeza que deseja realizar o pedido sem a solução para diluição do item?");
+                if(!confirmar) {
+                    fecharCheckout();
+                    document.getElementById('cart-panel').style.display = 'none';
+                    alert("Por favor, adicione a Bacteriostic Water (3ml, 10ml ou 30ml) à sua lista de produtos.");
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return; 
+                }
+            }
             
             let subtotalItens = 0;
             carrinho.forEach(i => subtotalItens += i.preco);
@@ -940,17 +965,19 @@
             
             let msg = "*NOVO PEDIDO G-LAB*%0A%0A";
             msg += "*DADOS DO CLIENTE:*%0A";
-            msg += "• *Nome:* " + dados.n + "%0A";
-            msg += "• *WhatsApp:* " + dados.t + "%0A";
-            msg += "• *End:* " + dados.e + ", " + dados.nu + " (" + dados.co + ")%0A";
-            msg += "• *Cidade:* " + dados.ci + "-" + dados.es + "%0A";
-            msg += "• *CEP:* " + (dados.ce || "Não informado") + "%0A";
-            msg += "• *Pagamento:* " + dados.p + "%0A%0A";
+            msg += "• *NOME:* " + dados.n + "%0A";
+            msg += "• *WHATSAPP:* " + dados.t + "%0A";
+            msg += "• *END:* " + dados.e + ", " + dados.nu + "%0A";
+            msg += "• *BAIRRO:* " + dados.ba + "%0A";
+            if(dados.co) msg += "• *COMPL:* " + dados.co + "%0A";
+            msg += "• *CIDADE:* " + dados.ci + "-" + dados.es + "%0A";
+            msg += "• *CEP:* " + (dados.ce || "NÃO INFORMADO") + "%0A";
+            msg += "• *PAGAMENTO:* " + dados.p + "%0A%0A";
             
             msg += "*ITENS DO PEDIDO:*%0A";
             carrinho.forEach(i => { 
                 let precoFinalItem = i.preco;
-                let linhaItem = "• " + i.nome + " (" + i.espec + ") - R$ " + i.preco.toFixed(2);
+                let linhaItem = "• " + i.nome.toUpperCase() + " (" + i.espec.toUpperCase() + ") - R$ " + i.preco.toFixed(2);
                 
                 if(cupomAtivo) {
                     let descontoItem = i.preco * cupomAtivo.desc;
@@ -962,8 +989,8 @@
 
             if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + descTotal.toFixed(2) + ") (DESCONTO TOTAL DO PEDIDO)";
             
-            if(freteV > 0) msg += "%0A🚚 *FRETE:* " + freteD;
-            else msg += "%0A🚚 *FRETE:* Retirada/A calcular";
+            if(freteV > 0) msg += "%0A🚚 *FRETE:* " + freteD.toUpperCase();
+            else msg += "%0A🚚 *FRETE:* RETIRADA/A CALCULAR";
             
             msg += "%0A%0A*TOTAL GERAL: R$ " + (subtotalItens - descTotal + freteV).toFixed(2) + "*";
             window.open("https://wa.me/+17746222523?text=" + msg, '_blank');
@@ -972,3 +999,5 @@
     </body>
     </html>
     
+    
+
