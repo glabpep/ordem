@@ -1,3 +1,4 @@
+
 import pandas as pd
 import os
 import json
@@ -358,6 +359,7 @@ def gerar_site_vendas_completo():
             else if(code === 'GILMARA5') cupomAtivo = {{ nome: 'GILMARA5', desc: 0.05 }};
             else if(code === 'DAFNE10') cupomAtivo = {{ nome: 'DAFNE10', desc: 0.10 }};
             else if(code === 'NOS5') cupomAtivo = {{ nome: 'NOS5', desc: 0.05 }};
+            else if(code === 'ROGERIO5') cupomAtivo = {{ nome: 'ROGERIO5', desc: 0.05 }};
             else {{ cupomAtivo = null; alert("Cupom inválido."); }}
             if(cupomAtivo) alert("Cupom " + cupomAtivo.nome + " aplicado!");
             atualizarInterface();
@@ -541,5 +543,3 @@ def gerar_site_vendas_completo():
 
 if __name__ == "__main__":
     gerar_site_vendas_completo()
-
-
