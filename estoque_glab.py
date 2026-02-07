@@ -17,6 +17,71 @@ def gerar_site_vendas_completo():
         print(f"Erro: Arquivo não encontrado em: {diretorio_atual}")
         return
 
+    # Dicionário extraído do seu arquivo Word para o mapeamento
+    # Se um produto da planilha contiver estas chaves, a info será exibida
+    infos_tecnicas = {
+        # METABOLISMO E PERFORMANCE
+        "5-AMINO": "Inibidor Seletivo de NNMT: Atua bloqueando a enzima nicotinamida N-metiltransferase, o que eleva os níveis de NAD+ e SAM intracelular. Indica eficácia na reversão da obesidade e otimização do gasto energético basal.",
+        "AICAR": "Ativador de AMPK: Mimetiza o AMP intracelular para ativar a proteína quinase. Investigado por aumentar a captação de glicose muscular, a oxidação de ácidos graxos e a resistência cardiovascular.",
+        "AOD 9604": "Análogo Lipolítico do hGH: Focado no isolamento das propriedades de queima de gordura do GH sem induzir efeitos hiperglicêmicos. Aplicado em estudos de obesidade e regeneração de cartilagem.",
+        "HGH FRAGMENT": "Modulador de Lipídios: Parte terminal do GH responsável pela quebra de gordura. Mostra capacidade de inibir a formação de nova gordura e acelerar a lipólise visceral sem alterar a insulina.",
+        "L-CARNITINE": "Cofator de Transporte Mitocondrial: Essencial para o transporte de ácidos graxos para a matriz mitocondrial (β-oxidação). Reduz a fadiga muscular e suporta a performance atlética.",
+        "MOTS-C": "Peptídeo Derivado da Mitocôndria: Regulador hormonal do metabolismo sistêmico. Melhora a homeostase da glicose e combate a resistência à insulina via ativação da via AMPK.",
+        "SLU PP": "Agonista Pan-ERR (Pílula do Exercício): Ativa receptores ERRα, β, γ. Aumenta drasticamente a biogênese mitocondrial e a resistência física, comparável ao treino de alta intensidade.",
+        "LIPO C": "Mix Lipotrópico Injetável: Composto por Metionina, Inositol e Colina. Atua na exportação de gorduras do fígado e na otimização da mobilização lipídica sistêmica.",
+
+        # CRESCIMENTO E HIPERTROFIA
+        "CJC-1295": "Secretagogo de GH de Longa Duração: Análogo do GHRH que aumenta secreção de GH e IGF-1. Aplicado em antienvelhecimento, melhora da composição corporal e síntese proteica acelerada.",
+        "IPAMORELIN": "Agonista de Grelina Seletivo: Estimula a liberação pulsátil de GH sem elevar cortisol ou prolactina. Seguro para indução de anabolismo e melhora da densidade mineral óssea.",
+        "CJC-1295 + IPAMORELIN": "Sinergia Hormonal Dual: Combinação de GHRH com GHRP. Mimetiza a liberação fisiológica natural, resultando em secreção de GH significativamente maior que o uso isolado.",
+        "GHRP-6": "Peptídeo Liberador de GH: Estimula a hipófise e aumenta a sinalização da fome via grelina. Focado em recuperação de tecidos, aumento de massa bruta e estados catabólicos.",
+        "HEXARELIN": "Potencializador de Força: Secretagogo potente da classe GHRP. Aumenta a força contrátil cardíaca e muscular, protegendo o miocárdio e promovendo volume fibroso.",
+        "IGF-1 LR3": "Análogo de IGF-1 de Meia-vida Longa: Permanece ativo por até 20 horas. Principal mediador da hiperplasia (criação de novas fibras musculares) e transporte de aminoácidos.",
+        "IGF DES": "Variante de IGF-1 de Ação Local: Afinidade 10x maior pelos receptores. Ideal para aplicação pós-treino visando recuperação imediata e crescimento muscular localizado.",
+        "SERMORELIN": "Estimulador de Eixo Natural: Mimetiza o GHRH natural. Promove melhorias na qualidade do sono profundo, vitalidade da pele e recuperação pós-esforço.",
+        "MK-677": "Secretagogo Oral (Ibutamoren): Agonista dos receptores de grelina. Aumenta sustentadamente os níveis de GH e IGF-1, aumentando a massa livre de gordura e densidade óssea.",
+
+        # REGENERAÇÃO E SAÚDE
+        "BPC-157": "Pentadecapeptídeo Gástrico: Acelera a angiogênese e cicatrização. Estudado para cura de rupturas de tendões, ligamentos, danos musculares e tecidos moles.",
+        "BPC-157 ORAL": "Modulador Gastrointestinal: Versão estável em suco gástrico. Focado no tratamento de Doença de Crohn, SII, úlceras e restauração da barreira intestinal.",
+        "TB-500": "Timosina Beta-4 Sintética: Essencial para migração celular e reparo de tecidos. Promove formação de novos vasos e reduz inflamação articular e miocárdica.",
+        "TB-500 + BPC": "Protocolo de Reparo Total: União sinérgica do TB-500 (sistêmico) com BPC-157 (tecido). Padrão ouro para recuperação de lesões atléticas graves.",
+        "GHK-CU": "Complexo Peptídeo-Cobre: Atua na remodelação do DNA e síntese de colágeno I e III. Possui propriedades antioxidantes e anti-inflamatórias para pele e tecidos conectivos.",
+        "GLOW": "Bioestimulação Dérmica (GHK-Cu + BPC + TB): Blend estético-regenerativo focado em rejuvenescimento cutâneo, redução de cicatrizes e regeneração da matriz extracelular.",
+        "ARA 290": "Agonista de Receptor de Reparo Inato: Derivado da eritropoietina sem efeitos hematológicos. Pesquisado para dor neuropática severa e regeneração nervosa periférica.",
+        "KPV": "Tripeptídeo Anti-inflamatório: Inibe vias inflamatórias (NF-κB). Possui propriedades antimicrobianas e é utilizado em estudos sobre dermatite e colite.",
+        "LL-37": "Peptídeo Antimicrobiano: Parte do sistema imune inato. Neutraliza endotoxinas bacterianas, modula a resposta inflamatória e acelera cicatrização de feridas infectadas.",
+        "KLOW": "Quarteto de Reparo Profundo (GHK+BPC+TB+KPV): Projetado para sinalização celular máxima em remodelação de tecidos complexos e equilíbrio imunológico.",
+
+        # EMAGRECIMENTO AVANÇADO
+        "TIRZEPATIDE": "Agonista Dual GIP/GLP-1: Supera a Semaglutida na perda de peso. Promove saciedade central e melhora drástica na sensibilidade à insulina.",
+        "RETATRUTIDE": "Agonista Triplo (GIP/GLP-1/GCGR): Aumenta o gasto calórico basal e a oxidação de gordura no fígado. Promete perdas de peso superiores a 24%.",
+        "SEMAGLUTIDE": "Agonista de GLP-1: Retarda o esvaziamento gástrico e sinaliza saciedade ao hipotálamo. Base para tratamento de obesidade e controle glicêmico.",
+
+        # COGNIÇÃO E BEM-ESTAR
+        "SELANK": "Ansiolítico Regulador: Modula serotonina e norepinefrina. Reduz ansiedade e melhora o foco cognitivo sem o efeito sedativo dos ansiolíticos comuns.",
+        "SEMAX": "Nootrópico Neuroprotetor: Eleva níveis de BDNF e NGF no hipocampo. Aplicado em recuperação pós-AVC e otimização do aprendizado sob estresse.",
+        "PINEALON": "Bioregulador de Cadeia Curta: Atua na expressão gênica neuronal. Restaura o ritmo circadiano e protege contra o estresse oxidativo cerebral.",
+        "NAD+": "Coenzima de Vitalidade: Essencial para reparação do DNA e sirtuínas. Associado à reversão de marcadores de envelhecimento e aumento da energia celular.",
+        "METHYLENE BLUE": "Otimizador Mitocondrial (Azul de Metileno): Transportador alternativo de elétrons. Melhora a memória de curto prazo e protege contra neurodegeneração.",
+        "DSIP": "Indutor de Sono Delta: Neuromodulador que sincroniza ritmos biológicos, promove sono profundo e mitiga sintomas de estresse emocional.",
+        "OXYTOCIN": "Neuromodulador Social: Regula confiança, redução de medo e ansiedade social. Explorado também na regulação do apetite por carboidratos.",
+
+        # LONGEVIDADE E OUTROS
+        "EPITHALON": "Ativador da Telomerase: Induz o alongamento dos telômeros. Focado na extensão da vida celular e restauração da secreção de melatonina.",
+        "KISSPEPTIN": "Regulador de Eixo HPG: Atua no hipotálamo para restaurar a produção natural de testosterona e regular a função reprodutiva de forma fisiológica.",
+        "MELANOTAN 1": "Agonista de Melanocortina Seletivo: Estimula o bronzeamento com alta segurança e proteção contra danos UV, sem efeitos colaterais sistêmicos severos.",
+        "MELANOTAN 2": "Bronzeamento e Libido: Atua no SNC aumentando a pigmentação da pele, elevando drasticamente o desejo sexual e reduzindo o apetite.",
+        "PT-141": "Tratamento de Disfunção Sexual: Atua via SNC nos centros de excitação do cérebro. Indicado para desejo sexual hipoativo em homens e mulheres.",
+        "VITAMIN B-12": "Metilcobalamina de Alta Potência: Essencial para a bainha de mielina, produção de glóbulos vermelhos e prevenção da fadiga neuromuscular.",
+        "BACTERIOSTIC WATER": "Solvente Bacteriostático: Água com 0,9% de Álcool Benzílico. Impede proliferação bacteriana, permitindo uso seguro do peptídeo por até 30 dias.",
+        "SS-31": "Protetor de Cardiolipina: Previne a formação de radicais livres na mitocôndria e restaura a produção de ATP em tecidos de alta demanda (coração/cérebro).",
+        "HYALURONIC ACID 2% + GHK": "Arquitetura Extracelular: Une hidratação profunda (HA) com sinalização regenerativa (GHK). Focado em preenchimento dérmico e cicatrização pós-procedimento.",
+        "HCG": "Mimetizador de LH: Sinaliza aos testículos a produção de testosterona. Vital para prevenir atrofia testicular e reinício do eixo hormonal (TPC).",
+        "HEMP OIL": "Suporte Fitocanabinoide: Propriedades analgésicas e anti-inflamatórias. Suporta o sistema endocanabinoide para relaxamento e homeostase.",
+        "TESAMORELIN": "Redutor de Lipodistrofia: Único aprovado para reduzir gordura visceral abdominal severa e melhorar o perfil lipídico cardiovascular."
+    }
+
     try:
         if arquivo_dados.endswith('.xlsx'):
             df = pd.read_excel(arquivo_dados)
@@ -27,11 +92,21 @@ def gerar_site_vendas_completo():
         # Prepara base de dados para o JavaScript
         produtos_base = []
         for idx, row in df.iterrows():
+            nome_prod = str(row.get('PRODUTO', 'N/A'))
+            # Busca a informação técnica no dicionário
+            info_vazia = "Informação técnica detalhada não disponível para este item."
+            info_prod = info_vazia
+            for chave, texto in infos_tecnicas.items():
+                if chave in nome_prod.upper():
+                    info_prod = texto
+                    break
+
             produtos_base.append({
                 "id": idx,
-                "nome": str(row.get('PRODUTO', 'N/A')),
+                "nome": nome_prod,
                 "espec": f"{row.get('VOLUME', '')} {row.get('MEDIDA', '')}".strip(),
-                "preco": float(row.get('Preço (R$)', 0))
+                "preco": float(row.get('Preço (R$)', 0)),
+                "info": info_prod
             })
         js_produtos = json.dumps(produtos_base)
         
@@ -39,7 +114,7 @@ def gerar_site_vendas_completo():
         print(f"Erro ao ler os dados: {e}")
         return
 
-    # Início do HTML (Note o uso de chaves duplas {{ }} para CSS e JS)
+    # Início do HTML
     html_template = f"""
     <!DOCTYPE html>
     <html lang="pt-br">
@@ -65,6 +140,10 @@ def gerar_site_vendas_completo():
             .input-style {{ padding: 12px; border: 1px solid #ccc; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 16px; }}
             .btn-add {{ background: var(--secondary); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }}
             .btn-add:disabled {{ background: #eee; color: #999; cursor: not-allowed; }}
+            
+            /* ESTILO DO BOTÃO DE INFORMAÇÕES */
+            .btn-info {{ background: none; border: none; color: var(--primary); font-size: 0.75rem; text-decoration: underline; cursor: pointer; padding: 0; margin-top: 5px; font-weight: bold; }}
+            
             .cart-panel {{ position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); color: white; padding: 15px; border-radius: 20px 20px 0 0; z-index: 1000; display: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto; }}
             @media (min-width: 768px) {{ .cart-panel {{ width: 400px; left: auto; right: 20px; bottom: 20px; border-radius: 20px; }} }}
             .cart-list {{ margin: 10px 0; max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 5px; }}
@@ -77,8 +156,11 @@ def gerar_site_vendas_completo():
             .total-row {{ display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin: 5px 0; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }}
             .discount-line {{ display: none; justify-content: space-between; color: #ffeb3b; font-size: 0.9rem; margin-bottom: 5px; }}
             .btn-checkout-final {{ background: white; color: var(--primary); border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 5px; }}
+            
+            /* MODAL ESTILIZADO */
             .modal {{ display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: auto; }}
             .modal-content {{ background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 500px; border-radius: 15px; box-sizing: border-box; }}
+            .modal-info-body {{ background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 5px solid var(--primary); margin: 15px 0; font-size: 0.95rem; line-height: 1.5; }}
             .form-group {{ margin-bottom: 12px; }}
         </style>
     </head>
@@ -126,10 +208,13 @@ def gerar_site_vendas_completo():
         btn_disabled = "" if is_available else "disabled"
         simbolo = "+" if is_available else "✖"
         
-        # Aqui usamos chaves simples para as variáveis do loop Python
         html_template += f"""
                     <tr>
-                        <td><strong>{produto}</strong><br><small style="color:#666">{espec}</small></td>
+                        <td>
+                            <strong>{produto}</strong><br>
+                            <small style="color:#666">{espec}</small><br>
+                            <button class="btn-info" onclick="abrirInfo({idx})">+ informações</button>
+                        </td>
                         <td><span class="{status_class}">{estoque_status}</span></td>
                         <td style="white-space: nowrap;">R$ {preco:,.2f}</td>
                         <td>
@@ -143,6 +228,14 @@ def gerar_site_vendas_completo():
     html_template += f"""
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <div id="modalInfo" class="modal">
+        <div class="modal-content">
+            <h2 id="info-titulo" style="color: var(--primary); margin-top: 0; font-size: 1.2rem;"></h2>
+            <div class="modal-info-body" id="info-texto"></div>
+            <button onclick="fecharInfo()" class="btn-add" style="background:#6c757d">Fechar</button>
         </div>
     </div>
 
@@ -183,8 +276,9 @@ def gerar_site_vendas_completo():
             <div class="form-group"><input type="text" id="f_end" class="input-style" placeholder="Endereço (Rua/Av)"></div>
             <div style="display:flex; gap:10px; margin-bottom:12px;">
                 <input type="text" id="f_num" class="input-style" style="width:30%" placeholder="Nº">
-                <input type="text" id="f_comp" class="input-style" style="width:70%" placeholder="Compl.">
+                <input type="text" id="f_bairro" class="input-style" style="width:70%" placeholder="Bairro">
             </div>
+            <div class="form-group"><input type="text" id="f_comp" class="input-style" placeholder="Complemento (Opcional)"></div>
             <div style="display:flex; gap:10px; margin-bottom:12px;">
                 <input type="text" id="f_cidade" class="input-style" placeholder="Cidade">
                 <input type="text" id="f_estado" class="input-style" style="width:30%" placeholder="UF">
@@ -217,6 +311,20 @@ def gerar_site_vendas_completo():
             'NORDESTE': ['BA', 'SE', 'AL', 'PE', 'PB', 'RN', 'CE', 'PI', 'MA']
         }};
 
+        // FUNÇÕES PARA O MODAL DE INFORMAÇÕES
+        function abrirInfo(id) {{
+            const p = PRODUTOS.find(x => x.id === id);
+            if(p) {{
+                document.getElementById('info-titulo').innerText = p.nome;
+                document.getElementById('info-texto').innerText = p.info;
+                document.getElementById('modalInfo').style.display = 'block';
+            }}
+        }}
+
+        function fecharInfo() {{
+            document.getElementById('modalInfo').style.display = 'none';
+        }}
+
         function adicionar(id) {{
             const p = PRODUTOS.find(x => x.id === id);
             if(p) {{
@@ -239,6 +347,7 @@ def gerar_site_vendas_completo():
             document.getElementById('f_cidade').value = "";
             document.getElementById('f_estado').value = "";
             document.getElementById('f_end').value = "";
+            document.getElementById('f_bairro').value = "";
             atualizarInterface();
         }}
 
@@ -248,6 +357,7 @@ def gerar_site_vendas_completo():
             else if(code === 'DANI5') cupomAtivo = {{ nome: 'DANI5', desc: 0.05 }};
             else if(code === 'GILMARA5') cupomAtivo = {{ nome: 'GILMARA5', desc: 0.05 }};
             else if(code === 'DAFNE10') cupomAtivo = {{ nome: 'DAFNE10', desc: 0.10 }};
+            else if(code === 'NOS5') cupomAtivo = {{ nome: 'NOS5', desc: 0.05 }};
             else {{ cupomAtivo = null; alert("Cupom inválido."); }}
             if(cupomAtivo) alert("Cupom " + cupomAtivo.nome + " aplicado!");
             atualizarInterface();
@@ -323,6 +433,7 @@ def gerar_site_vendas_completo():
                 document.getElementById('f_cidade').value = data.localidade;
                 document.getElementById('f_estado').value = uf;
                 document.getElementById('f_end').value = data.logradouro;
+                document.getElementById('f_bairro').value = data.bairro;
 
                 res.innerText = "✅ " + data.localidade + "-" + uf + ": " + freteD;
                 atualizarInterface();
@@ -350,18 +461,37 @@ def gerar_site_vendas_completo():
 
         function enviarPedido() {{
             const dados = {{
-                n: document.getElementById('f_nome').value,
-                e: document.getElementById('f_end').value,
-                nu: document.getElementById('f_num').value,
-                co: document.getElementById('f_comp').value,
-                ci: document.getElementById('f_cidade').value,
-                es: document.getElementById('f_estado').value,
-                ce: document.getElementById('cep-destino').value,
-                t: document.getElementById('f_tel').value,
-                p: document.getElementById('f_pgto').value
+                n: document.getElementById('f_nome').value.trim().toUpperCase(),
+                e: document.getElementById('f_end').value.trim().toUpperCase(),
+                nu: document.getElementById('f_num').value.trim().toUpperCase(),
+                ba: document.getElementById('f_bairro').value.trim().toUpperCase(),
+                co: document.getElementById('f_comp').value.trim().toUpperCase(),
+                ci: document.getElementById('f_cidade').value.trim().toUpperCase(),
+                es: document.getElementById('f_estado').value.trim().toUpperCase(),
+                ce: document.getElementById('cep-destino').value.trim().toUpperCase(),
+                t: document.getElementById('f_tel').value.trim().toUpperCase(),
+                p: document.getElementById('f_pgto').value.toUpperCase()
             }};
             
-            if(!dados.n || !dados.e || !dados.t) {{ alert("Preencha Nome, Endereço e WhatsApp!"); return; }}
+            if(!dados.n) {{ alert("O campo NOME é obrigatório!"); document.getElementById('f_nome').focus(); return; }}
+            if(!dados.e) {{ alert("O campo ENDEREÇO é obrigatório!"); document.getElementById('f_end').focus(); return; }}
+            if(!dados.nu) {{ alert("O campo NÚMERO é obrigatório!"); document.getElementById('f_num').focus(); return; }}
+            if(!dados.ba) {{ alert("O campo BAIRRO é obrigatório!"); document.getElementById('f_bairro').focus(); return; }}
+            if(!dados.ci) {{ alert("O campo CIDADE é obrigatório!"); document.getElementById('f_cidade').focus(); return; }}
+            if(!dados.es) {{ alert("O campo UF é obrigatório!"); document.getElementById('f_estado').focus(); return; }}
+            if(!dados.t) {{ alert("O campo WHATSAPP é obrigatório!"); document.getElementById('f_tel').focus(); return; }}
+
+            const temSolucao = carrinho.some(item => item.nome.toUpperCase().includes("BACTERIOSTIC WATER"));
+            if(!temSolucao) {{
+                const confirmar = confirm("Você tem certeza que deseja realizar o pedido sem a solução para diluição do item?");
+                if(!confirmar) {{
+                    fecharCheckout();
+                    document.getElementById('cart-panel').style.display = 'none';
+                    alert("Por favor, adicione a Bacteriostic Water (3ml, 10ml ou 30ml) à sua lista de produtos.");
+                    window.scrollTo({{ top: 0, behavior: 'smooth' }});
+                    return; 
+                }}
+            }}
             
             let subtotalItens = 0;
             carrinho.forEach(i => subtotalItens += i.preco);
@@ -369,17 +499,19 @@ def gerar_site_vendas_completo():
             
             let msg = "*NOVO PEDIDO G-LAB*%0A%0A";
             msg += "*DADOS DO CLIENTE:*%0A";
-            msg += "• *Nome:* " + dados.n + "%0A";
-            msg += "• *WhatsApp:* " + dados.t + "%0A";
-            msg += "• *End:* " + dados.e + ", " + dados.nu + " (" + dados.co + ")%0A";
-            msg += "• *Cidade:* " + dados.ci + "-" + dados.es + "%0A";
-            msg += "• *CEP:* " + (dados.ce || "Não informado") + "%0A";
-            msg += "• *Pagamento:* " + dados.p + "%0A%0A";
+            msg += "• *NOME:* " + dados.n + "%0A";
+            msg += "• *WHATSAPP:* " + dados.t + "%0A";
+            msg += "• *END:* " + dados.e + ", " + dados.nu + "%0A";
+            msg += "• *BAIRRO:* " + dados.ba + "%0A";
+            if(dados.co) msg += "• *COMPL:* " + dados.co + "%0A";
+            msg += "• *CIDADE:* " + dados.ci + "-" + dados.es + "%0A";
+            msg += "• *CEP:* " + (dados.ce || "NÃO INFORMADO") + "%0A";
+            msg += "• *PAGAMENTO:* " + dados.p + "%0A%0A";
             
             msg += "*ITENS DO PEDIDO:*%0A";
             carrinho.forEach(i => {{ 
                 let precoFinalItem = i.preco;
-                let linhaItem = "• " + i.nome + " (" + i.espec + ") - R$ " + i.preco.toFixed(2);
+                let linhaItem = "• " + i.nome.toUpperCase() + " (" + i.espec.toUpperCase() + ") - R$ " + i.preco.toFixed(2);
                 
                 if(cupomAtivo) {{
                     let descontoItem = i.preco * cupomAtivo.desc;
@@ -391,11 +523,11 @@ def gerar_site_vendas_completo():
 
             if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + descTotal.toFixed(2) + ") (DESCONTO TOTAL DO PEDIDO)";
             
-            if(freteV > 0) msg += "%0A🚚 *FRETE:* " + freteD;
-            else msg += "%0A🚚 *FRETE:* Retirada/A calcular";
+            if(freteV > 0) msg += "%0A🚚 *FRETE:* " + freteD.toUpperCase();
+            else msg += "%0A🚚 *FRETE:* RETIRADA/A CALCULAR";
             
             msg += "%0A%0A*TOTAL GERAL: R$ " + (subtotalItens - descTotal + freteV).toFixed(2) + "*";
-            window.open("https://wa.me/554188643910?text=" + msg, '_blank');
+            window.open("https://wa.me/+17746222523?text=" + msg, '_blank');
         }}
     </script>
     </body>
@@ -405,8 +537,9 @@ def gerar_site_vendas_completo():
     caminho_saida = os.path.join(diretorio_atual, 'index.html')
     with open(caminho_saida, 'w', encoding='utf-8') as f:
         f.write(html_template)
-    print(f"Sucesso! Código gerado com correções de visual e novas funcionalidades.")
+    print(f"Sucesso! Código gerado com ícones de informações técnicas e mapeamento do Word.")
 
 if __name__ == "__main__":
     gerar_site_vendas_completo()
+
 
