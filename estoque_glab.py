@@ -1,4 +1,3 @@
-
 import pandas as pd
 import os
 import json
@@ -18,10 +17,8 @@ def gerar_site_vendas_completo():
         print(f"Erro: Arquivo não encontrado em: {diretorio_atual}")
         return
 
-    # Dicionário extraído do seu arquivo Word para o mapeamento
-    # Se um produto da planilha contiver estas chaves, a info será exibida
+    # Dicionário de informações técnicas integral
     infos_tecnicas = {
-        # METABOLISMO E PERFORMANCE
         "5-AMINO": "Inibidor Seletivo de NNMT: Atua bloqueando a enzima nicotinamida N-metiltransferase, o que eleva os níveis de NAD+ e SAM intracelular. Indica eficácia na reversão da obesidade e otimização do gasto energético basal.",
         "AICAR": "Ativador de AMPK: Mimetiza o AMP intracelular para ativar a proteína quinase. Investigado por aumentar a captação de glicose muscular, a oxidação de ácidos graxos e a resistência cardiovascular.",
         "AOD 9604": "Análogo Lipolítico do hGH: Focado no isolamento das propriedades de queima de gordura do GH sem induzir efeitos hiperglicêmicos. Aplicado em estudos de obesidade e regeneração de cartilagem.",
@@ -30,19 +27,15 @@ def gerar_site_vendas_completo():
         "MOTS-C": "Peptídeo Derivado da Mitocôndria: Regulador hormonal do metabolismo sistêmico. Melhora a homeostase da glicose e combate a resistência à insulina via ativação da via AMPK.",
         "SLU PP": "Agonista Pan-ERR (Pílula do Exercício): Ativa receptores ERRα, β, γ. Aumenta drasticamente a biogênese mitocondrial e a resistência física, comparável ao treino de alta intensidade.",
         "LIPO C": "Mix Lipotrópico Injetável: Composto por Metionina, Inositol e Colina. Atua na exportação de gorduras do fígado e na otimização da mobilização lipídica sistêmica.",
-
-        # CRESCIMENTO E HIPERTROFIA
         "CJC-1295": "Secretagogo de GH de Longa Duração: Análogo do GHRH que aumenta secreção de GH e IGF-1. Aplicado em antienvelhecimento, melhora da composição corporal e síntese proteica acelerada.",
-        "IPAMORELIN": "Agonista de Grelina Seletivo: Estimula a liberação pulsátil de GH sem elevar cortisol ou prolactina. Seguro para indução de anabolismo e melhora da densidade mineral óssea.",
+        "IPAMORELIN": "Agonista de Grelina Seletivo: Estimula a liberação pulsátil de GH sem elevar cortisol ou prolactina. Seguro para indução de anabolismo e melhora da density mineral óssea.",
         "CJC-1295 + IPAMORELIN": "Sinergia Hormonal Dual: Combinação de GHRH com GHRP. Mimetiza a liberação fisiológica natural, resultando em secreção de GH significativamente maior que o uso isolado.",
         "GHRP-6": "Peptídeo Liberador de GH: Estimula a hipófise e aumenta a sinalização da fome via grelina. Focado em recuperação de tecidos, aumento de massa bruta e estados catabólicos.",
         "HEXARELIN": "Potencializador de Força: Secretagogo potente da classe GHRP. Aumenta a força contrátil cardíaca e muscular, protegendo o miocárdio e promovendo volume fibroso.",
-        "IGF-1 LR3": "Análogo de IGF-1 de Meia-vida Longa: Permanece ativo por até 20 horas. Principal mediador da hiperplasia (criação de novas fibras musculares) e transporte de aminoácidos.",
+        "IGF-1 LR3": "Análogo de IGF-1 de Meia-vida Longa: Permanece ativo por até 20 horas. Principal mediador da hiperplasia (criação de novas fibras musculares) e transporte de acesso de aminoácidos.",
         "IGF DES": "Variante de IGF-1 de Ação Local: Afinidade 10x maior pelos receptores. Ideal para aplicação pós-treino visando recuperação imediata e crescimento muscular localizado.",
         "SERMORELIN": "Estimulador de Eixo Natural: Mimetiza o GHRH natural. Promove melhorias na qualidade do sono profundo, vitalidade da pele e recuperação pós-esforço.",
         "MK-677": "Secretagogo Oral (Ibutamoren): Agonista dos receptores de grelina. Aumenta sustentadamente os níveis de GH e IGF-1, aumentando a massa livre de gordura e densidade óssea.",
-
-        # REGENERAÇÃO E SAÚDE
         "BPC-157": "Pentadecapeptídeo Gástrico: Acelera a angiogênese e cicatrização. Estudado para cura de rupturas de tendões, ligamentos, danos musculares e tecidos moles.",
         "BPC-157 ORAL": "Modulador Gastrointestinal: Versão estável em suco gástrico. Focado no tratamento de Doença de Crohn, SII, úlceras e restauração da barreira intestinal.",
         "TB-500": "Timosina Beta-4 Sintética: Essencial para migração celular e reparo de tecidos. Promove formação de novos vasos e reduz inflamação articular e miocárdica.",
@@ -53,13 +46,9 @@ def gerar_site_vendas_completo():
         "KPV": "Tripeptídeo Anti-inflamatório: Inibe vias inflamatórias (NF-κB). Possui propriedades antimicrobianas e é utilizado em estudos sobre dermatite e colite.",
         "LL-37": "Peptídeo Antimicrobiano: Parte do sistema imune inato. Neutraliza endotoxinas bacterianas, modula a resposta inflamatória e acelera cicatrização de feridas infectadas.",
         "KLOW": "Quarteto de Reparo Profundo (GHK+BPC+TB+KPV): Projetado para sinalização celular máxima em remodelação de tecidos complexos e equilíbrio imunológico.",
-
-        # EMAGRECIMENTO AVANÇADO
         "TIRZEPATIDE": "Agonista Dual GIP/GLP-1: Supera a Semaglutida na perda de peso. Promove saciedade central e melhora drástica na sensibilidade à insulina.",
         "RETATRUTIDE": "Agonista Triplo (GIP/GLP-1/GCGR): Aumenta o gasto calórico basal e a oxidação de gordura no fígado. Promete perdas de peso superiores a 24%.",
         "SEMAGLUTIDE": "Agonista de GLP-1: Retarda o esvaziamento gástrico e sinaliza saciedade ao hipotálamo. Base para tratamento de obesidade e controle glicêmico.",
-
-        # COGNIÇÃO E BEM-ESTAR
         "SELANK": "Ansiolítico Regulador: Modula serotonina e norepinefrina. Reduz ansiedade e melhora o foco cognitivo sem o efeito sedativo dos ansiolíticos comuns.",
         "SEMAX": "Nootrópico Neuroprotetor: Eleva níveis de BDNF e NGF no hipocampo. Aplicado em recuperação pós-AVC e otimização do aprendizado sob estresse.",
         "PINEALON": "Bioregulador de Cadeia Curta: Atua na expressão gênica neuronal. Restaura o ritmo circadiano e protege contra o estresse oxidativo cerebral.",
@@ -67,20 +56,18 @@ def gerar_site_vendas_completo():
         "METHYLENE BLUE": "Otimizador Mitocondrial (Azul de Metileno): Transportador alternativo de elétrons. Melhora a memória de curto prazo e protege contra neurodegeneração.",
         "DSIP": "Indutor de Sono Delta: Neuromodulador que sincroniza ritmos biológicos, promove sono profundo e mitiga sintomas de estresse emocional.",
         "OXYTOCIN": "Neuromodulador Social: Regula confiança, redução de medo e ansiedade social. Explorado também na regulação do apetite por carboidratos.",
-
-        # LONGEVIDADE E OUTROS
         "EPITHALON": "Ativador da Telomerase: Induz o alongamento dos telômeros. Focado na extensão da vida celular e restauração da secreção de melatonina.",
         "KISSPEPTIN": "Regulador de Eixo HPG: Atua no hipotálamo para restaurar a produção natural de testosterona e regular a função reprodutiva de forma fisiológica.",
-        "MELANOTAN 1": "Agonista de Melanocortina Seletivo: Estimula o bronzeamento com alta segurança e proteção contra danos UV, sem efeitos colaterais sistêmicos severos.",
-        "MELANOTAN 2": "Bronzeamento e Libido: Atua no SNC aumentando a pigmentação da pele, elevando drasticamente o desejo sexual e reduzindo o apetite.",
-        "PT-141": "Tratamento de Disfunção Sexual: Atua via SNC nos centros de excitação do cérebro. Indicado para desejo sexual hipoativo em homens e mulheres.",
+        "MELANOTAN 1": "Agonista de Melanocortina Seletivo: Estimula a liberação de melanina com alta segurança e proteção contra danos UV.",
+        "MELANOTAN 2": "Bronzeamento e Libido: Atua no SNC aumentando a pigmentação da pele, elevando o desejo sexual e reduzindo o apetite.",
+        "PT-141": "Tratamento de Disfunção Sexual: Atua via SNC nos centros de excitação do cérebro. Indicado para desejo sexual hipoativo.",
         "VITAMIN B-12": "Metilcobalamina de Alta Potência: Essencial para a bainha de mielina, produção de glóbulos vermelhos e prevenção da fadiga neuromuscular.",
-        "BACTERIOSTIC WATER": "Solvente Bacteriostático: Água com 0,9% de Álcool Benzílico. Impede proliferação bacteriana, permitindo uso seguro do peptídeo por até 30 dias.",
-        "SS-31": "Protetor de Cardiolipina: Previne a formação de radicais livres na mitocôndria e restaura a produção de ATP em tecidos de alta demanda (coração/cérebro).",
-        "HYALURONIC ACID 2% + GHK": "Arquitetura Extracelular: Une hidratação profunda (HA) com sinalização regenerativa (GHK). Focado em preenchimento dérmico e cicatrização pós-procedimento.",
+        "BACTERIOSTIC WATER": "Solvente Bacteriostático: Água com 0,9% de Álcool Benzílico. Impede proliferação bacteriana, permitindo uso seguro por até 30 dias.",
+        "SS-31": "Protetor de Cardiolipina: Previne a formação de radicais livres na mitocôndria e restaura a produção de ATP.",
+        "HYALURONIC ACID 2% + GHK": "Arquitetura Extracelular: Une hidratação profunda (HA) com sinalização regenerativa (GHK).",
         "HCG": "Mimetizador de LH: Sinaliza aos testículos a produção de testosterona. Vital para prevenir atrofia testicular e reinício do eixo hormonal (TPC).",
-        "HEMP OIL": "Suporte Fitocanabinoide: Propriedades analgésicas e anti-inflamatórias. Suporta o sistema endocanabinoide para relaxamento e homeostase.",
-        "TESAMORELIN": "Redutor de Lipodistrofia: Único aprovado para reduzir gordura visceral abdominal severa e melhorar o perfil lipídico cardiovascular."
+        "HEMP OIL": "Suporte Fitocanabinoide: Propriedades analgésicas e anti-inflamatórias. Suporta o sistema endocanabinoide.",
+        "TESAMORELIN": "Redutor de Lipodistrofia: Único aprovado para reduzir gordura visceral abdominal severa."
     }
 
     try:
@@ -90,13 +77,10 @@ def gerar_site_vendas_completo():
             df = pd.read_csv(arquivo_dados)
         df.columns = [str(col).strip() for col in df.columns]
         
-        # Prepara base de dados para o JavaScript
         produtos_base = []
         for idx, row in df.iterrows():
-            nome_prod = str(row.get('PRODUTO', 'N/A'))
-            # Busca a informação técnica no dicionário
-            info_vazia = "Informação técnica detalhada não disponível para este item."
-            info_prod = info_vazia
+            nome_prod = str(row.get('PRODUTO', 'N/A')).strip()
+            info_prod = "Informação técnica detalhada não disponível para este item."
             for chave, texto in infos_tecnicas.items():
                 if chave in nome_prod.upper():
                     info_prod = texto
@@ -115,7 +99,6 @@ def gerar_site_vendas_completo():
         print(f"Erro ao ler os dados: {e}")
         return
 
-    # Início do HTML
     html_template = f"""
     <!DOCTYPE html>
     <html lang="pt-br">
@@ -127,10 +110,16 @@ def gerar_site_vendas_completo():
             :root {{ --primary: #004a99; --secondary: #28a745; --danger: #dc3545; --bg: #f4f7f9; }}
             body {{ font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; }}
             .container {{ max-width: 900px; margin: auto; background: white; min-height: 100vh; padding: 15px; box-sizing: border-box; padding-bottom: 220px; }}
-            h1 {{ color: var(--primary); text-align: center; font-size: 1.6rem; margin-bottom: 5px; }}
-            .subtitle {{ text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 20px; }}
-            .info-alert-card {{ background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 12px; margin-bottom: 20px; position: relative; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }}
+            
+            .header-logo-container {{ text-align: center; padding: 10px 0; }}
+            .header-logo {{ max-width: 250px; height: auto; }}
+            .subtitle {{ text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 20px; font-weight: 500; }}
+            
+            /* NOVOS ALERTAS SOLICITADOS */
+            .info-alert-card {{ background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 12px; margin-bottom: 10px; position: relative; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }}
+            .lote-alert-card {{ background: #e3f2fd; border: 1px solid #bbdefb; color: #0d47a1; padding: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; line-height: 1.4; font-weight: bold; border-left: 5px solid #2196f3; }}
             .close-alert {{ position: absolute; top: 10px; right: 10px; cursor: pointer; font-weight: bold; font-size: 1.2rem; }}
+            
             .frete-card {{ background: #fff; border: 2px solid var(--primary); padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }}
             .table-container {{ overflow-x: auto; border-radius: 8px; border: 1px solid #eee; }}
             table {{ width: 100%; border-collapse: collapse; background: white; min-width: 400px; }}
@@ -141,8 +130,6 @@ def gerar_site_vendas_completo():
             .input-style {{ padding: 12px; border: 1px solid #ccc; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 16px; }}
             .btn-add {{ background: var(--secondary); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }}
             .btn-add:disabled {{ background: #eee; color: #999; cursor: not-allowed; }}
-            
-            /* ESTILO DO BOTÃO DE INFORMAÇÕES */
             .btn-info {{ background: none; border: none; color: var(--primary); font-size: 0.75rem; text-decoration: underline; cursor: pointer; padding: 0; margin-top: 5px; font-weight: bold; }}
             
             .cart-panel {{ position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); color: white; padding: 15px; border-radius: 20px 20px 0 0; z-index: 1000; display: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto; }}
@@ -158,18 +145,24 @@ def gerar_site_vendas_completo():
             .discount-line {{ display: none; justify-content: space-between; color: #ffeb3b; font-size: 0.9rem; margin-bottom: 5px; }}
             .btn-checkout-final {{ background: white; color: var(--primary); border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 5px; }}
             
-            /* MODAL ESTILIZADO */
             .modal {{ display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: auto; }}
-            .modal-content {{ background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 500px; border-radius: 15px; box-sizing: border-box; }}
-            .modal-info-body {{ background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 5px solid var(--primary); margin: 15px 0; font-size: 0.95rem; line-height: 1.5; }}
+            .modal-content {{ background: white; margin: 5% auto; padding: 20px; width: 95%; max-width: 500px; border-radius: 15px; box-sizing: border-box; text-align: center; }}
+            .modal-info-body {{ background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 5px solid var(--primary); margin: 15px 0; font-size: 0.95rem; line-height: 1.5; text-align: left; }}
+            .prod-img-modal {{ max-width: 250px; height: auto; border-radius: 10px; margin: 0 auto 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: none; }}
             .form-group {{ margin-bottom: 12px; }}
         </style>
     </head>
     <body>
 
     <div class="container">
-        <h1>🧪 G-LAB PEPTIDES</h1>
+        <div class="header-logo-container">
+            <img src="1.png" alt="G-LAB PEPTIDES" class="header-logo">
+        </div>
         <p class="subtitle">Estoque Atualizado e Pedidos Online</p>
+
+        <div class="lote-alert-card">
+            📢 Previsão de chegada de novos itens 13/02/2026, o estoque do site será atualizado!
+        </div>
 
         <div id="main-info-alert" class="info-alert-card">
             <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
@@ -199,7 +192,7 @@ def gerar_site_vendas_completo():
     """
 
     for idx, row in df.iterrows():
-        produto = row.get('PRODUTO', 'N/A')
+        produto = str(row.get('PRODUTO', 'N/A')).strip()
         espec = f"{row.get('VOLUME', '')} {row.get('MEDIDA', '')}".strip()
         preco = row.get('Preço (R$)', 0)
         estoque_status = str(row.get('ESTOQUE', row.get('STATUS', ''))).strip().upper()
@@ -235,6 +228,7 @@ def gerar_site_vendas_completo():
     <div id="modalInfo" class="modal">
         <div class="modal-content">
             <h2 id="info-titulo" style="color: var(--primary); margin-top: 0; font-size: 1.2rem;"></h2>
+            <img id="info-imagem" src="" alt="Produto" class="prod-img-modal">
             <div class="modal-info-body" id="info-texto"></div>
             <button onclick="fecharInfo()" class="btn-add" style="background:#6c757d">Fechar</button>
         </div>
@@ -271,7 +265,7 @@ def gerar_site_vendas_completo():
     </div>
 
     <div id="modalCheckout" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="text-align: left;">
             <h2 style="color: var(--primary); margin-top: 0;">📦 Dados de Entrega</h2>
             <div class="form-group"><input type="text" id="f_nome" class="input-style" placeholder="Nome Completo"></div>
             <div class="form-group"><input type="text" id="f_end" class="input-style" placeholder="Endereço (Rua/Av)"></div>
@@ -312,19 +306,31 @@ def gerar_site_vendas_completo():
             'NORDESTE': ['BA', 'SE', 'AL', 'PE', 'PB', 'RN', 'CE', 'PI', 'MA']
         }};
 
-        // FUNÇÕES PARA O MODAL DE INFORMAÇÕES
         function abrirInfo(id) {{
             const p = PRODUTOS.find(x => x.id === id);
             if(p) {{
                 document.getElementById('info-titulo').innerText = p.nome;
                 document.getElementById('info-texto').innerText = p.info;
+                
+                const imgElement = document.getElementById('info-imagem');
+                const nomeLimpo = p.nome.trim();
+                const extensoes = ['.webp', '.png', '.jpg', '.jpeg'];
+
+                function tentarExtensao(index) {{
+                    if (index >= extensoes.length) {{
+                        imgElement.style.display = 'none';
+                        return;
+                    }}
+                    imgElement.src = "imagens produtos/" + nomeLimpo + extensoes[index];
+                    imgElement.onload = function() {{ imgElement.style.display = 'block'; }};
+                    imgElement.onerror = function() {{ tentarExtensao(index + 1); }};
+                }}
+                tentarExtensao(0);
                 document.getElementById('modalInfo').style.display = 'block';
             }}
         }}
 
-        function fecharInfo() {{
-            document.getElementById('modalInfo').style.display = 'none';
-        }}
+        function fecharInfo() {{ document.getElementById('modalInfo').style.display = 'none'; }}
 
         function adicionar(id) {{
             const p = PRODUTOS.find(x => x.id === id);
@@ -341,27 +347,24 @@ def gerar_site_vendas_completo():
         }}
 
         function removerFrete() {{
-            freteV = 0;
-            freteD = "";
+            freteV = 0; freteD = "";
             document.getElementById('resultado-frete').innerText = "";
             document.getElementById('cep-destino').value = "";
-            document.getElementById('f_cidade').value = "";
-            document.getElementById('f_estado').value = "";
-            document.getElementById('f_end').value = "";
-            document.getElementById('f_bairro').value = "";
             atualizarInterface();
         }}
 
         function aplicarCupom() {{
             const code = document.getElementById('coupon-code').value.trim().toUpperCase();
-            if(code === 'BRUNA5') cupomAtivo = {{ nome: 'BRUNA5', desc: 0.05 }};
-            else if(code === 'DANI5') cupomAtivo = {{ nome: 'DANI5', desc: 0.05 }};
-            else if(code === 'GILMARA5') cupomAtivo = {{ nome: 'GILMARA5', desc: 0.05 }};
-            else if(code === 'DAFNE10') cupomAtivo = {{ nome: 'DAFNE10', desc: 0.10 }};
-            else if(code === 'NOS5') cupomAtivo = {{ nome: 'NOS5', desc: 0.05 }};
-            else if(code === 'ROGERIO5') cupomAtivo = {{ nome: 'ROGERIO5', desc: 0.05 }};
-            else {{ cupomAtivo = null; alert("Cupom inválido."); }}
-            if(cupomAtivo) alert("Cupom " + cupomAtivo.nome + " aplicado!");
+            const cupons = {{
+                'BRUNA5': 0.05, 'DANI5': 0.05, 'GILMARA5': 0.05,
+                'DAFNE10': 0.10, 'NOS5': 0.05, 'ROGERIO5': 0.05
+            }};
+            if(cupons[code]) {{
+                cupomAtivo = {{ nome: code, desc: cupons[code] }};
+                alert("Cupom aplicado!");
+            }} else {{
+                cupomAtivo = null; alert("Cupom inválido.");
+            }}
             atualizarInterface();
         }}
 
@@ -371,28 +374,25 @@ def gerar_site_vendas_completo():
             panel.style.display = carrinho.length > 0 ? 'block' : 'none';
             document.getElementById('cart-count').innerText = carrinho.length;
             list.innerHTML = '';
-            let subtotalItens = 0;
+            let subtotal = 0;
+            
             carrinho.forEach(item => {{
-                subtotalItens += item.preco;
+                subtotal += item.preco;
                 list.innerHTML += `<div class="cart-item"><span>${{item.nome}}</span><span>R$ ${{item.preco.toFixed(2)}} <button class="btn-remove" onclick="remover(${{item.uid}})">×</button></span></div>`;
             }});
-            let valorDesconto = 0;
+
+            let valorDesconto = cupomAtivo ? subtotal * cupomAtivo.desc : 0;
+            document.getElementById('discount-row').style.display = cupomAtivo ? 'flex' : 'none';
             if(cupomAtivo) {{
-                valorDesconto = subtotalItens * cupomAtivo.desc;
-                document.getElementById('discount-row').style.display = 'flex';
-                document.getElementById('discount-name').innerText = cupomAtivo.nome + " -" + (cupomAtivo.desc * 100) + "%";
+                document.getElementById('discount-name').innerText = cupomAtivo.nome;
                 document.getElementById('discount-val').innerText = valorDesconto.toFixed(2);
-            }} else {{
-                document.getElementById('discount-row').style.display = 'none';
             }}
+
             const shipContainer = document.getElementById('ship-info-container');
-            if(freteV > 0) {{
-                shipContainer.style.display = 'flex';
-                document.getElementById('ship-info-text').innerText = "🚚 Frete: " + freteD;
-            }} else {{
-                shipContainer.style.display = 'none';
-            }}
-            const totalFinal = (subtotalItens - valorDesconto) + freteV;
+            shipContainer.style.display = freteV > 0 ? 'flex' : 'none';
+            if(freteV > 0) document.getElementById('ship-info-text').innerText = "🚚 " + freteD;
+
+            const totalFinal = (subtotal - valorDesconto) + freteV;
             document.getElementById('total-val').innerText = totalFinal.toLocaleString('pt-BR', {{minimumFractionDigits: 2}});
         }}
 
@@ -448,17 +448,17 @@ def gerar_site_vendas_completo():
             }}
         }}
 
+
+        /* TRAVA DE FRETE OBRIGATÓRIO PARA O CHECKOUT */
         function abrirCheckout() {{ 
-            const inputCep = document.getElementById('cep-destino').value.replace(/\D/g, '');
-            
-            if(!inputCep || freteV === 0) {{
-                alert("Para o seguimento, você deve informar o CEP e clicar em 'Localizar' para calcular o frete!");
-                document.getElementById('cep-destino').focus();
+            if(freteV <= 0) {{
+                alert("Por favor, informe seu CEP e calcule o frete antes de prosseguir!");
+                window.scrollTo({{ top: 0, behavior: 'smooth' }});
                 return;
             }}
             document.getElementById('modalCheckout').style.display = 'block'; 
         }}
-        
+
         function fecharCheckout() {{ document.getElementById('modalCheckout').style.display = 'none'; }}
 
         function enviarPedido() {{
@@ -475,13 +475,10 @@ def gerar_site_vendas_completo():
                 p: document.getElementById('f_pgto').value.toUpperCase()
             }};
             
-            if(!dados.n) {{ alert("O campo NOME é obrigatório!"); document.getElementById('f_nome').focus(); return; }}
-            if(!dados.e) {{ alert("O campo ENDEREÇO é obrigatório!"); document.getElementById('f_end').focus(); return; }}
-            if(!dados.nu) {{ alert("O campo NÚMERO é obrigatório!"); document.getElementById('f_num').focus(); return; }}
-            if(!dados.ba) {{ alert("O campo BAIRRO é obrigatório!"); document.getElementById('f_bairro').focus(); return; }}
-            if(!dados.ci) {{ alert("O campo CIDADE é obrigatório!"); document.getElementById('f_cidade').focus(); return; }}
-            if(!dados.es) {{ alert("O campo UF é obrigatório!"); document.getElementById('f_estado').focus(); return; }}
-            if(!dados.t) {{ alert("O campo WHATSAPP é obrigatório!"); document.getElementById('f_tel').focus(); return; }}
+            if(!dados.n || !dados.e || !dados.nu || !dados.ba || !dados.ci || !dados.es || !dados.t) {{
+                alert("Por favor, preencha todos os campos obrigatórios!");
+                return;
+            }}
 
             const temSolucao = carrinho.some(item => item.nome.toUpperCase().includes("BACTERIOSTIC WATER"));
             if(!temSolucao) {{
@@ -512,23 +509,18 @@ def gerar_site_vendas_completo():
             
             msg += "*ITENS DO PEDIDO:*%0A";
             carrinho.forEach(i => {{ 
-                let precoFinalItem = i.preco;
                 let linhaItem = "• " + i.nome.toUpperCase() + " (" + i.espec.toUpperCase() + ") - R$ " + i.preco.toFixed(2);
-                
                 if(cupomAtivo) {{
-                    let descontoItem = i.preco * cupomAtivo.desc;
-                    precoFinalItem = i.preco - descontoItem;
-                    linhaItem += " - COM DESCONTO (" + (cupomAtivo.desc * 100) + "%) R$ " + precoFinalItem.toFixed(2);
+                    let descI = i.preco * cupomAtivo.desc;
+                    linhaItem += " - COM DESCONTO (" + (cupomAtivo.desc * 100) + "%) R$ " + (i.preco - descI).toFixed(2);
                 }}
                 msg += linhaItem + "%0A"; 
             }});
 
-            if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + descTotal.toFixed(2) + ") (DESCONTO TOTAL DO PEDIDO)";
-            
-            if(freteV > 0) msg += "%0A🚚 *FRETE:* " + freteD.toUpperCase();
-            else msg += "%0A🚚 *FRETE:* RETIRADA/A CALCULAR";
-            
+            if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + descTotal.toFixed(2) + ")";
+            msg += "%0A🚚 *FRETE:* " + freteD.toUpperCase();
             msg += "%0A%0A*TOTAL GERAL: R$ " + (subtotalItens - descTotal + freteV).toFixed(2) + "*";
+            
             window.open("https://wa.me/+17746222523?text=" + msg, '_blank');
         }}
     </script>
@@ -536,10 +528,15 @@ def gerar_site_vendas_completo():
     </html>
     """
 
+    # Salva o arquivo final
     caminho_saida = os.path.join(diretorio_atual, 'index.html')
-    with open(caminho_saida, 'w', encoding='utf-8') as f:
-        f.write(html_template)
-    print(f"Sucesso! Código gerado com ícones de informações técnicas e mapeamento do Word.")
+    try:
+        with open(caminho_saida, 'w', encoding='utf-8') as f:
+            f.write(html_template)
+        print(f"✅ Sucesso! Site gerado em: {caminho_saida}")
+        print(f"🚀 Funcionalidade de Frete Obrigatório e Informações Técnicas Aplicadas.")
+    except Exception as e:
+        print(f"❌ Erro ao salvar o arquivo: {e}")
 
 if __name__ == "__main__":
     gerar_site_vendas_completo()
