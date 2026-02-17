@@ -359,6 +359,7 @@ def gerar_site_vendas_completo():
                 'BRUNA5': 0.05, 'DANI5': 0.05, 'GILMARA5': 0.05,
                 'DAFNE10': 0.10, 'NOS5': 0.05, 'ROGERIO5': 0.05,
                 'ANDERSON5': 0.05, 'JAQUE5': 0.05, 'CABRAL5': 0.05, 'KARLINHA5': 0.05,
+                'LUD5': 0.05,
             }};
             if(cupons[code]) {{
                 cupomAtivo = {{ nome: code, desc: cupons[code] }};
