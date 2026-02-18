@@ -7,7 +7,7 @@ def gerar_site_vendas_completo():
     
     # Busca o arquivo de dados
     arquivo_dados = None
-    for nome in ['stock_0202.xlsx', 'stock_2901.xlsx - Plan1.csv']:
+    for nome in ['stock_0202 - NOVA.xlsx', 'stock_2901.xlsx - Plan1.csv']:
         caminho = os.path.join(diretorio_atual, nome)
         if os.path.exists(caminho):
             arquivo_dados = caminho
