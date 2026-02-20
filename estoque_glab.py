@@ -62,7 +62,7 @@ def gerar_site_vendas_completo():
         "MELANOTAN 2": "Bronzeamento e Libido: Atua no SNC aumentando a pigmentação da pele, elevando o desejo sexual e reduzindo o apetite.",
         "PT-141": "Tratamento de Disfunção Sexual: Atua via SNC nos centros de excitação do cérebro. Indicado para desejo sexual hipoativo.",
         "VITAMIN B-12": "Metilcobalamina de Alta Potência: Essencial para a bainha de mielina, produção de glóbulos vermelhos e prevenção da fadiga neuromuscular.",
-        "BACTERIOSTIC WATER": "Solvente Bacteriostático: Água com 0,9% de Álcool Benzílico. Impede proliferação bacteriana, permitindo uso seguro por até 30 dias.",
+        "BACTERIOSTATIC WATER": "Solvente Bacteriostático: Água com 0,9% de Álcool Benzílico. Impede proliferação bacteriana, permitindo uso seguro por até 30 dias.",
         "SS-31": "Protetor de Cardiolipina: Previne a formação de radicais livres na mitocôndria e restaura a produção de ATP.",
         "HYALURONIC ACID 2% + GHK": "Arquitetura Extracelular: Une hidratação profunda (HA) com sinalização regenerativa (GHK).",
         "HCG": "Mimetizador de LH: Sinaliza aos testículos a produção de testosterona. Vital para prevenir atrofia testicular e reinício do eixo hormonal (TPC).",
@@ -166,7 +166,7 @@ def gerar_site_vendas_completo():
 
         <div id="main-info-alert" class="info-alert-card">
             <span class="close-alert" onclick="this.parentElement.style.display='none'">&times;</span>
-            <strong>Aviso importante:</strong> Os produtos são envasados em forma sólida, assim não necessitam de refrigeração para manter as propriedades. O produto deve ser diluído em solução bacteriostática (vendida à parte). Após diluição manter refrigerado!. <br><strong>NOME DA SOLUÇÃO:</strong> Bacteriostic Water.
+            <strong>Aviso importante:</strong> Os produtos são envasados em forma sólida, assim não necessitam de refrigeração para manter as propriedades. O produto deve ser diluído em solução bacteriostática (vendida à parte). Após diluição manter refrigerado!. <br><strong>NOME DA SOLUÇÃO:</strong> BACTERIOSTATIC WATER.
         </div>
         
         <div class="frete-card">
@@ -482,13 +482,13 @@ def gerar_site_vendas_completo():
                 return;
             }}
 
-            const temSolucao = carrinho.some(item => item.nome.toUpperCase().includes("BACTERIOSTIC WATER"));
+            const temSolucao = carrinho.some(item => item.nome.toUpperCase().includes("BACTERIOSTATIC WATER"));
             if(!temSolucao) {{
                 const confirmar = confirm("Você tem certeza que deseja realizar o pedido sem a solução para diluição do item?");
                 if(!confirmar) {{
                     fecharCheckout();
                     document.getElementById('cart-panel').style.display = 'none';
-                    alert("Por favor, adicione a Bacteriostic Water (3ml, 10ml ou 30ml) à sua lista de produtos.");
+                    alert("Por favor, adicione a BACTERIOSTATIC WATER (3ml, 10ml ou 30ml) à sua lista de produtos.");
                     window.scrollTo({{ top: 0, behavior: 'smooth' }});
                     return; 
                 }}
