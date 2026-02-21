@@ -161,7 +161,7 @@ def gerar_site_vendas_completo():
         <p class="subtitle">Estoque Atualizado e Pedidos Online</p>
 
         <div class="lote-alert-card">
-            📢 Previsão de chegada de novos itens 24/02/2026, o estoque do site será atualizado!
+            📢 Previsão de chegada de novos itens 26/02/2026, o estoque do site será atualizado!
         </div>
 
         <div id="main-info-alert" class="info-alert-card">
@@ -359,7 +359,7 @@ def gerar_site_vendas_completo():
                 'BRUNA5': 0.05, 'DANI5': 0.05, 'GILMARA5': 0.05,
                 'DAFNE10': 0.10, 'NOS5': 0.05, 'ROGERIO5': 0.05,
                 'ANDERSON5': 0.05, 'JAQUE5': 0.05, 'CABRAL5': 0.05, 'KARLINHA5': 0.05,
-                'LUD5': 0.05, 'CASSIA5': 0.05,
+                'LUD5': 0.05, 'CASSIA5': 0.05, 'THAIS5': 0.05, 
             }};
             if(cupons[code]) {{
                 cupomAtivo = {{ nome: code, desc: cupons[code] }};
