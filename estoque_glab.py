@@ -464,8 +464,8 @@ def gerar_site_vendas_completo():
                 freteD = "SUDESTE/CENTRO-OESTE R$ 110,00 (5 a 10 dias úteis)";
             }}
             else {{
-                freteV = 140.00;
-                freteD = "NORTE/NORDESTE R$ 140,00 (8 a 15 dias úteis)";
+                freteV = 165.00;
+                freteD = "NORTE/NORDESTE R$ 165,00 (8 a 15 dias úteis)";
             }}
 
             document.getElementById('f_cidade').value = data.localidade;
