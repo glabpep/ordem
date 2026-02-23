@@ -14,7 +14,6 @@
             .header-logo { max-width: 250px; height: auto; }
             .subtitle { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 20px; font-weight: 500; }
             
-            /* NOVOS ALERTAS SOLICITADOS */
             .info-alert-card { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 12px; margin-bottom: 10px; position: relative; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
             .lote-alert-card { background: #e3f2fd; border: 1px solid #bbdefb; color: #0d47a1; padding: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; line-height: 1.4; font-weight: bold; border-left: 5px solid #2196f3; }
             .close-alert { position: absolute; top: 10px; right: 10px; cursor: pointer; font-weight: bold; font-size: 1.2rem; }
@@ -49,6 +48,7 @@
             .modal-info-body { background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 5px solid var(--primary); margin: 15px 0; font-size: 0.95rem; line-height: 1.5; text-align: left; }
             .prod-img-modal { max-width: 250px; height: auto; border-radius: 10px; margin: 0 auto 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: none; }
             .form-group { margin-bottom: 12px; }
+            .brinde-tag { color: #00ff00; font-weight: bold; font-size: 0.75rem; display: block; }
         </style>
     </head>
     <body>
@@ -1227,6 +1227,14 @@
                 list.innerHTML += `<div class="cart-item"><span>${item.nome}</span><span>R$ ${item.preco.toFixed(2)} <button class="btn-remove" onclick="remover(${item.uid})">×</button></span></div>`;
             });
 
+            // LÓGICA DO BRINDE BRUNA5
+            if (cupomAtivo && cupomAtivo.nome === 'BRUNA5') {
+                list.innerHTML += `<div class="cart-item" style="background: rgba(0,255,0,0.1); border: 1px dashed #fff;">
+                    <span>🎁 BRINDE CUPOM BRUNA<br><small>Bacteriostatic Water 7ml</small></span>
+                    <span style="color:#00ff00; font-weight:bold;">GRÁTIS</span>
+                </div>`;
+            }
+
             let valorDesconto = cupomAtivo ? subtotal * cupomAtivo.desc : 0;
             document.getElementById('discount-row').style.display = cupomAtivo ? 'flex' : 'none';
             if(cupomAtivo) {
@@ -1294,8 +1302,6 @@
             }
         }
 
-
-        /* TRAVA DE FRETE OBRIGATÓRIO PARA O CHECKOUT */
         function abrirCheckout() { 
             if(freteV <= 0) {
                 alert("Por favor, informe seu CEP e calcule o frete antes de prosseguir!");
@@ -1327,7 +1333,9 @@
             }
 
             const temSolucao = carrinho.some(item => item.nome.toUpperCase().includes("BACTERIOSTATIC WATER"));
-            if(!temSolucao) {
+            const temBrinde = cupomAtivo && cupomAtivo.nome === 'BRUNA5';
+
+            if(!temSolucao && !temBrinde) {
                 const confirmar = confirm("Você tem certeza que deseja realizar o pedido sem a solução para diluição do item?");
                 if(!confirmar) {
                     fecharCheckout();
@@ -1358,10 +1366,15 @@
                 let linhaItem = "• " + i.nome.toUpperCase() + " (" + i.espec.toUpperCase() + ") - R$ " + i.preco.toFixed(2);
                 if(cupomAtivo) {
                     let descI = i.preco * cupomAtivo.desc;
-                    linhaItem += " - COM DESCONTO (" + (cupomAtivo.desc * 100) + "%) R$ " + (i.preco - descI).toFixed(2);
+                    linhaItem += " - COM DESCONTO (" + (cupomAtivo.desc * 100).toFixed(0) + "%) R$ " + (i.preco - descI).toFixed(2);
                 }
                 msg += linhaItem + "%0A"; 
             });
+
+            // INCLUSÃO DO BRINDE NA MENSAGEM DO WHATSAPP
+            if (temBrinde) {
+                msg += "• BRINDE CUPOM BRUNA (BACTERIOSTATIC WATER 7 ML) - R$ 0,00%0A";
+            }
 
             if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + descTotal.toFixed(2) + ")";
             msg += "%0A🚚 *FRETE:* " + freteD.toUpperCase();
