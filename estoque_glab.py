@@ -334,13 +334,26 @@ def gerar_site_vendas_completo():
         function adicionar(id) {{
             const p = PRODUTOS.find(x => x.id === id);
             if(p) {{
-                carrinho.push({{...p, uid: Date.now() + Math.random()}});
+                // Verifica se o item já existe no carrinho para somar quantidade
+                const itemExistente = carrinho.find(item => item.id === id);
+                if (itemExistente) {{
+                    itemExistente.qtd += 1;
+                }} else {{
+                    carrinho.push({{...p, qtd: 1}});
+                }}
                 atualizarInterface();
             }}
         }}
 
-        function remover(uid) {{
-            carrinho = carrinho.filter(x => x.uid !== uid);
+        function remover(id) {{
+            const itemExistente = carrinho.find(x => x.id === id);
+            if (itemExistente) {{
+                if (itemExistente.qtd > 1) {{
+                    itemExistente.qtd -= 1;
+                }} else {{
+                    carrinho = carrinho.filter(x => x.id !== id);
+                }}
+            }}
             if (carrinho.length === 0) removerFrete();
             atualizarInterface();
         }}
@@ -375,16 +388,23 @@ def gerar_site_vendas_completo():
             const list = document.getElementById('cart-list');
             const panel = document.getElementById('cart-panel');
             panel.style.display = carrinho.length > 0 ? 'block' : 'none';
-            document.getElementById('cart-count').innerText = carrinho.length;
+            
+            // Soma total de unidades para o contador
+            const totalUnidades = carrinho.reduce((acc, item) => acc + item.qtd, 0);
+            document.getElementById('cart-count').innerText = totalUnidades;
+            
             list.innerHTML = '';
             let subtotal = 0;
             
             carrinho.forEach(item => {{
-                subtotal += item.preco;
-                list.innerHTML += `<div class="cart-item"><span>${{item.nome}}</span><span>R$ ${{item.preco.toFixed(2)}} <button class="btn-remove" onclick="remover(${{item.uid}})">×</button></span></div>`;
+                const valorTotalItem = item.preco * item.qtd;
+                subtotal += valorTotalItem;
+                list.innerHTML += `<div class="cart-item">
+                    <span><strong>${{item.qtd}}x</strong> ${{item.nome}}</span>
+                    <span>R$ ${{valorTotalItem.toFixed(2)}} <button class="btn-remove" onclick="remover(${{item.id}})">-</button></span>
+                </div>`;
             }});
 
-            // Lógica do Brinde Bruna5
             if (cupomAtivo && cupomAtivo.nome === 'BRUNA5') {{
                 list.innerHTML += `<div class="cart-item" style="background: rgba(0,255,0,0.1); border: 1px dashed #fff;">
                     <span>🎁 BRINDE CUPOM BRUNA<br><small>Bacteriostatic Water 7ml</small></span>
@@ -494,7 +514,7 @@ def gerar_site_vendas_completo():
         function fecharCheckout() {{ document.getElementById('modalCheckout').style.display = 'none'; }}
 
         function enviarPedido() {{
-            // Tratamento do CEP para o formato XXXXXX-XXX
+            // Tratamento do CEP para o formato XXXXX-XXX (Padrão Nacional)
             let cepLimpo = document.getElementById('cep-destino').value.replace(/\D/g, '');
             let cepFormatado = "NÃO INFORMADO";
             
@@ -521,7 +541,7 @@ def gerar_site_vendas_completo():
             }}
 
             const temSolucao = carrinho.some(item => item.nome.toUpperCase().includes("BACTERIOSTATIC WATER"));
-            const temBrinde = cupomAtivo && cupomAtivo.nome === 'BRUNA5';
+            const temBrinde = cupomAtivo && cupomAtivo.nome === "BRUNA5";
 
             if(!temSolucao && !temBrinde) {{
                 const confirmar = confirm("Você tem certeza que deseja realizar o pedido sem a solução para diluição do item?");
@@ -535,7 +555,22 @@ def gerar_site_vendas_completo():
             }}
             
             let subtotalItens = 0;
-            carrinho.forEach(i => subtotalItens += i.preco);
+            let msgItens = "";
+
+            // Lógica de soma e formatação para o WhatsApp
+            carrinho.forEach(i => {{ 
+                const valorTotalUnidades = i.preco * i.qtd;
+                subtotalItens += valorTotalUnidades;
+                
+                let linhaItem = "• " + i.qtd + "x " + i.nome.toUpperCase() + " (" + i.espec.toUpperCase() + ") - R$ " + valorTotalUnidades.toFixed(2);
+                
+                if(cupomAtivo) {{
+                    let descI = valorTotalUnidades * cupomAtivo.desc;
+                    linhaItem += " - COM DESCONTO R$ " + (valorTotalUnidades - descI).toFixed(2);
+                }}
+                msgItens += linhaItem + "%0A"; 
+            }});
+
             let descTotal = cupomAtivo ? subtotalItens * cupomAtivo.desc : 0;
             
             let msg = "*NOVO PEDIDO G-LAB*%0A%0A";
@@ -549,15 +584,7 @@ def gerar_site_vendas_completo():
             msg += "• *CEP:* " + dados.ce + "%0A";
             msg += "• *PAGAMENTO:* " + dados.p + "%0A%0A";
             
-            msg += "*ITENS DO PEDIDO:*%0A";
-            carrinho.forEach(i => {{ 
-                let linhaItem = "• " + i.nome.toUpperCase() + " (" + i.espec.toUpperCase() + ") - R$ " + i.preco.toFixed(2);
-                if(cupomAtivo) {{
-                    let descI = i.preco * cupomAtivo.desc;
-                    linhaItem += " - COM DESCONTO (" + (cupomAtivo.desc * 100).toFixed(0) + "%) R$ " + (i.preco - descI).toFixed(2);
-                }}
-                msg += linhaItem + "%0A"; 
-            }});
+            msg += "*ITENS DO PEDIDO:*%0A" + msgItens;
 
             if (temBrinde) {{
                 msg += "• BRINDE CUPOM BRUNA (BACTERIOSTATIC WATER 7 ML) - R$ 0,00%0A";
@@ -566,6 +593,10 @@ def gerar_site_vendas_completo():
             if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + descTotal.toFixed(2) + ")";
             msg += "%0A🚚 *FRETE:* " + freteD.toUpperCase();
             msg += "%0A%0A*TOTAL GERAL: R$ " + (subtotalItens - descTotal + freteV).toFixed(2) + "*";
+
+            const fone = "5541991444558";
+            window.open("https://wa.me/" + fone + "?text=" + msg, "_blank");
+        
             
             window.open("https://wa.me/+17746222523?text=" + msg, '_blank');
         }}
