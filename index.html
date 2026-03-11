@@ -1338,6 +1338,14 @@
         function fecharCheckout() { document.getElementById('modalCheckout').style.display = 'none'; }
 
         function enviarPedido() {
+            // Tratamento do CEP para o formato XXXXXX-XXX
+            let cepLimpo = document.getElementById('cep-destino').value.replace(/\D/g, '');
+            let cepFormatado = "NÃO INFORMADO";
+            
+            if (cepLimpo.length === 8) {
+                cepFormatado = cepLimpo.substring(0, 5) + "-" + cepLimpo.substring(5);
+            }
+
             const dados = {
                 n: document.getElementById('f_nome').value.trim().toUpperCase(),
                 e: document.getElementById('f_end').value.trim().toUpperCase(),
@@ -1346,7 +1354,7 @@
                 co: document.getElementById('f_comp').value.trim().toUpperCase(),
                 ci: document.getElementById('f_cidade').value.trim().toUpperCase(),
                 es: document.getElementById('f_estado').value.trim().toUpperCase(),
-                ce: document.getElementById('cep-destino').value.trim().toUpperCase(),
+                ce: cepFormatado,
                 t: document.getElementById('f_tel').value.trim().toUpperCase(),
                 p: document.getElementById('f_pgto').value.toUpperCase()
             };
@@ -1382,7 +1390,7 @@
             msg += "• *BAIRRO:* " + dados.ba + "%0A";
             if(dados.co) msg += "• *COMPL:* " + dados.co + "%0A";
             msg += "• *CIDADE:* " + dados.ci + "-" + dados.es + "%0A";
-            msg += "• *CEP:* " + (dados.ce || "NÃO INFORMADO") + "%0A";
+            msg += "• *CEP:* " + dados.ce + "%0A";
             msg += "• *PAGAMENTO:* " + dados.p + "%0A%0A";
             
             msg += "*ITENS DO PEDIDO:*%0A";
