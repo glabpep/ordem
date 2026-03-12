@@ -593,6 +593,7 @@ def gerar_site_vendas_completo():
             if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + descTotal.toFixed(2) + ")";
             msg += "%0A🚚 *FRETE:* " + freteD.toUpperCase();
             msg += "%0A%0A*TOTAL GERAL: R$ " + (subtotalItens - descTotal + freteV).toFixed(2) + "*";
+        
             
             window.open("https://wa.me/+17746222523?text=" + msg, '_blank');
         }}
@@ -613,4 +614,3 @@ def gerar_site_vendas_completo():
 
 if __name__ == "__main__":
     gerar_site_vendas_completo()
-
