@@ -160,7 +160,7 @@ def gerar_site_vendas_completo():
         <p class="subtitle">Estoque Atualizado e Pedidos Online</p>
 
         <div class="lote-alert-card">
-            📢 Previsão de chegada de novos itens 16/03/2026, o estoque do site será atualizado!
+            📢 Previsão de chegada de novos itens 23/03/2026, o estoque do site será atualizado!
         </div>
 
         <div id="main-info-alert" class="info-alert-card">
