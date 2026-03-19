@@ -405,12 +405,7 @@ def gerar_site_vendas_completo():
                 </div>`;
             }});
 
-            if (cupomAtivo && cupomAtivo.nome === 'BRUNA5') {{
-                list.innerHTML += `<div class="cart-item" style="background: rgba(0,255,0,0.1); border: 1px dashed #fff;">
-                    <span>🎁 BRINDE CUPOM BRUNA<br><small>Bacteriostatic Water 7ml</small></span>
-                    <span style="color:#00ff00; font-weight:bold;">GRÁTIS</span>
-                </div>`;
-            }}
+           
 
             let valorDesconto = cupomAtivo ? subtotal * cupomAtivo.desc : 0;
             document.getElementById('discount-row').style.display = cupomAtivo ? 'flex' : 'none';
