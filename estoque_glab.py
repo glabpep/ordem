@@ -581,9 +581,7 @@ def gerar_site_vendas_completo():
             
             msg += "*ITENS DO PEDIDO:*%0A" + msgItens;
 
-            if (temBrinde) {{
-                msg += "• BRINDE CUPOM BRUNA (BACTERIOSTATIC WATER 7 ML) - R$ 0,00%0A";
-            }}
+            
 
             if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + descTotal.toFixed(2) + ")";
             msg += "%0A🚚 *FRETE:* " + freteD.toUpperCase();
