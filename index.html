@@ -169,11 +169,11 @@
                             <small style="color:#666">3 ML</small><br>
                             <button class="btn-info" onclick="abrirInfo(5)">+ informações</button>
                         </td>
-                        <td><span class="status-espera">EM ESPERA</span></td>
+                        <td><span class="status-disponivel">DISPONÍVEL</span></td>
                         <td style="white-space: nowrap;">R$ 40.00</td>
                         <td>
-                            <button onclick="adicionar(5)" disabled class="btn-add">
-                                ✖
+                            <button onclick="adicionar(5)"  class="btn-add">
+                                +
                             </button>
                         </td>
                     </tr>
@@ -994,11 +994,11 @@
                             <small style="color:#666">10 MG</small><br>
                             <button class="btn-info" onclick="abrirInfo(60)">+ informações</button>
                         </td>
-                        <td><span class="status-disponivel">DISPONÍVEL</span></td>
+                        <td><span class="status-espera">EM ESPERA</span></td>
                         <td style="white-space: nowrap;">R$ 522.27</td>
                         <td>
-                            <button onclick="adicionar(60)"  class="btn-add">
-                                +
+                            <button onclick="adicionar(60)" disabled class="btn-add">
+                                ✖
                             </button>
                         </td>
                     </tr>
@@ -1217,7 +1217,7 @@
                 'ANDERSON5': 0.05, 'JAQUE5': 0.05, 'CABRAL5': 0.05, 'KARLINHA5': 0.05,
                 'LUD5': 0.05, 'CASSIA5': 0.05, 'THAIS5': 0.05, 'NATAN': 0.00000000001, 'LIRICY5': 0.05,
                 'ANDREAFLEURY': 0.05, 'ANA5': 0.05, '10PRO': 0.000000000001, 'PRO5': 0.05, 
-                'WEY5': 0.05, 'ALE5': 0.05, 'TRIGUEIRO' : 0.05,
+                'WEY5': 0.05, 'ALE5': 0.05, 'TRIGUEIRO' : 0.05, 'RAYSSA5': 0.05, 
             };
             if(cupons[code]) {
                 cupomAtivo = { nome: code, desc: cupons[code] };
