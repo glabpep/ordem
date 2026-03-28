@@ -373,7 +373,7 @@ def gerar_site_vendas_completo():
                 'ANDERSON5': 0.05, 'JAQUE5': 0.05, 'CABRAL5': 0.05, 'KARLINHA5': 0.05,
                 'LUD5': 0.05, 'CASSIA5': 0.05, 'THAIS5': 0.05, 'NATAN': 0.00000000001, 'LIRICY5': 0.05,
                 'ANDREAFLEURY': 0.05, 'ANA5': 0.05, '10PRO': 0.000000000001, 'PRO5': 0.05, 
-                'WEY5': 0.05, 'ALE5': 0.05, 'TRIGUEIRO' : 0.05, 'RAYSSA5': 0.05, 
+                'WEY5': 0.05, 'ALE5': 0.05, 'TRIGUEIRO' : 0.05, 'RAYSSA5': 0.05, 'BRUNA10': 0.10, 
             }};
             if(cupons[code]) {{
                 cupomAtivo = {{ nome: code, desc: cupons[code] }};
