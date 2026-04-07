@@ -160,10 +160,7 @@ def gerar_site_vendas_completo():
         <p class="subtitle">Estoque Atualizado e Pedidos Online</p>
 
         <div class="lote-alert-card">
-              📢 Previsão de chegada de novos itens 21/04/2026, o estoque do site será atualizado!
-            Devido as liberações alfandegárias ocorreram atrasos nos lotes!
-            Sabemos que todos estão ansiosos para a chegada dos itens e estamos trabalhando ao máximo para disponibilizar o mais breve possível!
-            As liberações NÃO estão em nosso controle, já tomamos providências para novos caminhos, agradecemos a paciência e compreensão de todos.  
+            📢 Previsão de chegada de novos itens 21/04/2026, o estoque do site será atualizado! Devido as liberações alfandegárias ocorreram atrasos nos lotes! Sabemos que todos estão ansiosos para a chegada dos itens e estamos trabalhando ao máximo para disponibilizar o mais breve possível! As liberações NÃO estão em nosso controle, já tomamos providências para novos caminhos, agradecemos a paciência e compreensão de todos.
         </div>
 
         <div id="main-info-alert" class="info-alert-card">
