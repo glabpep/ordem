@@ -1111,6 +1111,7 @@
         <div class="modal-content" style="text-align: left;">
             <h2 style="color: var(--primary); margin-top: 0;">📦 Dados de Entrega</h2>
             <div class="form-group"><input type="text" id="f_nome" class="input-style" placeholder="Nome Completo"></div>
+            <div class="form-group"><input type="text" id="f_cpf" class="input-style" placeholder="CPF"></div>
             <div class="form-group"><input type="text" id="f_end" class="input-style" placeholder="Endereço (Rua/Av)"></div>
             <div style="display:flex; gap:10px; margin-bottom:12px;">
                 <input type="text" id="f_num" class="input-style" style="width:30%" placeholder="Nº">
@@ -1363,6 +1364,7 @@
 
             const dados = {
                 n: document.getElementById('f_nome').value.trim().toUpperCase(),
+                cpf: document.getElementById('f_cpf').value.trim().toUpperCase(),
                 e: document.getElementById('f_end').value.trim().toUpperCase(),
                 nu: document.getElementById('f_num').value.trim().toUpperCase(),
                 ba: document.getElementById('f_bairro').value.trim().toUpperCase(),
@@ -1374,7 +1376,7 @@
                 p: document.getElementById('f_pgto').value.toUpperCase()
             };
             
-            if(!dados.n || !dados.e || !dados.nu || !dados.ba || !dados.ci || !dados.es || !dados.t) {
+            if(!dados.n || !dados.cpf || !dados.e || !dados.nu || !dados.ba || !dados.ci || !dados.es || !dados.t) {
                 alert("Por favor, preencha todos os campos obrigatórios!");
                 return;
             }
@@ -1415,6 +1417,7 @@
             let msg = "*NOVO PEDIDO G-LAB*%0A%0A";
             msg += "*DADOS DO CLIENTE:*%0A";
             msg += "• *NOME:* " + dados.n + "%0A";
+            msg += "• *CPF:* " + dados.cpf + "%0A";
             msg += "• *WHATSAPP:* " + dados.t + "%0A";
             msg += "• *END:* " + dados.e + ", " + dados.nu + "%0A";
             msg += "• *BAIRRO:* " + dados.ba + "%0A";
