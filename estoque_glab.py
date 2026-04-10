@@ -99,6 +99,7 @@ def gerar_site_vendas_completo():
         print(f"Erro ao ler os dados: {e}")
         return
 
+
     html_template = f"""
     <!DOCTYPE html>
     <html lang="pt-br">
@@ -107,51 +108,361 @@ def gerar_site_vendas_completo():
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>G-LAB PEPTIDES - Pedidos</title>
         <style>
-            :root {{ --primary: #004a99; --secondary: #28a745; --danger: #dc3545; --bg: #f4f7f9; }}
-            body {{ font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; }}
-            .container {{ max-width: 900px; margin: auto; background: white; min-height: 100vh; padding: 15px; box-sizing: border-box; padding-bottom: 220px; }}
+            :root {{
+                --primary: #0d6efd;
+                --secondary: #28a745;
+                --danger: #ff4d4f;
+                --bg: #121212;
+                --card-bg: #1e1e1e;
+                --card-bg-2: #242424;
+                --text: #ffffff;
+                --text-muted: #b0b0b0;
+                --border: #333;
+                --input-bg: #2a2a2a;
+                --warning-bg: #3a2f00;
+                --warning-border: #665200;
+                --warning-text: #ffe082;
+                --info-bg: #0d2a4a;
+                --info-border: #1e88e5;
+                --info-text: #90caf9;
+            }}
+
+            body {{
+                font-family: 'Segoe UI', Roboto, sans-serif;
+                background: var(--bg);
+                margin: 0;
+                padding: 0;
+                color: var(--text);
+            }}
+
+            .container {{
+                max-width: 900px;
+                margin: auto;
+                background: var(--card-bg);
+                min-height: 100vh;
+                padding: 15px;
+                box-sizing: border-box;
+                padding-bottom: 220px;
+            }}
             
             .header-logo-container {{ text-align: center; padding: 10px 0; }}
             .header-logo {{ max-width: 250px; height: auto; }}
-            .subtitle {{ text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 20px; font-weight: 500; }}
+            .subtitle {{
+                text-align: center;
+                color: var(--text-muted);
+                font-size: 0.9rem;
+                margin-bottom: 20px;
+                font-weight: 500;
+            }}
             
-            .info-alert-card {{ background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 12px; margin-bottom: 10px; position: relative; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }}
-            .lote-alert-card {{ background: #e3f2fd; border: 1px solid #bbdefb; color: #0d47a1; padding: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; line-height: 1.4; font-weight: bold; border-left: 5px solid #2196f3; }}
-            .close-alert {{ position: absolute; top: 10px; right: 10px; cursor: pointer; font-weight: bold; font-size: 1.2rem; }}
+            .info-alert-card {{
+                background: var(--warning-bg);
+                border: 1px solid var(--warning-border);
+                color: var(--warning-text);
+                padding: 15px;
+                border-radius: 12px;
+                margin-bottom: 10px;
+                position: relative;
+                font-size: 0.9rem;
+                line-height: 1.4;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            }}
+
+            .lote-alert-card {{
+                background: var(--info-bg);
+                border: 1px solid var(--info-border);
+                color: var(--info-text);
+                padding: 15px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+                font-size: 0.9rem;
+                line-height: 1.4;
+                font-weight: bold;
+                border-left: 5px solid var(--primary);
+            }}
+
+            .close-alert {{
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                cursor: pointer;
+                font-weight: bold;
+                font-size: 1.2rem;
+                color: var(--text);
+            }}
             
-            .frete-card {{ background: #fff; border: 2px solid var(--primary); padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }}
-            .table-container {{ overflow-x: auto; border-radius: 8px; border: 1px solid #eee; }}
-            table {{ width: 100%; border-collapse: collapse; background: white; min-width: 400px; }}
-            th {{ background: var(--primary); color: white; padding: 12px 8px; text-align: left; font-size: 0.85rem; }}
-            td {{ padding: 12px 8px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }}
-            .status-disponivel {{ color: var(--secondary); font-weight: bold; }}
-            .status-espera {{ color: var(--danger); font-weight: bold; background: #fff5f5; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--danger); display: inline-block; }}
-            .input-style {{ padding: 12px; border: 1px solid #ccc; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 16px; }}
-            .btn-add {{ background: var(--secondary); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }}
-            .btn-add:disabled {{ background: #eee; color: #999; cursor: not-allowed; }}
-            .btn-info {{ background: none; border: none; color: var(--primary); font-size: 0.75rem; text-decoration: underline; cursor: pointer; padding: 0; margin-top: 5px; font-weight: bold; }}
+            .frete-card {{
+                background: var(--card-bg-2);
+                border: 2px solid var(--primary);
+                padding: 15px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                color: var(--text);
+            }}
+
+            .table-container {{
+                overflow-x: auto;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+            }}
+
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                background: var(--card-bg-2);
+                min-width: 400px;
+                color: var(--text);
+            }}
+
+            th {{
+                background: var(--primary);
+                color: #ffffff;
+                padding: 12px 8px;
+                text-align: left;
+                font-size: 0.85rem;
+            }}
+
+            td {{
+                padding: 12px 8px;
+                border-bottom: 1px solid var(--border);
+                font-size: 0.9rem;
+            }}
+
+            .status-disponivel {{
+                color: #4caf50;
+                font-weight: bold;
+            }}
+
+            .status-espera {{
+                color: #ff6b6b;
+                font-weight: bold;
+                background: rgba(255, 77, 79, 0.15);
+                padding: 4px 8px;
+                border-radius: 4px;
+                border: 1px solid var(--danger);
+                display: inline-block;
+            }}
+
+            .input-style {{
+                padding: 12px;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                width: 100%;
+                box-sizing: border-box;
+                font-size: 16px;
+                background: var(--input-bg);
+                color: var(--text);
+            }}
+
+            .input-style::placeholder {{
+                color: var(--text-muted);
+            }}
+
+            .btn-add {{
+                background: var(--secondary);
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: bold;
+                width: 100%;
+            }}
+
+            .btn-add:disabled {{
+                background: #555;
+                color: #aaa;
+                cursor: not-allowed;
+            }}
+
+            .btn-info {{
+                background: none;
+                border: none;
+                color: #90caf9;
+                font-size: 0.75rem;
+                text-decoration: underline;
+                cursor: pointer;
+                padding: 0;
+                margin-top: 5px;
+                font-weight: bold;
+            }}
             
-            .cart-panel {{ position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); color: white; padding: 15px; border-radius: 20px 20px 0 0; z-index: 1000; display: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto; }}
-            @media (min-width: 768px) {{ .cart-panel {{ width: 400px; left: auto; right: 20px; bottom: 20px; border-radius: 20px; }} }}
-            .cart-list {{ margin: 10px 0; max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 5px; }}
-            .cart-item {{ display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; align-items: center; }}
-            .btn-remove {{ background: #ff4444; border: none; color: white; cursor: pointer; font-weight: bold; border-radius: 4px; padding: 2px 8px; margin-left: 10px; }}
-            .coupon-section {{ display: flex; gap: 5px; margin: 10px 0; }}
-            .coupon-input {{ flex: 1; padding: 8px; border-radius: 5px; border: none; font-size: 0.8rem; color: #333; }}
-            .btn-coupon {{ background: #ffeb3b; color: #333; border: none; padding: 8px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 0.8rem; }}
-            .ship-row {{ display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #ffeb3b; margin-top: 5px; font-weight: bold; }}
-            .total-row {{ display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin: 5px 0; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }}
-            .discount-line {{ display: none; justify-content: space-between; color: #ffeb3b; font-size: 0.9rem; margin-bottom: 5px; }}
-            .btn-checkout-final {{ background: white; color: var(--primary); border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 5px; }}
+            .cart-panel {{
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: var(--card-bg-2);
+                color: var(--text);
+                padding: 15px;
+                border-radius: 20px 20px 0 0;
+                z-index: 1000;
+                display: none;
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+                max-height: 80vh;
+                overflow-y: auto;
+                border-top: 2px solid var(--primary);
+            }}
+
+            @media (min-width: 768px) {{
+                .cart-panel {{
+                    width: 400px;
+                    left: auto;
+                    right: 20px;
+                    bottom: 20px;
+                    border-radius: 20px;
+                }}
+            }}
+
+            .cart-list {{
+                margin: 10px 0;
+                max-height: 150px;
+                overflow-y: auto;
+                background: rgba(255,255,255,0.05);
+                border-radius: 8px;
+                padding: 5px;
+            }}
+
+            .cart-item {{
+                display: flex;
+                justify-content: space-between;
+                padding: 8px;
+                border-bottom: 1px solid var(--border);
+                font-size: 0.85rem;
+                align-items: center;
+            }}
+
+            .btn-remove {{
+                background: var(--danger);
+                border: none;
+                color: white;
+                cursor: pointer;
+                font-weight: bold;
+                border-radius: 4px;
+                padding: 2px 8px;
+                margin-left: 10px;
+            }}
+
+            .coupon-section {{
+                display: flex;
+                gap: 5px;
+                margin: 10px 0;
+            }}
+
+            .coupon-input {{
+                flex: 1;
+                padding: 8px;
+                border-radius: 5px;
+                border: 1px solid var(--border);
+                font-size: 0.8rem;
+                background: var(--input-bg);
+                color: var(--text);
+            }}
+
+            .btn-coupon {{
+                background: #ffd54f;
+                color: #000;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 5px;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 0.8rem;
+            }}
+
+            .ship-row {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.85rem;
+                color: #ffd54f;
+                margin-top: 5px;
+                font-weight: bold;
+            }}
+
+            .total-row {{
+                display: flex;
+                justify-content: space-between;
+                font-size: 1.1rem;
+                font-weight: bold;
+                margin: 5px 0;
+                border-top: 1px solid var(--border);
+                padding-top: 10px;
+            }}
+
+            .discount-line {{
+                display: none;
+                justify-content: space-between;
+                color: #ffd54f;
+                font-size: 0.9rem;
+                margin-bottom: 5px;
+            }}
+
+            .btn-checkout-final {{
+                background: var(--primary);
+                color: white;
+                border: none;
+                width: 100%;
+                padding: 14px;
+                border-radius: 12px;
+                font-weight: bold;
+                font-size: 1rem;
+                cursor: pointer;
+                margin-top: 5px;
+            }}
             
-            .modal {{ display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: auto; }}
-            .modal-content {{ background: white; margin: 5% auto; padding: 20px; width: 95%; max-width: 500px; border-radius: 15px; box-sizing: border-box; text-align: center; }}
-            .modal-info-body {{ background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 5px solid var(--primary); margin: 15px 0; font-size: 0.95rem; line-height: 1.5; text-align: left; }}
-            .prod-img-modal {{ max-width: 250px; height: auto; border-radius: 10px; margin: 0 auto 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: none; }}
+            .modal {{
+                display: none;
+                position: fixed;
+                z-index: 2000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                overflow-y: auto;
+            }}
+
+            .modal-content {{
+                background: var(--card-bg);
+                color: var(--text);
+                margin: 5% auto;
+                padding: 20px;
+                width: 95%;
+                max-width: 500px;
+                border-radius: 15px;
+                box-sizing: border-box;
+                text-align: center;
+                border: 1px solid var(--border);
+            }}
+
+            .modal-info-body {{
+                background: rgba(255,255,255,0.05);
+                padding: 15px;
+                border-radius: 10px;
+                border-left: 5px solid var(--primary);
+                margin: 15px 0;
+                font-size: 0.95rem;
+                line-height: 1.5;
+                text-align: left;
+                color: var(--text);
+            }}
+
+            .prod-img-modal {{
+                max-width: 250px;
+                height: auto;
+                border-radius: 10px;
+                margin: 0 auto 15px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+                display: none;
+            }}
+
             .form-group {{ margin-bottom: 12px; }}
         </style>
     </head>
     <body>
+
 
     <div class="container">
         <div class="header-logo-container">
