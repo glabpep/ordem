@@ -23,248 +23,248 @@ def gerar_site_vendas_completo():
 
     infos_tecnicas = {
         "5-AMINO": {
-            "desc": "Inibidor Seletivo de NNMT: Atua bloqueando a enzima nicotinamida N-metiltransferase, o que eleva os níveis de NAD+ e SAM intracelular. Indica eficácia na reversão da obesidade e otimização do gasto energético basal.",
-            "cat": "Metabolismo",
+            "desc": "Inibidor Seletivo de NNMT: Atua bloqueando a enzima nicotinamida N-metiltransferase, o que eleva os níveis de NAD+ e SAM intracelular. Indica eficácia na reversão da obesidade e otimização do gasto energético basal. | Selective NNMT Inhibitor: Acts by blocking the nicotinamide N-methyltransferase enzyme, which elevates intracellular NAD+ and SAM levels. Indicates efficacy in reversing obesity and optimizing basal energy expenditure.",
+            "cat": "Metabolismo | Metabolism",
             "icon": "🔥"
         },
         "AICAR": {
-            "desc": "Ativador de AMPK: Mimetiza o AMP intracelular para ativar a proteína quinase. Investigado por aumentar a captação de glicose muscular, a oxidação de ácidos graxos e a resistência cardiovascular.",
-            "cat": "Metabolismo",
+            "desc": "Ativador de AMPK: Mimetiza o AMP intracelular para ativar a proteína quinase. Investigado por aumentar a captação de glicose muscular, a oxidação de ácidos graxos e a resistência cardiovascular. | AMPK Activator: Mimics intracellular AMP to activate protein kinase. Investigated for increasing muscle glucose uptake, fatty acid oxidation, and cardiovascular endurance.",
+            "cat": "Metabolismo | Metabolism",
             "icon": "🔥"
         },
         "AOD 9604": {
-            "desc": "Análogo Lipolítico do hGH: Focado no isolamento das propriedades de queima de gordura do GH sem induzir efeitos hiperglicêmicos. Aplicado em estudos de obesidade e regeneração de cartilagem.",
-            "cat": "Metabolismo",
+            "desc": "Análogo Lipolítico do hGH: Focado no isolamento das propriedades de queima de gordura do GH sem induzir efeitos hiperglicêmicos. Aplicado em estudos de obesidade e regeneração de cartilagem. | Lipolytic hGH Analog: Focused on isolating the fat-burning properties of GH without inducing hyperglycemic effects. Applied in obesity and cartilage regeneration studies.",
+            "cat": "Metabolismo | Metabolism",
             "icon": "🔥"
         },
         "HGH FRAGMENT": {
-            "desc": "Modulador de Lipídios: Parte terminal do GH responsável pela quebra de gordura. Mostra capacidade de inibir a formação de nova gordura e acelerar a lipólise visceral sem alterar a insulina.",
-            "cat": "Metabolismo",
+            "desc": "Modulador de Lipídios: Parte terminal do GH responsável pela quebra de gordura. Mostra capacidade de inibir a formação de nova gordura e acelerar a lipólise visceral sem alterar a insulina. | Lipid Modulator: Terminal part of GH responsible for fat breakdown. Shows ability to inhibit new fat formation and accelerate visceral lipolysis without altering insulin.",
+            "cat": "Metabolismo | Metabolism",
             "icon": "🔥"
         },
         "L-CARNITINE": {
-            "desc": "Cofator de Transporte Mitocondrial: Essencial para o transporte de ácidos graxos para a matriz mitocondrial (β-oxidação). Reduz a fadiga muscular e suporta a performance atlética.",
-            "cat": "Metabolismo",
+            "desc": "Cofator de Transporte Mitocondrial: Essencial para o transporte de ácidos graxos para a matriz mitocondrial (β-oxidação). Reduz a fadiga muscular e suporta a performance atlética. | Mitochondrial Transport Cofactor: Essential for the transport of fatty acids to the mitochondrial matrix (β-oxidation). Reduces muscle fatigue and supports athletic performance.",
+            "cat": "Metabolismo | Metabolism",
             "icon": "🔥"
         },
         "MOTS-C": {
-            "desc": "Peptídeo Derivado da Mitocôndria: Regulador hormonal do metabolismo sistêmico. Melhora a homeostase da glicose e combate a resistência à insulina via ativação da via AMPK.",
-            "cat": "Metabolismo",
+            "desc": "Peptídeo Derivado da Mitocôndria: Regulador hormonal do metabolismo sistêmico. Melhora a homeostase da glicose e combate a resistência à insulina via ativação da via AMPK. | Mitochondrial-Derived Peptide: Hormonal regulator of systemic metabolism. Improves glucose homeostasis and combats insulin resistance via activation of the AMPK pathway.",
+            "cat": "Metabolismo | Metabolism",
             "icon": "🔥"
         },
         "SLU PP": {
-            "desc": "Agonista Pan-ERR (Pílula do Exercício): Ativa receptores ERRα, β, γ. Aumenta drasticamente a biogênese mitocondrial e a resistência física, comparável ao treino de alta intensidade.",
-            "cat": "Metabolismo",
+            "desc": "Agonista Pan-ERR (Pílula do Exercício): Ativa receptores ERRα, β, γ. Aumenta drasticamente a biogênese mitocondrial e a resistência física, comparável ao treino de alta intensidade. | Pan-ERR Agonist (Exercise Pill): Activates ERRα, β, γ receptors. Drastically increases mitochondrial biogenesis and physical endurance, comparable to high-intensity training.",
+            "cat": "Metabolismo | Metabolism",
             "icon": "🔥"
         },
         "LIPO C": {
-            "desc": "Mix Lipotrópico Injetável: Composto por Metionina, Inositol e Colina. Atua na exportação de gorduras do fígado e na otimização da mobilização lipídica sistêmica.",
-            "cat": "Metabolismo",
+            "desc": "Mix Lipotrópico Injetável: Composto por Metionina, Inositol e Colina. Atua na exportação de gorduras do fígado e na otimização da mobilização lipídica sistêmica. | Injectable Lipotropic Mix: Composed of Methionine, Inositol, and Choline. Acts on the export of fats from the liver and the optimization of systemic lipid mobilization.",
+            "cat": "Metabolismo | Metabolism",
             "icon": "🔥"
         },
         "CJC-1295": {
-            "desc": "Secretagogo de GH de Longa Duração: Análogo do GHRH que aumenta secreção de GH e IGF-1. Aplicado em antienvelhecimento, melhora da composição corporal e síntese proteica acelerada.",
-            "cat": "Hormônios",
+            "desc": "Secretagogo de GH de Longa Duração: Análogo do GHRH que aumenta secreção de GH e IGF-1. Aplicado em antienvelhecimento, melhora da composição corporal e síntese proteica acelerada. | Long-Acting GH Secretagogue: GHRH analog that increases GH and IGF-1 secretion. Applied in anti-aging, improved body composition, and accelerated protein synthesis.",
+            "cat": "Hormônios | Hormones",
             "icon": "💉"
         },
         "IPAMORELIN": {
-            "desc": "Agonista de Grelina Seletivo: Estimula a liberação pulsátil de GH sem elevar cortisol ou prolactina. Seguro para indução de anabolismo e melhora da density mineral óssea.",
-            "cat": "Hormônios",
+            "desc": "Agonista de Grelina Seletivo: Estimula a liberação pulsátil de GH sem elevar cortisol ou prolactina. Seguro para indução de anabolismo e melhora da density mineral óssea. | Selective Ghrelin Agonist: Stimulates pulsatile GH release without elevating cortisol or prolactin. Safe for inducing anabolism and improving bone mineral density.",
+            "cat": "Hormônios | Hormones",
             "icon": "💉"
         },
         "CJC-1295 + IPAMORELIN": {
-            "desc": "Sinergia Hormonal Dual: Combinação de GHRH com GHRP. Mimetiza a liberação fisiológica natural, resultando em secreção de GH significativamente maior que o uso isolado.",
-            "cat": "Hormônios",
+            "desc": "Sinergia Hormonal Dual: Combinação de GHRH com GHRP. Mimetiza a liberação fisiológica natural, resultando em secreção de GH significativamente maior que o uso isolado. | Dual Hormonal Synergy: Combination of GHRH with GHRP. Mimics natural physiological release, resulting in significantly higher GH secretion than isolated use.",
+            "cat": "Hormônios | Hormones",
             "icon": "💉"
         },
         "GHRP-6": {
-            "desc": "Peptídeo Liberador de GH: Estimula a hipófise e aumenta a sinalização da fome via grelina. Focado em recuperação de tecidos, aumento de massa bruta e estados catabólicos.",
-            "cat": "Hormônios",
+            "desc": "Peptídeo Liberador de GH: Estimula a hipófise e aumenta a sinalização da fome via grelina. Focado em recuperação de tecidos, aumento de massa bruta e estados catabólicos. | GH-Releasing Peptide: Stimulates the pituitary and increases hunger signaling via ghrelin. Focused on tissue recovery, increased raw mass, and catabolic states.",
+            "cat": "Hormônios | Hormones",
             "icon": "💉"
         },
         "HEXARELIN": {
-            "desc": "Potencializador de Força: Secretagogo potente da classe GHRP. Aumenta a força contrátil cardíaca e muscular, protegendo o miocárdio e promovendo volume fibroso.",
-            "cat": "Hormônios",
+            "desc": "Potencializador de Força: Secretagogo potente da classe GHRP. Aumenta a força contrátil cardíaca e muscular, protegendo o miocárdio e promovendo volume fibroso. | Strength Enhancer: Potent secretagogue of the GHRP class. Increases cardiac and muscular contractile strength, protecting the myocardium and promoting fibrous volume.",
+            "cat": "Hormônios | Hormones",
             "icon": "💉"
         },
         "IGF-1 LR3": {
-            "desc": "Análogo de IGF-1 de Meia-vida Longa: Permanece ativo por até 20 horas. Principal mediador da hiperplasia (criação de novas fibras musculares) e transporte de acesso de aminoácidos.",
-            "cat": "Hormônios",
+            "desc": "Análogo de IGF-1 de Meia-vida Longa: Permanece ativo por até 20 horas. Principal mediador da hiperplasia (criação de novas fibras musculares) e transporte de acesso de aminoácidos. | Long-Acting IGF-1 Analog: Remains active for up to 20 hours. Primary mediator of hyperplasia (creation of new muscle fibers) and amino acid transport access.",
+            "cat": "Hormônios | Hormones",
             "icon": "💉"
         },
         "IGF DES": {
-            "desc": "Variante de IGF-1 de Ação Local: Afinidade 10x maior pelos receptores. Ideal para aplicação pós-treino visando recuperação imediata e crescimento muscular localizado.",
-            "cat": "Hormônios",
+            "desc": "Variante de IGF-1 de Ação Local: Afinidade 10x maior pelos receptores. Ideal para aplicação pós-treino visando recuperação imediata e crescimento muscular localizado. | Local-Acting IGF-1 Variant: 10x greater affinity for receptors. Ideal for post-workout application aiming for immediate recovery and localized muscle growth.",
+            "cat": "Hormônios | Hormones",
             "icon": "💉"
         },
         "SERMORELIN": {
-            "desc": "Estimulador de Eixo Natural: Mimetiza o GHRH natural. Promove melhorias na qualidade do sono profundo, vitalidade da pele e recuperação pós-esforço.",
-            "cat": "Hormônios",
+            "desc": "Estimulador de Eixo Natural: Mimetiza o GHRH natural. Promove melhorias na qualidade do sono profundo, vitalidade da pele e recuperação pós-esforço. | Natural Axis Stimulator: Mimics natural GHRH. Promotes improvements in deep sleep quality, skin vitality, and post-exertion recovery.",
+            "cat": "Hormônios | Hormones",
             "icon": "💉"
         },
         "MK-677": {
-            "desc": "Secretagogo Oral (Ibutamoren): Agonista dos receptores de grelina. Aumenta sustentadamente os níveis de GH e IGF-1, aumentando a massa livre de gordura e densidade óssea.",
-            "cat": "Hormônios",
+            "desc": "Secretagogo Oral (Ibutamoren): Agonista dos receptores de grelina. Aumenta sustentadamente os níveis de GH e IGF-1, aumentando a massa livre de gordura e densidade óssea. | Oral Secretagogue (Ibutamoren): Ghrelin receptor agonist. Sustainably increases GH and IGF-1 levels, increasing fat-free mass and bone density.",
+            "cat": "Hormônios | Hormones",
             "icon": "💉"
         },
         "BPC-157": {
-            "desc": "Pentadecapeptídeo Gástrico: Acelera a angiogênese e cicatrização. Estudado para cura de rupturas de tendões, ligamentos, danos musculares e tecidos moles.",
-            "cat": "Recuperação",
+            "desc": "Pentadecapeptídeo Gástrico: Acelera a angiogênese e cicatrização. Estudado para cura de rupturas de tendões, ligamentos, danos musculares e tecidos moles. | Gastric Pentadecapeptide: Accelerates angiogenesis and healing. Studied for the healing of tendon ruptures, ligaments, muscle damage, and soft tissues.",
+            "cat": "Recuperação | Recovery",
             "icon": "🩹"
         },
         "BPC-157 ORAL": {
-            "desc": "Modulador Gastrointestinal: Versão estável em suco gástrico. Focado no tratamento de Doença de Crohn, SII, úlceras e restauração da barreira intestinal.",
-            "cat": "Recuperação",
+            "desc": "Modulador Gastrointestinal: Versão estável em suco gástrico. Focado no tratamento de Doença de Crohn, SII, úlceras e restauração da barreira intestinal. | Gastrointestinal Modulator: Stable version in gastric juice. Focused on treating Crohn's Disease, IBS, ulcers, and restoring the intestinal barrier.",
+            "cat": "Recuperação | Recovery",
             "icon": "🩹"
         },
         "TB-500": {
-            "desc": "Timosina Beta-4 Sintética: Essencial para migração celular e reparo de tecidos. Promove formação de novos vasos e reduz inflamação articular e miocárdica.",
-            "cat": "Recuperação",
+            "desc": "Timosina Beta-4 Sintética: Essencial para migração celular e reparo de tecidos. Promove formação de novos vasos e reduz inflamação articular e miocárdica. | Synthetic Thymosin Beta-4: Essential for cell migration and tissue repair. Promotes formation of new vessels and reduces joint and myocardial inflammation.",
+            "cat": "Recuperação | Recovery",
             "icon": "🩹"
         },
         "TB-500 + BPC": {
-            "desc": "Protocolo de Reparo Total: União sinérgica do TB-500 (sistêmico) com BPC-157 (tecido). Padrão ouro para recuperação de lesões atléticas graves.",
-            "cat": "Recuperação",
+            "desc": "Protocolo de Reparo Total: União sinérgica do TB-500 (sistêmico) com BPC-157 (tecido). Padrão ouro para recuperação de lesões atléticas graves. | Total Repair Protocol: Synergistic union of TB-500 (systemic) with BPC-157 (tissue). Gold standard for severe athletic injury recovery.",
+            "cat": "Recuperação | Recovery",
             "icon": "🩹"
         },
         "GHK-CU": {
-            "desc": "Complexo Peptídeo-Cobre: Atua na remodelação do DNA e síntese de colágeno I e III. Possui propriedades antioxidantes e anti-inflamatórias para pele e tecidos conectivos.",
-            "cat": "Estética",
+            "desc": "Complexo Peptídeo-Cobre: Atua na remodelação do DNA e síntese de colágeno I e III. Possui propriedades antioxidantes e anti-inflamatórias para pele e tecidos conectivos. | Copper Peptide Complex: Acts on DNA remodeling and collagen I and III synthesis. Features antioxidant and anti-inflammatory properties for skin and connective tissues.",
+            "cat": "Estética | Aesthetics",
             "icon": "✨"
         },
         "GLOW": {
-            "desc": "Bioestimulação Dérmica (GHK-Cu + BPC + TB): Blend estético-regenerativo focado em rejuvenescimento cutâneo, redução de cicatrizes e regeneração da matriz extracelular.",
-            "cat": "Estética",
+            "desc": "Bioestimulação Dérmica (GHK-Cu + BPC + TB): Blend estético-regenerativo focado em rejuvenescimento cutâneo, redução de cicatrizes e regeneração da matriz extracelular. | Dermal Biostimulation (GHK-Cu + BPC + TB): Aesthetic-regenerative blend focused on skin rejuvenation, scar reduction, and extracellular matrix regeneration.",
+            "cat": "Estética | Aesthetics",
             "icon": "✨"
         },
         "ARA 290": {
-            "desc": "Agonista de Receptor de Reparo Inato: Derivado da eritropoietina sem efeitos hematológicos. Pesquisado para dor neuropática severa e regeneração nervosa periférica.",
-            "cat": "Recuperação",
+            "desc": "Agonista de Receptor de Reparo Inato: Derivado da eritropoietina sem efeitos hematológicos. Pesquisado para dor neuropática severa e regeneração nervosa periférica. | Innate Repair Receptor Agonist: Derived from erythropoietin without hematological effects. Researched for severe neuropathic pain and peripheral nerve regeneration.",
+            "cat": "Recuperação | Recovery",
             "icon": "🩹"
         },
         "KPV": {
-            "desc": "Tripeptídeo Anti-inflamatório: Inibe vias inflamatórias (NF-κB). Possui propriedades antimicrobianas e é utilizado em estudos sobre dermatite e colite.",
-            "cat": "Imunidade",
+            "desc": "Tripeptídeo Anti-inflamatório: Inibe vias inflamatórias (NF-κB). Possui propriedades antimicrobianas e é utilizado em estudos sobre dermatite e colite. | Anti-inflammatory Tripeptide: Inhibits inflammatory pathways (NF-κB). Possesses antimicrobial properties and is used in studies on dermatitis and colitis.",
+            "cat": "Imunidade | Immunity",
             "icon": "🛡️"
         },
         "LL-37": {
-            "desc": "Peptídeo Antimicrobiano: Parte do sistema imune inato. Neutraliza endotoxinas bacterianas, modula a resposta inflamatória e acelera cicatrização de feridas infectadas.",
-            "cat": "Imunidade",
+            "desc": "Peptídeo Antimicrobiano: Parte do sistema imune inato. Neutraliza endotoxinas bacterianas, modula a resposta inflamatória e acelera cicatrização de feridas infectadas. | Antimicrobial Peptide: Part of the innate immune system. Neutralizes bacterial endotoxins, modulates the inflammatory response, and accelerates healing of infected wounds.",
+            "cat": "Imunidade | Immunity",
             "icon": "🛡️"
         },
         "KLOW": {
-            "desc": "Quarteto de Reparo Profundo (GHK+BPC+TB+KPV): Projetado para sinalização celular máxima em remodelação de tecidos complexos e equilíbrio imunológico.",
-            "cat": "Recuperação",
+            "desc": "Quarteto de Reparo Profundo (GHK+BPC+TB+KPV): Projetado para sinalização celular máxima em remodelação de tecidos complexos e equilíbrio imunológico. | Deep Repair Quartet (GHK+BPC+TB+KPV): Designed for maximum cellular signaling in complex tissue remodeling and immune balance.",
+            "cat": "Recuperação | Recovery",
             "icon": "🩹"
         },
         "TIRZEPATIDE": {
-            "desc": "Agonista Dual GIP/GLP-1: Supera a Semaglutida na perda de peso. Promove saciedade central e melhora drástica na sensibilidade à insulina.",
-            "cat": "Emagrecimento",
+            "desc": "Agonista Dual GIP/GLP-1: Supera a Semaglutida na perda de peso. Promove saciedade central e melhora drástica na sensibilidade à insulina. | Dual GIP/GLP-1 Agonist: Outperforms Semaglutide in weight loss. Promotes central satiety and drastic improvement in insulin sensitivity.",
+            "cat": "Emagrecimento | Weight Loss",
             "icon": "⚖️"
         },
         "RETATRUTIDE": {
-            "desc": "Agonista Triplo (GIP/GLP-1/GCGR): Aumenta o gasto calórico basal e a oxidação de gordura no fígado. Promete perdas de peso superiores a 24%.",
-            "cat": "Emagrecimento",
+            "desc": "Agonista Triplo (GIP/GLP-1/GCGR): Aumenta o gasto calórico basal e a oxidação de gordura no fígado. Promete perdas de peso superiores a 24%. | Triple Agonist (GIP/GLP-1/GCGR): Increases basal caloric expenditure and fat oxidation in the liver. Promises weight loss exceeding 24%.",
+            "cat": "Emagrecimento | Weight Loss",
             "icon": "⚖️"
         },
         "SEMAGLUTIDE": {
-            "desc": "Agonista de GLP-1: Retarda o esvaziamento gástrico e sinaliza saciedade ao hipotálamo. Base para tratamento de obesidade e controle glicêmico.",
-            "cat": "Emagrecimento",
+            "desc": "Agonista de GLP-1: Retarda o esvaziamento gástrico e sinaliza saciedade ao hipotálamo. Base para tratamento de obesidade e controle glicêmico. | GLP-1 Agonist: Delays gastric emptying and signals satiety to the hypothalamus. Basis for obesity treatment and glycemic control.",
+            "cat": "Emagrecimento | Weight Loss",
             "icon": "⚖️"
         },
         "SELANK": {
-            "desc": "Ansiolítico Regulador: Modula serotonina e norepinefrina. Reduz ansiedade e melhora o foco cognitivo sem o efeito sedativo dos ansiolíticos comuns.",
-            "cat": "Cognitivo",
+            "desc": "Ansiolítico Regulador: Modula serotonina e norepinefrina. Reduz ansiedade e melhora o foco cognitivo sem o efeito sedativo dos ansiolíticos comuns. | Regulating Anxiolytic: Modulates serotonin and norepinephrine. Reduces anxiety and improves cognitive focus without the sedative effect of common anxiolytics.",
+            "cat": "Cognitivo | Cognitive",
             "icon": "🧠"
         },
         "SEMAX": {
-            "desc": "Nootrópico Neuroprotetor: Eleva níveis de BDNF e NGF no hipocampo. Aplicado em recuperação pós-AVC e otimização do aprendizado sob estresse.",
-            "cat": "Cognitivo",
+            "desc": "Nootrópico Neuroprotetor: Eleva níveis de BDNF e NGF no hipocampo. Aplicado em recuperação pós-AVC e otimização do aprendizado sob estresse. | Neuroprotective Nootropic: Elevates BDNF and NGF levels in the hippocampus. Applied in post-stroke recovery and learning optimization under stress.",
+            "cat": "Cognitivo | Cognitive",
             "icon": "🧠"
         },
         "PINEALON": {
-            "desc": "Bioregulador de Cadeia Curta: Atua na expressão gênica neuronal. Restaura o ritmo circadiano e protege contra o estresse oxidativo cerebral.",
-            "cat": "Cognitivo",
+            "desc": "Bioregulador de Cadeia Curta: Atua na expressão gênica neuronal. Restaura o ritmo circadiano e protege contra o estresse oxidativo cerebral. | Short-Chain Bioregulator: Acts on neuronal gene expression. Restores circadian rhythm and protects against cerebral oxidative stress.",
+            "cat": "Cognitivo | Cognitive",
             "icon": "🧠"
         },
         "NAD+": {
-            "desc": "Coenzima de Vitalidade: Essencial para reparação do DNA e sirtuínas. Associado à reversão de marcadores de envelhecimento e aumento da energia celular.",
-            "cat": "Longevidade",
+            "desc": "Coenzima de Vitalidade: Essencial para reparação do DNA e sirtuínas. Associado à reversão de marcadores de envelhecimento e aumento da energia celular. | Vitality Coenzyme: Essential for DNA repair and sirtuins. Associated with reversing aging markers and increasing cellular energy.",
+            "cat": "Longevidade | Longevity",
             "icon": "⏳"
         },
         "METHYLENE BLUE": {
-            "desc": "Otimizador Mitocondrial (Azul de Metileno): Transportador alternativo de elétrons. Melhora a memória de curto prazo e protege contra neurodegeneração.",
-            "cat": "Cognitivo",
+            "desc": "Otimizador Mitocondrial (Azul de Metileno): Transportador alternativo de elétrons. Melhora a memória de curto prazo e protege contra neurodegeneração. | Mitochondrial Optimizer (Methylene Blue): Alternative electron carrier. Improves short-term memory and protects against neurodegeneration.",
+            "cat": "Cognitivo | Cognitive",
             "icon": "🧠"
         },
         "DSIP": {
-            "desc": "Indutor de Sono Delta: Neuromodulador que sincroniza ritmos biológicos, promove sono profundo e mitiga sintomas de estresse emocional.",
-            "cat": "Cognitivo",
+            "desc": "Indutor de Sono Delta: Neuromodulador que sincroniza ritmos biológicos, promove sono profundo e mitiga sintomas de estresse emocional. | Delta Sleep-Inducing Peptide: Neuromodulator that synchronizes biological rhythms, promotes deep sleep, and mitigates emotional stress symptoms.",
+            "cat": "Cognitivo | Cognitive",
             "icon": "🧠"
         },
         "OXYTOCIN": {
-            "desc": "Neuromodulador Social: Regula confiança, redução de medo e ansiedade social. Explorado também na regulação do apetite por carboidratos.",
-            "cat": "Cognitivo",
+            "desc": "Neuromodulador Social: Regula confiança, redução de medo e ansiedade social. Explorado também na regulação do apetite por carboidratos. | Social Neuromodulator: Regulates trust, fear reduction, and social anxiety. Also explored in carbohydrate appetite regulation.",
+            "cat": "Cognitivo | Cognitive",
             "icon": "🧠"
         },
         "EPITHALON": {
-            "desc": "Ativador da Telomerase: Induz o alongamento dos telômeros. Focado na extensão da vida celular e restauração da secreção de melatonina.",
-            "cat": "Longevidade",
+            "desc": "Ativador da Telomerase: Induz o alongamento dos telômeros. Focado na extensão da vida celular e restauração da secreção de melatonina. | Telomerase Activator: Induces telomere lengthening. Focused on cellular life extension and melatonin secretion restoration.",
+            "cat": "Longevidade | Longevity",
             "icon": "⏳"
         },
         "KISSPEPTIN": {
-            "desc": "Regulador de Eixo HPG: Atua no hipotálamo para restaurar a produção natural de testosterona e regular a função reprodutiva de forma fisiológica.",
-            "cat": "Hormônios",
+            "desc": "Regulador de Eixo HPG: Atua no hipotálamo para restaurar a produção natural de testosterona e regular a função reprodutiva de forma fisiológica. | HPG Axis Regulator: Acts in the hypothalamus to restore natural testosterone production and regulate reproductive function physiologically.",
+            "cat": "Hormônios | Hormones",
             "icon": "💉"
         },
         "MELANOTAN 1": {
-            "desc": "Agonista de Melanocortina Seletivo: Estimula a liberação de melanina com alta segurança e proteção contra danos UV.",
-            "cat": "Estética",
+            "desc": "Agonista de Melanocortina Seletivo: Estimula a liberação de melanina com alta segurança e proteção contra danos UV. | Selective Melanocortin Agonist: Stimulates melanin release with high safety and protection against UV damage.",
+            "cat": "Estética | Aesthetics",
             "icon": "✨"
         },
         "MELANOTAN 2": {
-            "desc": "Bronzeamento e Libido: Atua no SNC aumentando a pigmentação da pele, elevando o desejo sexual e reduzindo o apetite.",
-            "cat": "Estética",
+            "desc": "Bronzeamento e Libido: Atua no SNC aumentando a pigmentação da pele, elevando o desejo sexual e reduzindo o apetite. | Tanning and Libido: Acts on the CNS increasing skin pigmentation, boosting sexual desire, and reducing appetite.",
+            "cat": "Estética | Aesthetics",
             "icon": "✨"
         },
         "PT-141": {
-            "desc": "Tratamento de Disfunção Sexual: Atua via SNC nos centros de excitação do cérebro. Indicado para desejo sexual hipoativo.",
-            "cat": "Sexual",
+            "desc": "Tratamento de Disfunção Sexual: Atua via SNC nos centros de excitação do cérebro. Indicado para desejo sexual hipoativo. | Sexual Dysfunction Treatment: Acts via the CNS on the brain's arousal centers. Indicated for hypoactive sexual desire.",
+            "cat": "Sexual | Sexual",
             "icon": "❤️"
         },
         "VITAMIN B-12": {
-            "desc": "Metilcobalamina de Alta Potência: Essencial para a bainha de mielina, produção de glóbulos vermelhos e prevenção da fadiga neuromuscular.",
-            "cat": "Suplemento",
+            "desc": "Metilcobalamina de Alta Potência: Essencial para a bainha de mielina, produção de glóbulos vermelhos e prevenção da fadiga neuromuscular. | High-Potency Methylcobalamin: Essential for the myelin sheath, red blood cell production, and neuromuscular fatigue prevention.",
+            "cat": "Suplemento | Supplement",
             "icon": "💊"
         },
         "BACTERIOSTATIC WATER": {
-            "desc": "Solvente Bacteriostático: Água com 0,9% de Álcool Benzílico. Impede proliferação bacteriana, permitindo uso seguro por até 30 dias.",
-            "cat": "Acessório",
+            "desc": "Solvente Bacteriostático: Água com 0,9% de Álcool Benzílico. Impede proliferação bacteriana, permitindo uso seguro por até 30 dias. | Bacteriostatic Water: Water with 0.9% Benzyl Alcohol. Prevents bacterial proliferation, allowing safe use for up to 30 days.",
+            "cat": "Acessório | Accessory",
             "icon": "💧"
         },
         "SS-31": {
-            "desc": "Protetor de Cardiolipina: Previne a formação de radicais livres na mitocôndria e restaura a produção de ATP.",
-            "cat": "Longevidade",
+            "desc": "Protetor de Cardiolipina: Previne a formação de radicais livres na mitocôndria e restaura a produção de ATP. | Cardiolipin Protector: Prevents the formation of free radicals in the mitochondria and restores ATP production.",
+            "cat": "Longevidade | Longevity",
             "icon": "⏳"
         },
         "HYALURONIC ACID 2% + GHK": {
-            "desc": "Arquitetura Extracelular: Une hidratação profunda (HA) com sinalização regenerativa (GHK).",
-            "cat": "Estética",
+            "desc": "Arquitetura Extracelular: Une hidratação profunda (HA) com sinalização regenerativa (GHK). | Extracellular Architecture: Combines deep hydration (HA) with regenerative signaling (GHK).",
+            "cat": "Estética | Aesthetics",
             "icon": "✨"
         },
         "HCG": {
-            "desc": "Mimetizador de LH: Sinaliza aos testículos a produção de testosterona. Vital para prevenir atrofia testicular e reinício do eixo hormonal (TPC).",
-            "cat": "Hormônios",
+            "desc": "Mimetizador de LH: Sinaliza aos testículos a produção de testosterona. Vital para prevenir atrofia testicular e reinício do eixo hormonal (TPC). | LH Mimetic: Signals the testes to produce testosterone. Vital for preventing testicular atrophy and hormonal axis restart (PCT).",
+            "cat": "Hormônios | Hormones",
             "icon": "💉"
         },
         "HEMP OIL": {
-            "desc": "Suporte Fitocanabinoide: Propriedades analgésicas e anti-inflamatórias. Suporta o sistema endocanabinoide.",
-            "cat": "Suplemento",
+            "desc": "Suporte Fitocanabinoide: Propriedades analgésicas e anti-inflamatórias. Suporta o sistema endocanabinoide. | Phytocannabinoid Support: Analgesic and anti-inflammatory properties. Supports the endocannabinoid system.",
+            "cat": "Suplemento | Supplement",
             "icon": "💊"
         },
         "TESAMORELIN": {
-            "desc": "Redutor de Lipodistrofia: Único aprovado para reduzir gordura visceral abdominal severa.",
-            "cat": "Metabolismo",
+            "desc": "Redutor de Lipodistrofia: Único aprovado para reduzir gordura visceral abdominal severa. | Lipodystrophy Reducer: Only one approved to reduce severe abdominal visceral fat.",
+            "cat": "Metabolismo | Metabolism",
             "icon": "🔥"
         }
     }
@@ -306,7 +306,7 @@ def gerar_site_vendas_completo():
                 "id": idx,
                 "nome": nome_prod,
                 "espec": f"{row.get('VOLUME', '')} {row.get('MEDIDA', '')}".strip(),
-                "preco": float(row.get('Preço (R$)', 0)),
+                "preco": float(row.get('Preço (U$)', 0)),
                 "info": info["desc"],
                 "cat": cat,
                 "icon": info["icon"],
@@ -334,7 +334,7 @@ def gerar_site_vendas_completo():
     for idx, row in df.iterrows():
         produto = str(row.get('PRODUTO', 'N/A')).strip()
         espec = f"{row.get('VOLUME', '')} {row.get('MEDIDA', '')}".strip()
-        preco = row.get('Preço (R$)', 0)
+        preco = row.get('Preço (U$)', 0)
         estoque_status = str(row.get('ESTOQUE', row.get('STATUS', ''))).strip().upper()
         
         is_available = "DISPONÍVEL" in estoque_status
@@ -361,13 +361,13 @@ def gerar_site_vendas_completo():
             </div>
             <div class="pc-bottom">
                 <div class="pc-price-status">
-                    <span class="pc-price">R$ {preco:,.2f}</span>
+                    <span class="pc-price">U$ {preco:,.2f}</span>
                     <span class="pc-status {'st-ok' if is_available else 'st-out'}">{estoque_status}</span>
                 </div>
                 <div class="pc-actions">
-                    <button class="btn-detail" onclick="abrirInfo({idx})">Detalhes</button>
+                    <button class="btn-detail" onclick="abrirInfo({idx})">DETAILS - Detalhes</button>
                     <button class="btn-cart" onclick="adicionar({idx})" {'disabled' if not is_available else ''}>
-                        {'Adicionar' if is_available else 'Indisponível'}
+                        {'ADD TO CART - Adicionar' if is_available else 'OFF STOCK - Indisponível'}
                     </button>
                 </div>
             </div>
@@ -379,7 +379,7 @@ def gerar_site_vendas_completo():
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>G-LAB PEPTIDES — Catálogo</title>
+<title>G-LAB PEPTIDES — Store — Catálogo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -556,30 +556,22 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
 
   <div class="alert-bar">
     <span class="close-x" onclick="this.parentElement.style.display='none'">&times;</span>
-    <strong>📢 Aviso:</strong> Previsão de chegada de novos itens 21/04/2026, o estoque do site será atualizado! Devido as liberações alfandegárias ocorreram atrasos nos lotes! Sabemos que todos estão ansiosos para a chegada dos itens e estamos trabalhando ao máximo para disponibilizar o mais breve possível! As liberações NÃO estão em nosso controle, já tomamos providências para novos caminhos, agradecemos a paciência e compreensão de todos.
+    <strong>📢 Notice-Aviso:</strong> 
   </div>
   <div class="alert-bar">
     <span class="close-x" onclick="this.parentElement.style.display='none'">&times;</span>
-    <strong>⚗️ Importante:</strong> Os produtos são envasados em forma sólida, assim não necessitam de refrigeração para manter as propriedades. O produto deve ser diluído em solução bacteriostática (vendida à parte). Após diluição manter refrigerado!. <br><strong>NOME DA SOLUÇÃO:</strong> BACTERIOSTATIC WATER.
+    <strong>⚗️ IMPORTANT- Importante:</strong> Products are filled in solid form, so they do not require refrigeration to maintain their properties. The product must be diluted in a bacteriostatic solution (sold separately). Keep refrigerated after dilution! Os produtos são envasados em forma sólida, assim não necessitam de refrigeração para manter as propriedades. O produto deve ser diluído em solução bacteriostática (vendida à parte). Após diluição manter refrigerado!. <br><strong>NOME DA SOLUÇÃO:</strong> BACTERIOSTATIC WATER.
   </div>
 
   <div class="featured-section">
-    <div class="section-title"><span></span> Destaques do Dia</div>
+    <div class="section-title"><span></span> Daily Highlights - Destaques do Dia</div>
     <div class="featured-scroll" id="featured-scroll"></div>
   </div>
 
-  <div class="cep-section">
-    <h3>🚚 Calcule o Frete</h3>
-    <div class="cep-row">
-      <input type="tel" id="cep-destino" class="search-input" placeholder="00000-000" style="min-width:auto">
-      <button id="btn-calc" onclick="calcularFrete()" class="btn-cart" style="padding:12px 20px;font-size:0.85rem">Localizar</button>
-    </div>
-    <div id="resultado-frete"></div>
-  </div>
 
   <div class="search-area">
-    <input type="text" class="search-input" id="search-input" placeholder="Buscar produto..." oninput="filtrarProdutos()">
-    <button class="toggle-avail" id="toggle-avail" onclick="toggleAvail()">Apenas Disponíveis</button>
+    <input type="text" class="search-input" id="search-input" placeholder="Search products - Buscar produto..." oninput="filtrarProdutos()">
+    <button class="toggle-avail" id="toggle-avail" onclick="toggleAvail()">Only in stock - Apenas Disponíveis</button>
   </div>
   <div class="cat-filters" id="cat-filters">
     {cat_buttons_html}
@@ -590,7 +582,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
   </div>
   <div class="no-results" id="no-results" style="display:none">
     <span>🔍</span>
-    Nenhum produto encontrado.
+    No products found - Nenhum produto encontrado.
   </div>
 </div>
 
@@ -601,25 +593,25 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
 
 <!-- CART PANEL -->
 <div class="cart-panel" id="cart-panel">
-  <h3>🛒 Pedido (<span id="cart-count">0</span>)<button onclick="toggleCartPanel()">▾</button></h3>
+  <h3>🛒 Order - Pedido (<span id="cart-count">0</span>)<button onclick="toggleCartPanel()">▾</button></h3>
   <div class="cart-list" id="cart-list"></div>
   <div class="coupon-row">
-    <input type="text" id="coupon-code" placeholder="Cupom de Desconto">
-    <button onclick="aplicarCupom()">Aplicar</button>
+    <input type="text" id="coupon-code" placeholder="Coupon Code - Cupom de Desconto">
+    <button onclick="aplicarCupom()">Apply - Aplicar</button>
   </div>
   <div id="ship-info-container" class="ship-row" style="display:none">
     <span id="ship-info-text"></span>
     <button class="btn-rm" style="background:rgba(255,255,255,0.15)" onclick="removerFrete()">✖</button>
   </div>
   <div id="discount-row" class="discount-line">
-    <span>Desconto (<span id="discount-name"></span>):</span>
-    <span>- R$ <span id="discount-val">0.00</span></span>
+    <span>Discount - Desconto (<span id="discount-name"></span>):</span>
+    <span>- U$ <span id="discount-val">0.00</span></span>
   </div>
   <div class="total-row">
-    <span>TOTAL GERAL:</span>
-    <span>R$ <span id="total-val">0.00</span></span>
+    <span>SUBTOTAL - TOTAL GERAL:</span>
+    <span>U$ <span id="total-val">0.00</span></span>
   </div>
-  <button class="btn-checkout" onclick="abrirCheckout()">Ir para Pagamento</button>
+  <button class="btn-checkout" onclick="abrirCheckout()">Payments - Pagamento</button>
 </div>
 
 <!-- MODAL INFO -->
@@ -630,275 +622,343 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
     <div class="modal-body" id="info-texto"></div>
     <img id="info-imagem" src="" alt="Imagem do Produto"
       style="width:100%;border-radius:12px;margin:12px 0;display:none;">
-    <button onclick="fecharInfo()" class="modal-close">Fechar</button>
+    <button onclick="fecharInfo()" class="modal-close">Close -  Fechar</button>
   </div>
 </div>
 
 <!-- MODAL CHECKOUT -->
 <div class="modal-overlay" id="modalCheckout">
   <div class="modal-box" style="text-align:left">
-    <h2>📦 Dados de Entrega</h2>
-    <div class="form-group"><input type="text" id="f_nome" placeholder="Nome Completo"></div>
-    <div class="form-group"><input type="text" id="f_cpf" placeholder="CPF"></div>
-    <div class="form-group"><input type="text" id="f_end" placeholder="Endereço (Rua/Av)"></div>
-    <div class="form-row">
-      <input type="text" id="f_num" placeholder="Nº" style="max-width:100px">
-      <input type="text" id="f_bairro" placeholder="Bairro">
+    <div class="modal-box" style="text-align:left">
+    <h2>📦 Delivery Details | Dados de Entrega</h2>
+    <div class="form-group"><input type="text" id="zip-code" placeholder="ZIP Code | Código Postal"></div>
+    <div class="form-group"><input type="text" id="f_nome" placeholder="Full Name | Nome Completo"></div>
+    <div class="form-group"><input type="text" id="f_end" placeholder="Address (Street/Ave) | Endereço (Rua/Av)"></div>
+    <div class="form-row">         
     </div>
-    <div class="form-group"><input type="text" id="f_comp" placeholder="Complemento (Opcional)"></div>
+    <div class="form-group"><input type="text" id="f_comp" placeholder="Complement (Optional) | Complemento (Opcional)"></div>
     <div class="form-row">
-      <input type="text" id="f_cidade" placeholder="Cidade">
-      <input type="text" id="f_estado" placeholder="UF" style="max-width:80px">
+      <input type="text" id="f_cidade" placeholder="City | Cidade">
+      <input type="text" id="f_estado" placeholder="State | UF" style="max-width:80px">
     </div>
     <div class="form-group"><input type="tel" id="f_tel" placeholder="WhatsApp"></div>
     <div class="form-group">
       <select id="f_pgto">
-        <option value="Pix">Pix (Aprovação Imediata)</option>
-        <option value="Cartão de crédito">Cartão de Crédito (até 12x)</option>
+        <option value="Zelle">Zelle </option>
+        <option value="Invoice">INVOICE</option>
       </select>
     </div>
-    <button onclick="enviarPedido()" class="btn-checkout" style="margin-top:0">ENVIAR PARA WHATSAPP</button>
-    <button onclick="fecharCheckout()" style="background:none;border:none;width:100%;color:var(--text2);margin-top:14px;cursor:pointer;font-family:var(--font)">Cancelar</button>
+    <button onclick="enviarPedido()" class="btn-checkout" style="margin-top:0">SEND WHATSAPP - ENVIAR PARA WHATSAPP</button>
+    <button onclick="fecharCheckout()" style="background:none;border:none;width:100%;color:var(--text2);margin-top:14px;cursor:pointer;font-family:var(--font)">Close - Cancelar</button>
   </div>
 </div>
 
 <script>
+// 1. DADOS E ESTADO
 const PRODUTOS = {js_produtos};
 let carrinho = [];
-let freteV = 0, freteD = "";
+let freteV = 12
+let freteD = "Flat Rate: $ 12.00 | Frete Único: $ 12,00";
 let cupomAtivo = null;
 let catAtual = "all";
 let apenasDisp = false;
 
-const REGIOES = {{
-  'SUL':['PR','SC','RS'],'SUDESTE':['SP','RJ','MG','ES'],'CENTRO-OESTE':['DF','GO','MT','MS'],
-  'NORTE':['AM','RR','AP','PA','TO','RO','AC'],'NORDESTE':['BA','SE','AL','PE','PB','RN','CE','PI','MA']
-}};
-
-// Featured items: rotate daily using day-of-year as seed
-function gerarDestaques() {{
-  const avail = PRODUTOS.filter(p => true);
-  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(),0,0))/86400000);
-  // Simple shuffle based on day
-  const shuffled = [...avail].sort((a,b) => {{
-    const ha = ((a.id+1)*2654435761 + dayOfYear*31) % 4294967296;
-    const hb = ((b.id+1)*2654435761 + dayOfYear*31) % 4294967296;
-    return ha - hb;
-  }});
-  const picks = shuffled.slice(0, 6);
-  const container = document.getElementById('featured-scroll');
-  container.innerHTML = picks.map(p => `
-    <div class="feat-card">
-      <div class="feat-icon">${{p.icon}}</div>
-      <div class="feat-name">${{p.nome}}</div>
-      <div class="feat-spec">${{p.espec}}</div>
-      <div class="feat-desc">${{p.info}}</div>
-      <div class="feat-price">R$ ${{p.preco.toFixed(2)}}</div>
-    </div>
-  `).join('');
-}}
-
-// Apply cat colors via CSS vars
-document.querySelectorAll('.pc-cat').forEach(el => {{
-  el.style.setProperty('--cat-bg', el.dataset.catBg);
-  el.style.setProperty('--cat-border', el.dataset.catBorder);
-  el.style.setProperty('--cat-text', el.dataset.catText);
-  el.style.background = el.dataset.catBg;
-  el.style.borderColor = el.dataset.catBorder;
-  el.style.color = el.dataset.catText;
-}});
-
-function filtrarCat(cat) {{
-  catAtual = cat;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
-  filtrarProdutos();
-}}
-
-function toggleAvail() {{
-  apenasDisp = !apenasDisp;
-  document.getElementById('toggle-avail').classList.toggle('active', apenasDisp);
-  filtrarProdutos();
-}}
-
-function filtrarProdutos() {{
-  const q = document.getElementById('search-input').value.toLowerCase();
-  const cards = document.querySelectorAll('.product-card');
-  let visible = 0;
-  cards.forEach(c => {{
-    const name = c.querySelector('.pc-name').textContent.toLowerCase();
-    const cat = c.dataset.cat;
-    const avail = c.dataset.available === '1';
-    const matchSearch = !q || name.includes(q);
-    const matchCat = catAtual === 'all' || cat === catAtual;
-    const matchAvail = !apenasDisp || avail;
-    const show = matchSearch && matchCat && matchAvail;
-    c.style.display = show ? '' : 'none';
-    if(show) visible++;
-  }});
-  document.getElementById('no-results').style.display = visible === 0 ? '' : 'none';
-}}
-
-function abrirInfo(id) {{
-  const p = PRODUTOS.find(x => x.id === id);
-  if(p) {{
-    document.getElementById('info-titulo').textContent = p.nome;
-    document.getElementById('info-spec').textContent = p.espec + ' — ' + p.cat;
-    document.getElementById('info-texto').textContent = p.info;
-    document.getElementById('info-imagem').src = encodeURI(p.imagem);
-    document.getElementById('info-imagem').style.display = 'block';
-    document.getElementById('modalInfo').style.display = 'block';
-  }}
-}}
-function fecharInfo() {{ document.getElementById('modalInfo').style.display = 'none'; }}
-
-function adicionar(id) {{
-  const p = PRODUTOS.find(x => x.id === id);
-  if(p) {{
-    const ex = carrinho.find(i => i.id === id);
-    if(ex) ex.qtd += 1; else carrinho.push({{...p, qtd: 1}});
-    atualizarCarrinho();
-  }}
-}}
-function remover(id) {{
-  const ex = carrinho.find(x => x.id === id);
-  if(ex) {{ if(ex.qtd > 1) ex.qtd--; else carrinho = carrinho.filter(x => x.id !== id); }}
-  if(!carrinho.length) removerFrete();
-  atualizarCarrinho();
-}}
-
-function toggleCartPanel() {{
-  const p = document.getElementById('cart-panel');
-  p.style.display = p.style.display === 'block' ? 'none' : 'block';
-}}
-
-function atualizarCarrinho() {{
-  const list = document.getElementById('cart-list');
-  const panel = document.getElementById('cart-panel');
-  const fab = document.getElementById('cart-fab');
-  const totalUn = carrinho.reduce((a,i) => a + i.qtd, 0);
-  
-  fab.style.display = carrinho.length ? 'flex' : 'none';
-  document.getElementById('fab-badge').textContent = totalUn;
-  document.getElementById('cart-count').textContent = totalUn;
-  if(!carrinho.length) panel.style.display = 'none';
-  
-  list.innerHTML = '';
-  let subtotal = 0;
-  carrinho.forEach(item => {{
-    const vt = item.preco * item.qtd;
-    subtotal += vt;
-    list.innerHTML += `<div class="cart-item"><span><strong>${{item.qtd}}x</strong> ${{item.nome}}</span><span>R$ ${{vt.toFixed(2)}} <button class="btn-rm" onclick="remover(${{item.id}})">−</button></span></div>`;
-  }});
-  let desc = cupomAtivo ? subtotal * cupomAtivo.desc : 0;
-  document.getElementById('discount-row').style.display = cupomAtivo ? 'flex' : 'none';
-  if(cupomAtivo) {{
-    document.getElementById('discount-name').textContent = cupomAtivo.nome;
-    document.getElementById('discount-val').textContent = desc.toFixed(2);
-  }}
-  const sc = document.getElementById('ship-info-container');
-  sc.style.display = freteV > 0 ? 'flex' : 'none';
-  if(freteV > 0) document.getElementById('ship-info-text').textContent = '🚚 ' + freteD;
-  document.getElementById('total-val').textContent = (subtotal - desc + freteV).toLocaleString('pt-BR', {{minimumFractionDigits:2}});
-}}
-
-function removerFrete() {{ freteV=0;freteD="";document.getElementById('resultado-frete').textContent="";document.getElementById('cep-destino').value="";atualizarCarrinho(); }}
-
-function aplicarCupom() {{
-  const code = document.getElementById('coupon-code').value.trim().toUpperCase();
-  const cupons = {{'BRUNA5':0.05,'DANI5':0.05,'GILMARA5':0.05,'DAFNE10':0.10,'NOS5':0.05,'ROGERIO5':0.05,
-    'ANDERSON5':0.05,'JAQUE5':0.05,'CABRAL5':0.05,'KARLINHA5':0.05,'LUD5':0.05,'CASSIA5':0.05,'THAIS5':0.05,
-    'NATAN':0.00000000001,'LIRICY5':0.05,'ANDREAFLEURY':0.05,'ANA5':0.05,'10PRO':0.000000000001,'PRO5':0.05,
-    'WEY5':0.05,'ALE5':0.05,'TRIGUEIRO':0.05,'RAYSSA5':0.05,'BRUNA11':0.11}};
-  if(cupons[code]) {{ cupomAtivo = {{nome:code,desc:cupons[code]}}; alert("Cupom aplicado!"); }}
-  else {{ cupomAtivo = null; alert("Cupom inválido."); }}
-  atualizarCarrinho();
-}}
-
-async function buscarDadosCep(cep) {{
+async function buscarDadosZip(zip) {{
   try {{
-    const r = await fetch(`https://viacep.com.br/ws/${{cep}}/json/`);
+    const r = await fetch(`https://api.zippopotam.us/us/${{zip}}`);
     const d = await r.json();
-    if(!d.erro) return {{localidade:d.localidade,uf:d.uf.toUpperCase(),logradouro:d.logradouro,bairro:d.bairro}};
-  }} catch(e){{}}
+    if (r.ok && d.places && d.places.length > 0) {{
+      return {{
+        localidade: d.places[0]["place name"],
+        uf: d.places[0]["state abbreviation"].toUpperCase(),
+        logradouro: "",
+        bairro: ""
+      }};
+    }}
+  }} catch (e) {{}}
+
   try {{
-    const r = await fetch(`https://brasilapi.com.br/api/cep/v1/${{cep}}`);
+    const r = await fetch(`https://www.zipcodeapi.com/rest/LTruIhU3BvIaOekI0j9OE2rjxjTK6ev2quJ1ikWo0MFQ8H03qgSx8xSW62pzmUwh/info.json/${{zip}}/degrees`);
     const d = await r.json();
-    if(r.ok) return {{localidade:d.city,uf:d.state.toUpperCase(),logradouro:d.street||"",bairro:d.neighborhood||""}};
-  }} catch(e){{}}
+    if (r.ok) {{
+      return {{
+        localidade: d.city,
+        uf: d.state.toUpperCase(),
+        logradouro: "",
+        bairro: ""
+      }};
+    }}
+  }} catch (e) {{}}
+
   return null;
 }}
 
+// 3. FUNÇÃO DE FRETE (FIXA EM 12 DÓLARES)
 async function calcularFrete() {{
-  const cep = document.getElementById('cep-destino').value.replace(/\D/g,'');
-  const btn = document.getElementById('btn-calc');
-  if(cep.length !== 8) {{ alert("CEP inválido"); return; }}
-  btn.disabled = true; btn.textContent = "...";
-  const data = await buscarDadosCep(cep);
-  if(!data) {{ alert("CEP não encontrado"); btn.disabled=false; btn.textContent="Localizar"; return; }}
-  const uf = data.uf;
-  if(REGIOES.SUL.includes(uf)) {{ freteV=90; freteD="SUL R$ 90,00 (3-9 dias)"; }}
-  else if([...REGIOES.SUDESTE,...REGIOES['CENTRO-OESTE']].includes(uf)) {{ freteV=110; freteD="SUDESTE/CO R$ 110,00 (5-10 dias)"; }}
-  else {{ freteV=165; freteD="N/NE R$ 165,00 (8-15 dias)"; }}
-  document.getElementById('f_cidade').value = data.localidade;
-  document.getElementById('f_estado').value = uf;
-  document.getElementById('f_end').value = data.logradouro;
-  document.getElementById('f_bairro').value = data.bairro;
-  document.getElementById('resultado-frete').textContent = '✅ ' + data.localidade + '-' + uf + ': ' + freteD;
-  atualizarCarrinho();
-  btn.disabled = false; btn.textContent = "Localizar";
+    const campoCep = document.getElementById('zip-code');
+    if(!campoCep) return;
+    const cep = campoCep.value.replace(/\D/g,'');
+    const btn = document.getElementById('btn-calc');
+    
+    if(cep.length !== 5) {{ alert("CEP inválido"); return; }}
+    
+    if(btn) {{ btn.disabled = true; btn.textContent = "..."; }}
+
+    const data = await buscarDadosZip(cep);
+    
+    if(!data) {{ 
+        alert("CEP não encontrado"); 
+        if(btn) {{ btn.disabled = false; btn.textContent = "Locate"; }}
+        return; 
+    }}
+
+    freteV = 12; 
+    freteD = "Flat Rate: $ 12.00 | Frete Único: $ 12,00";
+
+    document.getElementById('f_cidade').value = data.localidade;
+    document.getElementById('f_estado').value = data.uf;
+    document.getElementById('f_end').value = data.logradouro;
+    document.getElementById('resultado-frete').textContent = '✅ ' + data.localidade + '-' + data.uf + ': ' + freteD;
+    
+    atualizarCarrinho();
+    if(btn) {{ btn.disabled = false; btn.textContent = "Locate"; }}
 }}
+
+// 4. FUNÇÕES DE INTERFACE
+function abrirInfo(id) {{
+    const p = PRODUTOS.find(x => x.id === id);
+    if(p) {{
+        document.getElementById('info-titulo').textContent = p.nome;
+        document.getElementById('info-spec').textContent = p.espec + ' — ' + p.cat;
+        document.getElementById('info-texto').textContent = p.info;
+        document.getElementById('info-imagem').src = encodeURI(p.imagem);
+        document.getElementById('info-imagem').style.display = 'block';
+        document.getElementById('modalInfo').style.display = 'block';
+    }}
+}}
+
+function fecharInfo() {{ document.getElementById('modalInfo').style.display = 'none'; }}
 
 function abrirCheckout() {{
-  if(freteV <= 0) {{ alert("Calcule o frete primeiro!"); return; }}
-  document.getElementById('modalCheckout').style.display = 'block';
+    
+    document.getElementById('modalCheckout').style.display = 'block';
 }}
+
 function fecharCheckout() {{ document.getElementById('modalCheckout').style.display = 'none'; }}
 
-function enviarPedido() {{
-  let cepLimpo = document.getElementById('cep-destino').value.replace(/\D/g,'');
-  let cepF = cepLimpo.length===8 ? cepLimpo.substring(0,5)+"-"+cepLimpo.substring(5) : "N/I";
-  const d = {{
-    n:document.getElementById('f_nome').value.trim().toUpperCase(),
-    cpf:document.getElementById('f_cpf').value.trim(),
-    e:document.getElementById('f_end').value.trim().toUpperCase(),
-    nu:document.getElementById('f_num').value.trim(),
-    ba:document.getElementById('f_bairro').value.trim().toUpperCase(),
-    co:document.getElementById('f_comp').value.trim().toUpperCase(),
-    ci:document.getElementById('f_cidade').value.trim().toUpperCase(),
-    es:document.getElementById('f_estado').value.trim().toUpperCase(),
-    ce:cepF, t:document.getElementById('f_tel').value.trim(),
-    p:document.getElementById('f_pgto').value.toUpperCase()
-  }};
-  if(!d.n||!d.cpf||!d.e||!d.nu||!d.ba||!d.ci||!d.es||!d.t) {{ alert("Preencha todos os campos!"); return; }}
-  const temSol = carrinho.some(i => i.nome.toUpperCase().includes("BACTERIOSTATIC WATER"));
-  const temBrinde = cupomAtivo && cupomAtivo.nome === "BRUNA5";
-  if(!temSol && !temBrinde) {{
-    if(!confirm("Pedido sem solução de diluição. Continuar?")) {{
-      fecharCheckout(); return;
+// 5. CARRINHO
+function adicionar(id) {{
+    const p = PRODUTOS.find(x => x.id === id);
+    if(p) {{
+        const ex = carrinho.find(i => i.id === id);
+        if(ex) ex.qtd += 1; else carrinho.push({{...p, qtd: 1}});
+        atualizarCarrinho();
     }}
-  }}
-  let sub = 0, msgI = "";
-  carrinho.forEach(i => {{
-    const vt = i.preco * i.qtd; sub += vt;
-    let l = "• "+i.qtd+"x "+i.nome.toUpperCase()+" ("+i.espec.toUpperCase()+") - R$ "+vt.toFixed(2);
-    if(cupomAtivo) l += " → R$ "+(vt - vt*cupomAtivo.desc).toFixed(2);
-    msgI += l + "%0A";
-  }});
-  let desc = cupomAtivo ? sub * cupomAtivo.desc : 0;
-  let msg = "*NOVO PEDIDO G-LAB*%0A%0A*CLIENTE:*%0A";
-  msg += "• *NOME:* "+d.n+"%0A• *CPF:* "+d.cpf+"%0A• *WHATSAPP:* "+d.t+"%0A";
-  msg += "• *END:* "+d.e+", "+d.nu+"%0A• *BAIRRO:* "+d.ba+"%0A";
-  if(d.co) msg += "• *COMPL:* "+d.co+"%0A";
-  msg += "• *CIDADE:* "+d.ci+"-"+d.es+"%0A• *CEP:* "+d.ce+"%0A";
-  msg += "• *PGTO:* "+d.p+"%0A%0A*ITENS:*%0A"+msgI;
-  if(cupomAtivo) msg += "%0A🏷️ *CUPOM:* "+cupomAtivo.nome+" (-R$ "+desc.toFixed(2)+")";
-  msg += "%0A🚚 *FRETE:* "+freteD.toUpperCase();
-  msg += "%0A%0A*TOTAL: R$ "+(sub-desc+freteV).toFixed(2)+"*";
-  window.open("https://wa.me/+17746222523?text="+msg,'_blank');
 }}
 
-// Init
+function remover(id) {{
+    const ex = carrinho.find(x => x.id === id);
+    if(ex) {{ if(ex.qtd > 1) ex.qtd--; else carrinho = carrinho.filter(x => x.id !== id); }}
+    if(!carrinho.length) removerFrete();
+    atualizarCarrinho();
+}}
+
+function atualizarCarrinho() {{
+    const list = document.getElementById('cart-list');
+    const panel = document.getElementById('cart-panel');
+    const fab = document.getElementById('cart-fab');
+    const totalUn = carrinho.reduce((a,i) => a + i.qtd, 0);
+    
+    // Controle do botão flutuante e contadores
+    if(fab) fab.style.display = carrinho.length ? 'flex' : 'none';
+    document.getElementById('fab-badge').textContent = totalUn;
+    document.getElementById('cart-count').textContent = totalUn;
+    
+    list.innerHTML = '';
+    let subtotal = 0;
+
+    // Renderização dos itens
+    carrinho.forEach(item => {{
+        const vt = item.preco * item.qtd;
+        subtotal += vt;
+        list.innerHTML += `<div class="cart-item">
+            <span><strong>${{item.qtd}}x</strong> ${{item.nome}}</span>
+            <span>U$ ${{vt.toFixed(2)}} <button class="btn-rm" onclick="remover(${{item.id}})">−</button></span>
+        </div>`;
+    }});
+
+    // Lógica do Cupom
+    let desc = cupomAtivo ? subtotal * cupomAtivo.desc : 0;
+    const discRow = document.getElementById('discount-row');
+    if(discRow) {{
+        discRow.style.display = cupomAtivo ? 'flex' : 'none';
+        if(cupomAtivo) {{
+            document.getElementById('discount-name').textContent = cupomAtivo.nome;
+            document.getElementById('discount-val').textContent = desc.toFixed(2);
+        }}
+    }}
+
+    // INCLUSÃO DO FRETE FIXO
+    // Definimos os valores caso o carrinho não esteja vazio
+    if (carrinho.length > 0) {{
+        freteV = 12;
+        freteD = "Flat Rate: $ 12.00 | Frete Único: $ 12,00";
+    }} else {{
+        freteV = 0;
+        freteD = "";
+    }}
+
+    const sc = document.getElementById('ship-info-container');
+    const st = document.getElementById('ship-info-text');
+    
+    if(sc) sc.style.display = freteV > 0 ? 'flex' : 'none';
+    if(st && freteV > 0) st.textContent = '🚚 ' + freteD;
+
+    // CÁLCULO TOTAL FINAL
+    const totalFinal = subtotal - desc + freteV;
+    document.getElementById('total-val').textContent = totalFinal.toLocaleString('pt-BR', {{
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2
+    }});
+}}
+
+function removerFrete() {{ freteV=0; freteD=""; document.getElementById('resultado-frete').textContent=""; atualizarCarrinho(); }}
+
+function toggleCartPanel() {{
+    const p = document.getElementById('cart-panel');
+    p.style.display = p.style.display === 'block' ? 'none' : 'block';
+}}
+
+// 6. FILTROS E CUPOM
+function filtrarProdutos() {{
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const cards = document.querySelectorAll('.product-card');
+    let visible = 0;
+    cards.forEach(c => {{
+        const name = c.querySelector('.pc-name').textContent.toLowerCase();
+        const cat = c.dataset.cat;
+        const avail = c.dataset.available === '1';
+        const show = (!q || name.includes(q)) && (catAtual === 'all' || cat === catAtual) && (!apenasDisp || avail);
+        c.style.display = show ? '' : 'none';
+        if(show) visible++;
+    }});
+    document.getElementById('no-results').style.display = visible === 0 ? '' : 'none';
+}}
+
+function filtrarCat(cat) {{
+    catAtual = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+    filtrarProdutos();
+}}
+
+function toggleAvail() {{
+    apenasDisp = !apenasDisp;
+    document.getElementById('toggle-avail').classList.toggle('active', apenasDisp);
+    filtrarProdutos();
+}}
+
+function aplicarCupom() {{
+    const code = document.getElementById('coupon-code').value.trim().toUpperCase();
+    const cupons = {{'BRUNA5':0.05,'BRUNA11':0.11, 'BRU11':0.11, 'PRO5':0.05, 'LARI5':0.05, 'AMANDA5':0.05, 'BRUNA10':0.10, 'MIKA5':0.05, 'PRIME5':0.05, 'WEY5':0.05, 'CASSIA5':0.05, 'LUD5':0.05, 'DANI5':0.05, 'GR26R':0.05, 'THA10':0.10, 'ESTEPHANY5':0.05, 'DAFNE10':0.10}};
+    
+    if(cupons[code]) {{ cupomAtivo = {{nome:code, desc:cupons[code]}}; alert("Coupon applied - Cupom aplicado!"); }}
+    else {{ cupomAtivo = null; alert("Invalid coupon - Cupom inválido."); }}
+    atualizarCarrinho();
+}}
+
+
+
+
+// 7. FINALIZAÇÃO E WHATSAPP
+function enviarPedido() {{
+    // 1. Coleta dos dados do formulário
+    const d = {{
+        ce: document.getElementById('zip-code').value.trim(),
+        n: document.getElementById('f_nome').value.trim().toUpperCase(),
+        e: document.getElementById('f_end').value.trim().toUpperCase(),
+        co: document.getElementById('f_comp').value.trim().toUpperCase(),
+        ci: document.getElementById('f_cidade').value.trim().toUpperCase(),
+        es: document.getElementById('f_estado').value.trim().toUpperCase(),
+        t: document.getElementById('f_tel').value.trim(),
+        p: document.getElementById('f_pgto').value.toUpperCase()
+    }};
+
+    // Validação básica
+    if(!d.n || !d.e || !d.t) {{ 
+        alert("Please fill in all required fields | Preencha os campos obrigatórios!"); 
+        return; 
+    }}
+
+    // 2. Montagem da lista de itens
+    let sub = 0;
+    let msgI = "";
+    carrinho.forEach(i => {{
+        const vt = i.preco * i.qtd;
+        sub += vt;
+        let linha = `• ${{i.qtd}}x ${{i.nome.toUpperCase()}} (${{i.espec.toUpperCase()}}) - U$ ${{vt.toFixed(2)}}`;
+        if(cupomAtivo) {{
+            const vDesconto = vt - (vt * cupomAtivo.desc);
+            linha += ` → U$ ${{vDesconto.toFixed(2)}}`;
+        }}
+        msgI += linha + "%0A";
+    }});
+
+    let desc = cupomAtivo ? sub * cupomAtivo.desc : 0;
+
+    // 3. Montagem da Mensagem Final
+    let msg = "*NOVO PEDIDO G-LAB*%0A";
+    msg += "*CLIENTE:*%0A";
+    msg += "• *NOME:* " + d.n + "%0A";
+    msg += "• *WHATSAPP:* " + d.t + "%0A";
+    msg += "• *END:* " + d.e + ", " + "%0A";
+    
+    if(d.co) msg += "• *COMPL:* " + d.co + "%0A";
+    
+    msg += "• *CIDADE:* " + d.ci + "-" + d.es + "%0A";
+    msg += "• *ZIP CODE:* " + d.ce + "%0A";
+    msg += "• *PGTO:* " + d.p + "%0A";
+    
+    msg += "*ITENS:*%0A" + msgI;
+    
+    msg += "%0A🚚 *FRETE:* " + freteD.toUpperCase();
+
+    if(cupomAtivo) {{
+        msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-U$ " + desc.toFixed(2) + ")";
+    }}
+    
+    if (d.p === "ZELLE") {{
+        if (!confirm("You have selected Zelle. Here is the Zelle key for the transfer: +1 (774) 351-9845 Don't forget to send the proof of payment along with your order! Você selecionou Zelle. Segue a chave zelle para a transferência: +1 (774) 351-9845 Não esqueça de enviar o comprovante junto com o pedido!")) {{
+            return; // Cancela o envio se o usuário clicar em 'Cancel - Cancelar'
+        }}
+    }}
+  
+    msg += "%0A*TOTAL: U$ " + (sub - desc + freteV).toFixed(2) + "*";
+
+    msg += "%0A%0A*Zelle key for the transfer - Chave zelle para a transferência: +1 (774) 351-9845*";
+
+    // 4. Envio
+    window.open("https://wa.me/+17743519845?text=" + msg, '_blank');
+}}
+
+function gerarDestaques() {{
+    const picks = PRODUTOS.slice(0, 6);
+    const container = document.getElementById('featured-scroll');
+    if(!container) return;
+    container.innerHTML = picks.map(p => `
+        <div class="feat-card">
+            <div class="feat-icon">${{p.icon}}</div>
+            <div class="feat-name">${{p.nome}}</div>
+            <div class="feat-price">U$ ${{p.preco.toFixed(2)}}</div>
+        </div>
+    `).join('');
+}}
+
+// INIT
 gerarDestaques();
+filtrarProdutos();
+
+document.getElementById('zip-code').addEventListener('blur', calcularFrete);
+
 </script>
 </body>
 </html>"""
