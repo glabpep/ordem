@@ -2163,8 +2163,8 @@ async function calcularFrete() {
   if(!data) { alert("CEP não encontrado"); btn.disabled=false; btn.textContent="Localizar"; return; }
   const uf = data.uf;
   if(REGIOES.SUL.includes(uf)) { freteV=90; freteD="SUL R$ 90,00 (3-9 dias)"; }
-  else if([...REGIOES.SUDESTE,...REGIOES['CENTRO-OESTE']].includes(uf)) { freteV=110; freteD="SUDESTE/CO R$ 110,00 (5-10 dias)"; }
-  else { freteV=165; freteD="N/NE R$ 165,00 (8-15 dias)"; }
+  else if([...REGIOES.SUDESTE,...REGIOES['CENTRO-OESTE']].includes(uf)) { freteV=110; freteD="SUDESTE/CO R$ 110,00 (5-15 dias)"; }
+  else { freteV=165; freteD="N/NE R$ 165,00 (10-30 dias)"; }
   document.getElementById('f_cidade').value = data.localidade;
   document.getElementById('f_estado').value = uf;
   document.getElementById('f_end').value = data.logradouro;
