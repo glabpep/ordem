@@ -556,7 +556,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
 
   <div class="alert-bar">
     <span class="close-x" onclick="this.parentElement.style.display='none'">&times;</span>
-    <strong>📢 Aviso:</strong> Previsão de chegada de novos itens 10/05/2026, o estoque do site será atualizado! Devido as liberações alfandegárias ocorreram atrasos nos lotes! Sabemos que todos estão ansiosos para a chegada dos itens e estamos trabalhando ao máximo para disponibilizar o mais breve possível! As liberações NÃO estão em nosso controle, já tomamos providências para novos caminhos, agradecemos a paciência e compreensão de todos.
+    <strong>📢 Aviso:</strong> Previsão de chegada de novos itens 30/05/2026, o estoque do site será atualizado! Devido as liberações alfandegárias ocorreram atrasos nos lotes! Sabemos que todos estão ansiosos para a chegada dos itens e estamos trabalhando ao máximo para disponibilizar o mais breve possível! As liberações NÃO estão em nosso controle, já tomamos providências para novos caminhos, agradecemos a paciência e compreensão de todos.
   </div>
   <div class="alert-bar">
     <span class="close-x" onclick="this.parentElement.style.display='none'">&times;</span>
