@@ -461,7 +461,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
   </div>
   <div class="alert-bar">
     <span class="close-x" onclick="this.parentElement.style.display='none'">&times;</span>
-    <strong>📢 Aviso:</strong> Previsão de chegada de novos itens 30/05/2026, o estoque do site será atualizado!
+    <strong>📢 Aviso:</strong> Previsão de chegada de novos itens 10/07/2026. PEDIDOS ACIMA DE R$1.000 ACOMPANHAM DILUENTE.
   </div>
   <div class="alert-bar">
     <span class="close-x" onclick="this.parentElement.style.display='none'">&times;</span>
