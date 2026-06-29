@@ -823,8 +823,8 @@ function atualizarCarrinho() {{
   }}
 
   const sc = document.getElementById('ship-info-container');
-  sc.style.display = freteD ? 'flex' : 'none';
-  if (freteD) document.getElementById('ship-info-text').textContent = '🚚 ' + freteD;
+  sc.style.display = freteV > 0 ? 'flex' : 'none';
+  if (freteV > 0) document.getElementById('ship-info-text').textContent = '🚚 ' + freteD;
 
 
   const total = subtotalNormal + subtotalPromo - desc + freteV;
@@ -886,9 +886,9 @@ async function calcularFrete() {{
   }}
 
   const uf = data.uf.replace(/[^A-Z]/g, '').slice(0, 2);   // hard-sanitize UF
-  if      (REGIOES.SUL.includes(uf))                                          {{ freteV = 0;  freteD = "SUL R$ 0,00 (3-9 dias)"; }}
-  else if ([...REGIOES.SUDESTE, ...REGIOES['CENTRO-OESTE']].includes(uf))     {{ freteV = 0; freteD = "SUDESTE/CO R$ 0,00 (5-15 dias)"; }}
-  else                                                                         {{ freteV = 0; freteD = "N/NE R$ 0,00 (10-30 dias)"; }}
+  if      (REGIOES.SUL.includes(uf))                                          {{ freteV = 90,00;  freteD = "SUL R$ 90,00 (3-9 dias)"; }}
+  else if ([...REGIOES.SUDESTE, ...REGIOES['CENTRO-OESTE']].includes(uf))     {{ freteV = 110,00; freteD = "SUDESTE/CO R$ 110,00 (5-15 dias)"; }}
+  else                                                                         {{ freteV = 165,00; freteD = "N/NE R$ 165,00 (10-30 dias)"; }}
 
   // Populate form fields with textContent-safe values
   document.getElementById('f_cidade').value = data.localidade  || '';
@@ -906,7 +906,7 @@ async function calcularFrete() {{
 
 // ─── CHECKOUT ──────────────────────────────────────────────────────────────────
 function abrirCheckout() {{
-  if (!document.getElementById('f_cidade').value) {{ alert("Calcule o frete primeiro!"); return; }}
+  if (freteV <= 0) {{ alert("Calcule o frete primeiro!"); return; }}
 
   document.getElementById('modalCheckout').style.display = 'block';
 }}
