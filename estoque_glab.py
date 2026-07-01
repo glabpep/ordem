@@ -922,9 +922,9 @@ async function calcularFrete() {{
   }}
 
   const uf = data.uf.replace(/[^A-Z]/g, '').slice(0, 2);   // hard-sanitize UF
-  if      (REGIOES.SUL.includes(uf))                                          {{ freteV = 90,00;  freteD = "SUL R$ 90,00 (3-9 dias)"; }}
-  else if ([...REGIOES.SUDESTE, ...REGIOES['CENTRO-OESTE']].includes(uf))     {{ freteV = 110,00; freteD = "SUDESTE/CO R$ 110,00 (5-15 dias)"; }}
-  else                                                                         {{ freteV = 165,00; freteD = "N/NE R$ 165,00 (10-30 dias)"; }}
+  if      (REGIOES.SUL.includes(uf))                                          {{ freteV = 60,00;  freteD = "SUL R$ 60,00 (3-9 dias)"; }}
+  else if ([...REGIOES.SUDESTE, ...REGIOES['CENTRO-OESTE']].includes(uf))     {{ freteV = 90,00; freteD = "SUDESTE/CO R$ 90,00 (5-15 dias)"; }}
+  else                                                                         {{ freteV = 110,00; freteD = "N/NE R$ 110,00 (10-30 dias)"; }}
 
   // Populate form fields with textContent-safe values
   document.getElementById('f_cidade').value = data.localidade  || '';
