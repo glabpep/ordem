@@ -468,7 +468,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
   </div>
   <div class="alert-bar">
     <span class="close-x" onclick="this.parentElement.style.display='none'">&times;</span>
-    <strong>📢 Aviso:</strong> Previsão de chegada de novos itens 10/07/2026. PEDIDOS ACIMA DE R$1.000 ACOMPANHAM DILUENTE.
+    <strong>📢 Aviso:</strong> Previsão de chegada de novos itens 10/07/2026. PEDIDOS ACIMA DE R$1.000 ACOMPANHAM DILUENTE. PEDIDOS ACIMA DE R$1.500 ganham um GhKCu 50 MG!
   </div>
   <div class="alert-bar">
     <span class="close-x" onclick="this.parentElement.style.display='none'">&times;</span>
