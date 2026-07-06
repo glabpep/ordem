@@ -607,7 +607,7 @@ const PRODUTOS = {js_produtos};
 
 // ─── STATE ─────────────────────────────────────────────────────────────────────
 let carrinho    = [];
-let freteV      = 0, freteD = "";
+let freteV      = 0, freteD = "FRETE GRÁTIS";
 let cupomAtivo  = null;
 let catAtual    = "all";
 let apenasDisp  = false;
@@ -626,7 +626,7 @@ const CUPONS = {{
   'ANDERSON5':0.05,'JAQUE5':0.05,'CABRAL5':0.05,'KARLINHA5':0.05,'LUD5':0.05,'CASSIA5':0.05,
   'THAIS5':0.05,'NATAN':0.00000000001,'LIRICY5':0.05,'ANDREAFLEURY':0.05,'ANA5':0.05,
   '10PRO':0.000000000001,'PRO5':0.05,'WEY5':0.05,'ALE5':0.05,'TRIGUEIRO':0.05,
-  'RAYSSA5':0.05,'PATRICIA5':0.05,'LU5':0.05, 'RAFA5':0.05, 'WAWA':0.05, 'DUDA5':0.05, 'ALYNE5':0.05, 'JRCREMONEZ':0.05, 'ZAMA5':0.05, 'JENNI5':0.05, 
+  'RAYSSA5':0.05,'PATRICIA5':0.05,'LU5':0.05, 'RAFA5':0.05, 'WAWA':0.05, 'DUDA5':0.05, 'ALYNE5':0.05, 'ZAMA5':0.05, 'JENNI5':0.05,
 }};
 
 // ─── SECURITY HELPERS ──────────────────────────────────────────────────────────
@@ -922,9 +922,9 @@ async function calcularFrete() {{
   }}
 
   const uf = data.uf.replace(/[^A-Z]/g, '').slice(0, 2);   // hard-sanitize UF
-  if      (REGIOES.SUL.includes(uf))                                          {{ freteV = 60,00;  freteD = "SUL R$ 60,00 (3-9 dias)"; }}
-  else if ([...REGIOES.SUDESTE, ...REGIOES['CENTRO-OESTE']].includes(uf))     {{ freteV = 90,00; freteD = "SUDESTE/CO R$ 90,00 (5-15 dias)"; }}
-  else                                                                         {{ freteV = 110,00; freteD = "N/NE R$ 110,00 (10-30 dias)"; }}
+  if      (REGIOES.SUL.includes(uf))                                          {{ freteV = 0,00;  freteD = "SUL R$ 0,00 (3-9 dias)"; }}
+  else if ([...REGIOES.SUDESTE, ...REGIOES['CENTRO-OESTE']].includes(uf))     {{ freteV = 0,00; freteD = "SUDESTE/CO R$ 0,00 (5-15 dias)"; }}
+  else                                                                         {{ freteV = 0,00; freteD = "N/NE R$ 0,00 (10-30 dias)"; }}
 
   // Populate form fields with textContent-safe values
   document.getElementById('f_cidade').value = data.localidade  || '';
@@ -942,8 +942,10 @@ async function calcularFrete() {{
 
 // ─── CHECKOUT ──────────────────────────────────────────────────────────────────
 function abrirCheckout() {{
-  if (freteV <= 0) {{ alert("Calcule o frete primeiro!"); return; }}
-
+  if (document.getElementById('f_cidade').value === '') {{
+    alert("Calcule o frete primeiro!");
+    return;
+  }}
   document.getElementById('modalCheckout').style.display = 'block';
 }}
 function fecharCheckout() {{ document.getElementById('modalCheckout').style.display = 'none'; }}
