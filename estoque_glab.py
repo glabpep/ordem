@@ -451,9 +451,101 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
   .logo-text{{font-size:1.8rem}}
   .feat-card{{min-width:240px}}
 }}
+
+/* ===== MODAL G-LAB ===== */
+#glab-modal-overlay {{
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; animation: glabFade .3s ease;
+}}
+#glab-modal {{
+  position: relative; width: 100%; max-width: 640px;
+  border-radius: 20px; overflow: hidden;
+  border: 1px solid rgba(220,38,38,0.4);
+  box-shadow: 0 0 60px rgba(220,38,38,0.45);
+  background-color: #0a0a0a;
+  background-image: linear-gradient(rgba(0,0,0,0.82), rgba(0,0,0,0.92)), url('1.png');
+  background-size: cover; background-position: center;
+  color: #fff; padding: 40px 32px;
+  animation: glabZoom .3s ease;
+}}
+#glab-close {{
+  position: absolute; top: 16px; right: 16px;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(255,255,255,0.1); color:#fff;
+  border: none; cursor: pointer; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}}
+#glab-close:hover {{ background: #dc2626; transform: scale(1.1); }}
+.glab-eyebrow {{
+  color:#ef4444; letter-spacing:.3em; font-size:12px;
+  font-weight:600; text-transform:uppercase; text-align:center;
+  margin-bottom: 12px;
+}}
+.glab-title {{
+  text-align:center; font-size: 32px; font-weight: 800;
+  margin: 0 0 8px; letter-spacing:-0.02em;
+}}
+.glab-title span {{ color:#dc2626; }}
+.glab-divider {{ width:64px; height:2px; background:#dc2626; margin: 16px auto 28px; }}
+.glab-list {{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:14px; }}
+.glab-item {{
+  display:flex; gap:14px; padding:16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; transition: all .2s;
+}}
+.glab-item:hover {{ border-color: rgba(220,38,38,0.5); background: rgba(255,255,255,0.07); }}
+.glab-icon {{
+  width:44px; height:44px; border-radius:10px; flex-shrink:0;
+  background: rgba(220,38,38,0.15);
+  display:flex; align-items:center; justify-content:center; font-size:24px;
+}}
+.glab-item h3 {{ margin:0 0 4px; font-size:16px; font-weight:600; }}
+.glab-item p  {{ margin:0; font-size:14px; color: rgba(255,255,255,0.7); line-height:1.5; }}
+.glab-btn {{
+  margin-top: 28px; width:100%; padding: 14px;
+  background:#dc2626; color:#fff; border:none; border-radius:12px;
+  font-weight:600; text-transform:uppercase; letter-spacing:.1em;
+  font-size:14px; cursor:pointer; transition:all .2s;
+}}
+.glab-btn:hover {{ background:#b91c1c; box-shadow: 0 0 30px rgba(220,38,38,0.6); }}
+@keyframes glabFade {{ from{{opacity:0}} to{{opacity:1}} }}
+@keyframes glabZoom {{ from{{opacity:0; transform:scale(.95)}} to{{opacity:1; transform:scale(1)}} }}
+
+
 </style>
 </head>
 <body>
+<div id="glab-modal-overlay" onclick="if(event.target===this)document.getElementById('glab-modal-overlay').remove()">
+  <div id="glab-modal">
+    <button id="glab-close" onclick="document.getElementById('glab-modal-overlay').remove()">✕</button>
+    <p class="glab-eyebrow">Bem-vindo à G-LAB</p>
+    <h2 class="glab-title">Por que escolher a <span>G-LAB</span>?</h2>
+    <div class="glab-divider"></div>
+    <ul class="glab-list">
+      <li class="glab-item">
+        <div class="glab-icon">🤝</div>
+        <div><h3>Atendimento Personalizado</h3><p>Suporte dedicado e exclusivo para cada cliente.</p></div>
+      </li>
+      <li class="glab-item">
+        <div class="glab-icon">🧬</div>
+        <div><h3>Auxílio nos Protocolos</h3><p>Orientação especializada na montagem do seu protocolo.</p></div>
+      </li>
+      <li class="glab-item">
+        <div class="glab-icon">💬</div>
+        <div><h3>Acompanhamento Completo</h3><p>Esclarecimento de dúvidas durante todo o tratamento.</p></div>
+      </li>
+      <li class="glab-item">
+        <div class="glab-icon">🛡️</div>
+        <div><h3>Compra Garantida</h3><p>Se seu pacote não chegar ou for extraviado, o reembolso é <strong>TOTAL</strong>!</p></div>
+      </li>
+    </ul>
+    <button class="glab-btn" onclick="document.getElementById('glab-modal-overlay').remove()">Entrar no site ✨</button>
+  </div>
+</div>
 <div class="grain"></div>
 <div class="glow-orb glow-1"></div>
 <div class="glow-orb glow-2"></div>
