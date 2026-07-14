@@ -558,6 +558,14 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
     <div><strong>🔬 Certificados de pureza:</strong> Consulte os laudos de pureza dos nossos peptídeos.</div>
     <button class="btn-cert" onclick="abrirCertificados()">Ver Certificados</button>
   </div>
+  <div class="reconstituicao-bar">
+    <div><strong>🔬 Reconstituição:</strong> Veja como fazer a reconstituição dos nossos peptídeos.</div>
+    <button class="btn-cert" onclick="abrirReconstituicao()">Ver Reconstituição</button>
+  </div>
+  <div class="guia-calculo-bar">
+    <div><strong>📊 Guia de Cálculo:</strong> Aprenda a calcular a dosagem correta dos peptídeos.</div>
+    <button class="btn-cert" onclick="abrirGuiaCalculo()">Ver Guia de Cálculo</button>
+  </div>
   <div class="alert-bar">
     <span class="close-x" onclick="this.parentElement.style.display='none'">&times;</span>
     <strong>📢 Aviso:</strong> Previsão de chegada de novos itens 30/07/2026. PEDIDOS ACIMA DE R$1.000 ACOMPANHAM DILUENTE. 
@@ -661,6 +669,31 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
       <a class="cert-link" href="certificados/6.pdf" target="_blank" rel="noopener">📄 Certificado 6</a>
     </div>
     <button onclick="fecharCertificados()" class="modal-close">Fechar</button>
+  </div>
+</div>
+
+<!-- MODAL GUIA DE CÁLCULO -->
+<div class="modal-overlay" id="modalGuiaCalculo" role="dialog" aria-modal="true" aria-labelledby="guia-titulo">
+  <div class="modal-box">
+    <h2 id="guia-titulo">🔬 Guia de Cálculo</h2>
+    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:0">Clique para abrir o guia de cálculo da G-LAB.</p>
+    <div class="cert-list">
+      <a class="cert-link" href="conversao/1.pdf" target="_blank" rel="noopener">📄 Guia 1</a>
+    </div>
+    <button onclick="fecharGuiaCalculo()" class="modal-close">Fechar</button>
+  </div>
+</div>
+
+
+<!-- MODAL RECONSTITUICAO -->
+<div class="modal-overlay" id="modalReconstituicao" role="dialog" aria-modal="true" aria-labelledby="reconst-titulo">
+  <div class="modal-box">
+    <h2 id="reconst-titulo">🔬 Veja como fazer a Reconstituição</h2>
+    <p style="font-size:0.85rem;color:var(--text2);margin-bottom:0">Clique para abrir a reconstituição.</p>
+    <div class="cert-list">
+      <a class="cert-link" href="reconstituicao/1.pdf" target="_blank" rel="noopener">📄 Reconstituição 1</a>
+    </div>
+    <button onclick="fecharReconstituicao()" class="modal-close">Fechar</button>
   </div>
 </div>
 
@@ -844,6 +877,11 @@ function abrirInfo(id) {{
 function fecharInfo() {{ document.getElementById('modalInfo').style.display = 'none'; }}
 function abrirCertificados() {{ document.getElementById('modalCertificados').style.display = 'block'; }}
 function fecharCertificados() {{ document.getElementById('modalCertificados').style.display = 'none'; }}
+function abrirReconstituicao() {{ document.getElementById('modalReconstituicao').style.display = 'block'; }}
+function fecharReconstituicao() {{ document.getElementById('modalReconstituicao').style.display = 'none'; }}  
+function abrirGuiaCalculo() {{ document.getElementById('modalGuiaCalculo').style.display = 'block'; }}
+function fecharGuiaCalculo() {{ document.getElementById('modalGuiaCalculo').style.display = 'none'; }}
+
 
 // ─── CART ──────────────────────────────────────────────────────────────────────
 function adicionar(id) {{
