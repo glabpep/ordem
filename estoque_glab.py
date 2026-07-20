@@ -1,242 +1,4 @@
-import pandas as pd
-import os
-import json
-import math
-from datetime import date
-import unicodedata
-import re
-
-
-def sanitizar_texto(texto):
-    """Remove caracteres perigosos para evitar injeção de HTML/JS."""
-    if not isinstance(texto, str):
-        texto = str(texto)
-    # Remove tags HTML e caracteres de controle
-    texto = re.sub(r'<[^>]+>', '', texto)
-    texto = texto.replace('&', '&amp;').replace('"', '&quot;').replace("'", '&#x27;').replace('`', '&#x60;')
-    return texto.strip()
-
-
-def parse_promo(val):
-    """
-    Lê o valor da coluna PROMOÇÃO e retorna um float entre 0 e 1 representando o desconto.
-    Aceita: '10%', '0.10', '10', '', None, NaN.
-    Retorna 0.0 se não houver promoção válida.
-    """
-    if val is None:
-        return 0.0
-    try:
-        if isinstance(val, float) and math.isnan(val):
-            return 0.0
-    except Exception:
-        pass
-    s = str(val).strip().replace(',', '.')
-    if not s or s.lower() in ('nan', 'none', ''):
-        return 0.0
-    s = s.replace('%', '')
-    try:
-        n = float(s)
-        # Se veio como 10, interpreta como 10%
-        if n > 1:
-            n = n / 100.0
-        # Clamp entre 0 e 1
-        n = max(0.0, min(1.0, n))
-        return n
-    except ValueError:
-        return 0.0
-
-
-def gerar_site_vendas_completo():
-    diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-
-    arquivo_dados = None
-    for nome in ['stock_0202 - NOVA.xlsx', 'stock_2901.xlsx - Plan1.csv']:
-        caminho = os.path.join(diretorio_atual, nome)
-        if os.path.exists(caminho):
-            arquivo_dados = caminho
-            break
-    if not arquivo_dados:
-        print(f"Erro: Arquivo não encontrado em: {diretorio_atual}")
-        return
-
-    infos_tecnicas = {
-        
-        "AOD 9604": {"desc": "Análogo Lipolítico do hGH: Focado no isolamento das propriedades de queima de gordura do GH sem induzir efeitos hiperglicêmicos. Aplicado em estudos de obesidade e regeneração de cartilagem.", "cat": "Metabolismo", "icon": "🔥"},
-        "HGH FRAGMENT": {"desc": "Modulador de Lipídios: Parte terminal do GH responsável pela quebra de gordura. Mostra capacidade de inibir a formação de nova gordura e acelerar a lipólise visceral sem alterar a insulina.", "cat": "Metabolismo", "icon": "🔥"},
-        "MOTS-C": {"desc": "Peptídeo Derivado da Mitocôndria: Regulador hormonal do metabolismo sistêmico. Melhora a homeostase da glicose e combate a resistência à insulina via ativação da via AMPK.", "cat": "Metabolismo", "icon": "🔥"},
-        "SLU PP": {"desc": "Agonista Pan-ERR (Pílula do Exercício): Ativa receptores ERRα, β, γ. Aumenta drasticamente a biogênese mitocondrial e a resistência física, comparável ao treino de alta intensidade.", "cat": "Metabolismo", "icon": "🔥"},
-        "CJC-1295": {"desc": "Secretagogo de GH de Longa Duração: Análogo do GHRH que aumenta secreção de GH e IGF-1. Aplicado em antienvelhecimento, melhora da composição corporal e síntese proteica acelerada.", "cat": "Hormônios", "icon": "💉"},
-        "IPAMORELIN": {"desc": "Agonista de Grelina Seletivo: Estimula a liberação pulsátil de GH sem elevar cortisol ou prolactina. Seguro para indução de anabolismo e melhora da density mineral óssea.", "cat": "Hormônios", "icon": "💉"},
-        "CJC-1295 + IPAMORELIN": {"desc": "Sinergia Hormonal Dual: Combinação de GHRH com GHRP. Mimetiza a liberação fisiológica natural, resultando em secreção de GH significativamente maior que o uso isolado.", "cat": "Hormônios", "icon": "💉"},
-        "IGF-1 LR3": {"desc": "Análogo de IGF-1 de Meia-vida Longa: Permanece ativo por até 20 horas. Principal mediador da hiperplasia (criação de novas fibras musculares) e transporte de acesso de aminoácidos.", "cat": "Hormônios", "icon": "💉"},
-        "SERMORELIN": {"desc": "Estimulador de Eixo Natural: Mimetiza o GHRH natural. Promove melhorias na qualidade do sono profundo, vitalidade da pele e recuperação pós-esforço.", "cat": "Hormônios", "icon": "💉"},
-        "BPC-157": {"desc": "Pentadecapeptídeo Gástrico: Acelera a angiogênese e cicatrização. Estudado para cura de rupturas de tendões, ligamentos, danos musculares e tecidos moles.", "cat": "Recuperação", "icon": "🩹"},
-        "TB-500": {"desc": "Timosina Beta-4 Sintética: Essencial para migração celular e reparo de tecidos. Promove formação de novos vasos e reduz inflamação articular e miocárdica.", "cat": "Recuperação", "icon": "🩹"},
-        "TB-500 + BPC": {"desc": "Protocolo de Reparo Total: União sinérgica do TB-500 (sistêmico) com BPC-157 (tecido). Padrão ouro para recuperação de lesões atléticas graves.", "cat": "Recuperação", "icon": "🩹"},
-        "GHK-CU": {"desc": "Complexo Peptídeo-Cobre: Atua na remodelação do DNA e síntese de colágeno I e III. Possui propriedades antioxidantes e anti-inflamatórias para pele e tecidos conectivos.", "cat": "Estética", "icon": "✨"},
-        "GLOW": {"desc": "Bioestimulação Dérmica (GHK-Cu + BPC + TB): Blend estético-regenerativo focado em rejuvenescimento cutâneo, redução de cicatrizes e regeneração da matriz extracelular.", "cat": "Estética", "icon": "✨"},
-        "ARA 290": {"desc": "Agonista de Receptor de Reparo Inato: Derivado da eritropoietina sem efeitos hematológicos. Pesquisado para dor neuropática severa e regeneração nervosa periférica.", "cat": "Recuperação", "icon": "🩹"},
-        "KPV": {"desc": "Tripeptídeo Anti-inflamatório: Inibe vias inflamatórias (NF-κB). Possui propriedades antimicrobianas e é utilizado em estudos sobre dermatite e colite.", "cat": "Imunidade", "icon": "🛡️"},
-        "KLOW": {"desc": "Quarteto de Reparo Profundo (GHK+BPC+TB+KPV): Projetado para sinalização celular máxima em remodelação de tecidos complexos e equilíbrio imunológico.", "cat": "Recuperação", "icon": "🩹"},
-        "TIRZEPATIDE": {"desc": "Agonista Dual GIP/GLP-1: Supera a Semaglutida na perda de peso. Promove saciedade central e melhora drástica na sensibilidade à insulina.", "cat": "Emagrecimento", "icon": "⚖️"},
-        "RETATRUTIDE": {"desc": "Agonista Triplo (GIP/GLP-1/GCGR): Aumenta o gasto calórico basal e a oxidação de gordura no fígado. Promete perdas de peso superiores a 24%.", "cat": "Emagrecimento", "icon": "⚖️"},
-        "SEMAGLUTIDE": {"desc": "Agonista de GLP-1: Retarda o esvaziamento gástrico e sinaliza saciedade ao hipotálamo. Base para tratamento de obesidade e controle glicêmico.", "cat": "Emagrecimento", "icon": "⚖️"},
-        "SELANK": {"desc": "Ansiolítico Regulador: Modula serotonina e norepinefrina. Reduz ansiedade e melhora o foco cognitivo sem o efeito sedativo dos ansiolíticos comuns.", "cat": "Cognitivo", "icon": "🧠"},
-        "SEMAX": {"desc": "Nootrópico Neuroprotetor: Eleva níveis de BDNF e NGF no hipocampo. Aplicado em recuperação pós-AVC e otimização do aprendizado sob estresse.", "cat": "Cognitivo", "icon": "🧠"},
-        "PINEALON": {"desc": "Bioregulador de Cadeia Curta: Atua na expressão gênica neuronal. Restaura o ritmo circadiano e protege contra o estresse oxidativo cerebral.", "cat": "Cognitivo", "icon": "🧠"},
-        "NAD+": {"desc": "Coenzima de Vitalidade: Essencial para reparação do DNA e sirtuínas. Associado à reversão de marcadores de envelhecimento e aumento da energia celular.", "cat": "Longevidade", "icon": "⏳"},
-        "DSIP": {"desc": "Indutor de Sono Delta: Neuromodulador que sincroniza ritmos biológicos, promove sono profundo e mitiga sintomas de estresse emocional.", "cat": "Cognitivo", "icon": "🧠"},
-        "OXYTOCIN": {"desc": "Neuromodulador Social: Regula confiança, redução de medo e ansiedade social. Explorado também na regulação do apetite por carboidratos.", "cat": "Cognitivo", "icon": "🧠"},
-        "EPITHALON": {"desc": "Ativador da Telomerase: Induz o alongamento dos telômeros. Focado na extensão da vida celular e restauração da secreção de melatonina.", "cat": "Longevidade", "icon": "⏳"},
-        "PT-141": {"desc": "Tratamento de Disfunção Sexual: Atua via SNC nos centros de excitação do cérebro. Indicado para desejo sexual hipoativo.", "cat": "Sexual", "icon": "❤️"},
-        "BACTERIOSTATIC WATER": {"desc": "Solvente Bacteriostático: Água com 0,9% de Álcool Benzílico. Impede proliferação bacteriana, permitindo uso seguro por até 30 dias.", "cat": "Acessório", "icon": "💧"},
-        "SS-31": {"desc": "Protetor de Cardiolipina: Previne a formação de radicais livres na mitocôndria e restaura a produção de ATP.", "cat": "Longevidade", "icon": "⏳"},
-        "TESAMORELIN": {"desc": "Redutor de Lipodistrofia: Único aprovado para reduzir gordura visceral abdominal severa.", "cat": "Metabolismo", "icon": "🔥"},
-    }
-
-    cat_colors = {
-        "Metabolismo":    {"bg": "rgba(255,107,53,0.12)",  "border": "#ff6b35", "text": "#ff6b35"},
-        "Hormônios":      {"bg": "rgba(0,150,255,0.12)",   "border": "#0096ff", "text": "#0096ff"},
-        "Recuperação":    {"bg": "rgba(76,175,80,0.12)",   "border": "#4caf50", "text": "#4caf50"},
-        "Estética":       {"bg": "rgba(233,30,99,0.12)",   "border": "#e91e63", "text": "#e91e63"},
-        "Imunidade":      {"bg": "rgba(156,39,176,0.12)",  "border": "#9c27b0", "text": "#9c27b0"},
-        "Emagrecimento":  {"bg": "rgba(255,193,7,0.12)",   "border": "#ffc107", "text": "#ffc107"},
-        "Cognitivo":      {"bg": "rgba(0,188,212,0.12)",   "border": "#00bcd4", "text": "#00bcd4"},
-        "Longevidade":    {"bg": "rgba(121,85,72,0.12)",   "border": "#c49b68", "text": "#c49b68"},
-        "Sexual":         {"bg": "rgba(244,67,54,0.12)",   "border": "#f44336", "text": "#f44336"},
-        "Suplemento":     {"bg": "rgba(96,125,139,0.12)",  "border": "#78909c", "text": "#78909c"},
-        "Acessório":      {"bg": "rgba(158,158,158,0.12)", "border": "#9e9e9e", "text": "#9e9e9e"},
-    }
-
-    try:
-        if arquivo_dados.endswith('.xlsx'):
-            df = pd.read_excel(arquivo_dados)
-        else:
-            df = pd.read_csv(arquivo_dados)
-        df.columns = [str(col).strip() for col in df.columns]
-
-        produtos_base = []
-        for idx, row in df.iterrows():
-            nome_prod_raw = str(row.get('PRODUTO', 'N/A')).strip()
-            # Sanitize all text from spreadsheet before embedding in HTML/JS
-            nome_prod = sanitizar_texto(nome_prod_raw)
-            volume    = sanitizar_texto(str(row.get('VOLUME', '')))
-            medida    = sanitizar_texto(str(row.get('MEDIDA', '')))
-
-            info = {"desc": "Informação técnica não disponível.", "cat": "Outro", "icon": "📦"}
-            for chave, dados in infos_tecnicas.items():
-                if chave in nome_prod.upper():
-                    info = dados
-                    break
-
-            cat = info["cat"]
-            cc  = cat_colors.get(cat, {"bg": "rgba(158,158,158,0.12)", "border": "#9e9e9e", "text": "#9e9e9e"})
-
-            estoque_raw   = str(row.get('ESTOQUE', row.get('STATUS', ''))).strip().upper()
-            is_available  = "DISPONÍVEL" in estoque_raw
-
-            # ── PROMOÇÃO ────────────────────────────────────────────────────
-            promo_raw   = row.get('PROMOÇÃO', row.get('PROMOCAO', row.get('Promoção', None)))
-            promo_pct   = parse_promo(promo_raw)   # float 0..1
-            preco_orig  = float(row.get('Preço (R$)', 0) or 0)
-            preco_final = round(preco_orig * (1 - promo_pct), 2) if promo_pct > 0 else preco_orig
-
-            produtos_base.append({
-                "id":          idx,
-                "nome":        nome_prod,
-                "espec":       f"{volume} {medida}".strip(),
-                "precoOrig":   preco_orig,
-                "preco":       preco_final,   # effective price (discounted)
-                "promoPct":    promo_pct,     # 0 = no promo, e.g. 0.10 = 10% off
-                "info":        info["desc"],
-                "cat":         cat,
-                "icon":        info["icon"],
-                "catBg":       cc["bg"],
-                "catBorder":   cc["border"],
-                "catText":     cc["text"],
-                "available":   is_available,
-                "imagem":      f"imagens_produtos/{nome_prod}.webp",
-            })
-
-        js_produtos = json.dumps(produtos_base, ensure_ascii=False)
-
-    except Exception as e:
-        print(f"Erro ao ler os dados: {e}")
-        return
-
-    # ── Category filter buttons ──────────────────────────────────────────────
-    all_cats = sorted(set(p["cat"] for p in produtos_base))
-    cat_buttons_html = '<button class="cat-btn active" data-cat="all" onclick="filtrarCat(\'all\')">Todos</button>\n'
-    for cat in all_cats:
-        cc = cat_colors.get(cat, {"border": "#9e9e9e"})
-        border_color = cc["border"]
-        cat_buttons_html += (
-            f'<button class="cat-btn" data-cat="{cat}" '
-            f'onclick="filtrarCat(\'{cat}\')" '
-            f'style="--cat-color:{border_color}">{cat}</button>\n'
-        )
-
-    # ── Product cards ────────────────────────────────────────────────────────
-    table_rows = ""
-    for p in produtos_base:
-        idx           = p["id"]
-        produto       = p["nome"]
-        espec         = p["espec"]
-        preco_orig    = p["precoOrig"]
-        preco_final   = p["preco"]
-        promo_pct     = p["promoPct"]
-        cat           = p["cat"]
-        icon          = p["icon"]
-        is_available  = p["available"]
-        estoque_label = "DISPONÍVEL" if is_available else "EM ESPERA"
-        cc            = cat_colors.get(cat, {"bg": "rgba(158,158,158,0.12)", "border": "#9e9e9e", "text": "#9e9e9e"})
-        cc_text       = cc["text"]
-        cc_bg         = cc["bg"]
-        cc_border     = cc["border"]
-
-        # Price display block
-        if promo_pct > 0:
-            pct_label   = f"{round(promo_pct * 100)}% OFF"
-            preco_html  = f'''
-                <div class="pc-price-wrap promo">
-                  <span class="pc-badge-promo">{pct_label}</span>
-                  <span class="pc-price-orig">R$ {preco_orig:,.2f}</span>
-                  <span class="pc-price promo-price">R$ {preco_final:,.2f}</span>
-                </div>'''
-        else:
-            preco_html = f'''
-                <div class="pc-price-wrap">
-                  <span class="pc-price">R$ {preco_orig:,.2f}</span>
-                </div>'''
-
-        table_rows += f"""
-        <div class="product-card" data-cat="{cat}" data-available="{'1' if is_available else '0'}">
-            <div class="pc-top">
-                <div class="pc-icon">{icon}</div>
-                <div class="pc-info">
-                    <h3 class="pc-name">{produto}</h3>
-                    <span class="pc-spec">{espec}</span>
-                    <span class="pc-cat"
-                          style="color:{cc_text};background:{cc_bg};border:1px solid {cc_border};">{cat}</span>
-                </div>
-            </div>
-            <div class="pc-bottom">
-                <div class="pc-price-status">
-                    {preco_html}
-                    <span class="pc-status {'st-ok' if is_available else 'st-out'}">{estoque_label}</span>
-                </div>
-                <div class="pc-actions">
-                    <button class="btn-detail" onclick="abrirInfo({idx})">Detalhes</button>
-                    <button class="btn-cart" onclick="adicionar({idx})" {'disabled' if not is_available else ''}>
-                        {'Adicionar' if is_available else 'Indisponível'}
-                    </button>
-                </div>
-            </div>
-        </div>
-"""
-
-    # ════════════════════════════════════════════════════════════════════════
-    html = f"""<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
@@ -260,206 +22,206 @@ def gerar_site_vendas_completo():
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*{{margin:0;padding:0;box-sizing:border-box}}
-:root{{
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
   --bg:#07080a;--surface:#0e1117;--surface2:#161b22;--surface3:#1c2333;
   --text:#e6edf3;--text2:#8b949e;--accent:#58a6ff;--accent2:#1f6feb;
   --green:#3fb950;--red:#f85149;--gold:#d29922;--pink:#f778ba;
   --radius:16px;--font:'Space Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
-}}
-body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden}}
-.grain{{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden}
+.grain{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  background-repeat:repeat;opacity:0.4}}
-.glow-orb{{position:fixed;width:600px;height:600px;border-radius:50%;filter:blur(120px);opacity:0.07;pointer-events:none;z-index:0}}
-.glow-1{{top:-200px;left:-100px;background:var(--accent)}}
-.glow-2{{bottom:-200px;right:-100px;background:var(--pink)}}
-.wrap{{max-width:1100px;margin:0 auto;padding:20px;position:relative;z-index:1;padding-bottom:240px}}
-.header{{text-align:center;padding:40px 0 20px}}
-.logo-text{{font-size:2.4rem;font-weight:700;letter-spacing:-1px;
-  background:linear-gradient(135deg,var(--accent),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}}
-.logo-sub{{font-family:var(--mono);font-size:0.8rem;color:var(--text2);margin-top:4px;letter-spacing:2px;text-transform:uppercase}}
+  background-repeat:repeat;opacity:0.4}
+.glow-orb{position:fixed;width:600px;height:600px;border-radius:50%;filter:blur(120px);opacity:0.07;pointer-events:none;z-index:0}
+.glow-1{top:-200px;left:-100px;background:var(--accent)}
+.glow-2{bottom:-200px;right:-100px;background:var(--pink)}
+.wrap{max-width:1100px;margin:0 auto;padding:20px;position:relative;z-index:1;padding-bottom:240px}
+.header{text-align:center;padding:40px 0 20px}
+.logo-text{font-size:2.4rem;font-weight:700;letter-spacing:-1px;
+  background:linear-gradient(135deg,var(--accent),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-family:var(--mono);font-size:0.8rem;color:var(--text2);margin-top:4px;letter-spacing:2px;text-transform:uppercase}
 
 /* ── FEATURED ─────────────────────────────────────── */
-.featured-section{{margin:30px 0}}
-.section-title{{font-size:1.1rem;font-weight:600;color:var(--text2);margin-bottom:16px;display:flex;align-items:center;gap:8px}}
-.section-title span{{display:inline-block;width:4px;height:20px;background:linear-gradient(var(--accent),var(--pink));border-radius:2px}}
-.featured-scroll{{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}}
-.featured-scroll::-webkit-scrollbar{{height:4px}}
-.featured-scroll::-webkit-scrollbar-track{{background:var(--surface)}}
-.featured-scroll::-webkit-scrollbar-thumb{{background:var(--accent);border-radius:4px}}
-.feat-card{{min-width:280px;max-width:320px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--surface3);
-  border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;flex-shrink:0;transition:transform 0.3s,border-color 0.3s}}
-.feat-card:hover{{transform:translateY(-4px);border-color:var(--accent)}}
-.feat-card::before{{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--pink))}}
-.feat-card.promo-card::before{{background:linear-gradient(90deg,#ff6b35,#ffc107)}}
-.feat-icon{{font-size:2rem;margin-bottom:12px}}
-.feat-name{{font-size:1.05rem;font-weight:600;margin-bottom:4px}}
-.feat-spec{{font-size:0.75rem;color:var(--text2);font-family:var(--mono)}}
-.feat-desc{{font-size:0.8rem;color:var(--text2);margin-top:10px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}}
+.featured-section{margin:30px 0}
+.section-title{font-size:1.1rem;font-weight:600;color:var(--text2);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title span{display:inline-block;width:4px;height:20px;background:linear-gradient(var(--accent),var(--pink));border-radius:2px}
+.featured-scroll{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.featured-scroll::-webkit-scrollbar{height:4px}
+.featured-scroll::-webkit-scrollbar-track{background:var(--surface)}
+.featured-scroll::-webkit-scrollbar-thumb{background:var(--accent);border-radius:4px}
+.feat-card{min-width:280px;max-width:320px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--surface3);
+  border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;flex-shrink:0;transition:transform 0.3s,border-color 0.3s}
+.feat-card:hover{transform:translateY(-4px);border-color:var(--accent)}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--pink))}
+.feat-card.promo-card::before{background:linear-gradient(90deg,#ff6b35,#ffc107)}
+.feat-icon{font-size:2rem;margin-bottom:12px}
+.feat-name{font-size:1.05rem;font-weight:600;margin-bottom:4px}
+.feat-spec{font-size:0.75rem;color:var(--text2);font-family:var(--mono)}
+.feat-desc{font-size:0.8rem;color:var(--text2);margin-top:10px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 
 /* promo price in featured card */
-.feat-price-wrap{{margin-top:12px}}
-.feat-price-wrap.promo .feat-badge{{display:inline-block;background:linear-gradient(135deg,#ff6b35,#ffc107);color:#000;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px}}
-.feat-price-wrap.promo .feat-orig{{font-size:0.8rem;color:var(--text2);text-decoration:line-through}}
-.feat-price{{font-size:1.2rem;font-weight:700;color:var(--green)}}
-.feat-price-wrap.promo .feat-price{{color:#ffc107}}
-.feat-price-wrap .feat-badge{{display:none}}
-.feat-price-wrap .feat-orig{{display:none}}
+.feat-price-wrap{margin-top:12px}
+.feat-price-wrap.promo .feat-badge{display:inline-block;background:linear-gradient(135deg,#ff6b35,#ffc107);color:#000;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px}
+.feat-price-wrap.promo .feat-orig{font-size:0.8rem;color:var(--text2);text-decoration:line-through}
+.feat-price{font-size:1.2rem;font-weight:700;color:var(--green)}
+.feat-price-wrap.promo .feat-price{color:#ffc107}
+.feat-price-wrap .feat-badge{display:none}
+.feat-price-wrap .feat-orig{display:none}
 
-.feat-btn{{margin-top:10px;width:100%;padding:10px;border:none;border-radius:10px;font-weight:600;font-family:var(--font);
-  cursor:pointer;background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;font-size:0.85rem;transition:opacity 0.2s}}
-.feat-btn:hover{{opacity:0.85}}
+.feat-btn{margin-top:10px;width:100%;padding:10px;border:none;border-radius:10px;font-weight:600;font-family:var(--font);
+  cursor:pointer;background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;font-size:0.85rem;transition:opacity 0.2s}
+.feat-btn:hover{opacity:0.85}
 
 /* ── PROMO BADGE in product cards ─────────────────── */
-.pc-price-wrap{{display:flex;flex-direction:column;gap:2px}}
-.pc-badge-promo{{display:inline-block;font-size:0.62rem;font-weight:700;background:linear-gradient(135deg,#ff6b35,#ffc107);
-  color:#000;padding:2px 8px;border-radius:12px;width:fit-content}}
-.pc-price-orig{{font-size:0.78rem;color:var(--text2);text-decoration:line-through}}
-.promo-price{{color:#ffc107 !important}}
+.pc-price-wrap{display:flex;flex-direction:column;gap:2px}
+.pc-badge-promo{display:inline-block;font-size:0.62rem;font-weight:700;background:linear-gradient(135deg,#ff6b35,#ffc107);
+  color:#000;padding:2px 8px;border-radius:12px;width:fit-content}
+.pc-price-orig{font-size:0.78rem;color:var(--text2);text-decoration:line-through}
+.promo-price{color:#ffc107 !important}
 
 /* ── ALERTS ───────────────────────────────────────── */
-.alert-bar{{background:var(--surface);border:1px solid var(--surface3);border-left:4px solid var(--accent);
-  padding:14px 18px;border-radius:12px;margin-bottom:14px;font-size:0.85rem;line-height:1.5;color:var(--text2);position:relative}}
-.alert-bar strong{{color:var(--text)}}
-.alert-bar .close-x{{position:absolute;top:10px;right:14px;cursor:pointer;color:var(--text2);font-size:1.1rem}}
-.cert-bar{{background:var(--surface);border:1px solid var(--surface3);border-left:4px solid var(--green);
+.alert-bar{background:var(--surface);border:1px solid var(--surface3);border-left:4px solid var(--accent);
+  padding:14px 18px;border-radius:12px;margin-bottom:14px;font-size:0.85rem;line-height:1.5;color:var(--text2);position:relative}
+.alert-bar strong{color:var(--text)}
+.alert-bar .close-x{position:absolute;top:10px;right:14px;cursor:pointer;color:var(--text2);font-size:1.1rem}
+.cert-bar{background:var(--surface);border:1px solid var(--surface3);border-left:4px solid var(--green);
   padding:14px 18px;border-radius:12px;margin-bottom:14px;font-size:0.85rem;line-height:1.5;color:var(--text2);
-  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}}
-.cert-bar strong{{color:var(--text)}}
-.btn-cert{{padding:8px 16px;border:none;border-radius:10px;background:var(--green);color:#fff;
-  font-size:0.8rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:opacity 0.2s;white-space:nowrap}}
-.btn-cert:hover{{opacity:0.85}}
-.cert-list{{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:16px 0}}
-.cert-link{{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 10px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.cert-bar strong{color:var(--text)}
+.btn-cert{padding:8px 16px;border:none;border-radius:10px;background:var(--green);color:#fff;
+  font-size:0.8rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:opacity 0.2s;white-space:nowrap}
+.btn-cert:hover{opacity:0.85}
+.cert-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:16px 0}
+.cert-link{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 10px;
   background:var(--surface2);border:1px solid var(--surface3);border-radius:12px;color:var(--text);
-  text-decoration:none;font-size:0.85rem;font-weight:600;transition:all 0.2s}}
-.cert-link:hover{{border-color:var(--green);color:var(--green);transform:translateY(-2px)}}
+  text-decoration:none;font-size:0.85rem;font-weight:600;transition:all 0.2s}
+.cert-link:hover{border-color:var(--green);color:var(--green);transform:translateY(-2px)}
 
 /* ── SEARCH & FILTERS ─────────────────────────────── */
-.search-area{{margin:24px 0 16px;display:flex;gap:10px;flex-wrap:wrap}}
-.search-input{{flex:1;min-width:200px;padding:12px 16px;border:1px solid var(--surface3);border-radius:12px;
-  background:var(--surface);color:var(--text);font-size:0.9rem;font-family:var(--font);outline:none;transition:border-color 0.2s}}
-.search-input:focus{{border-color:var(--accent)}}
-.search-input::placeholder{{color:var(--text2)}}
-.toggle-avail{{padding:10px 18px;border:1px solid var(--surface3);border-radius:12px;background:var(--surface);color:var(--text2);
-  font-size:0.8rem;font-family:var(--font);cursor:pointer;transition:all 0.2s;white-space:nowrap}}
-.toggle-avail.active{{border-color:var(--green);color:var(--green);background:rgba(63,185,80,0.1)}}
-.cat-filters{{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px;-webkit-overflow-scrolling:touch}}
-.cat-filters::-webkit-scrollbar{{height:0}}
-.cat-btn{{padding:6px 14px;border-radius:20px;border:1px solid var(--surface3);background:var(--surface);color:var(--text2);
-  font-size:0.75rem;font-family:var(--font);cursor:pointer;white-space:nowrap;transition:all 0.2s}}
-.cat-btn:hover,.cat-btn.active{{border-color:var(--accent);color:var(--accent);background:rgba(88,166,255,0.08)}}
+.search-area{margin:24px 0 16px;display:flex;gap:10px;flex-wrap:wrap}
+.search-input{flex:1;min-width:200px;padding:12px 16px;border:1px solid var(--surface3);border-radius:12px;
+  background:var(--surface);color:var(--text);font-size:0.9rem;font-family:var(--font);outline:none;transition:border-color 0.2s}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--text2)}
+.toggle-avail{padding:10px 18px;border:1px solid var(--surface3);border-radius:12px;background:var(--surface);color:var(--text2);
+  font-size:0.8rem;font-family:var(--font);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.toggle-avail.active{border-color:var(--green);color:var(--green);background:rgba(63,185,80,0.1)}
+.cat-filters{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px;-webkit-overflow-scrolling:touch}
+.cat-filters::-webkit-scrollbar{height:0}
+.cat-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--surface3);background:var(--surface);color:var(--text2);
+  font-size:0.75rem;font-family:var(--font);cursor:pointer;white-space:nowrap;transition:all 0.2s}
+.cat-btn:hover,.cat-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(88,166,255,0.08)}
 
 /* ── PRODUCT GRID ─────────────────────────────────── */
-.product-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}}
-.product-card{{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius);padding:18px;
-  transition:all 0.3s;position:relative;overflow:hidden}}
-.product-card:hover{{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 30px rgba(88,166,255,0.06)}}
-.product-card[data-available="0"]{{opacity:0.55}}
-.pc-top{{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}}
-.pc-icon{{font-size:1.6rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
-  background:var(--surface2);border-radius:12px;flex-shrink:0}}
-.pc-info{{flex:1;min-width:0}}
-.pc-name{{font-size:0.95rem;font-weight:600;line-height:1.3;margin-bottom:4px}}
-.pc-spec{{font-size:0.72rem;color:var(--text2);font-family:var(--mono)}}
-.pc-cat{{display:inline-block;font-size:0.65rem;padding:2px 8px;border-radius:8px;margin-top:6px;font-weight:500}}
-.pc-bottom{{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}}
-.pc-price-status{{display:flex;flex-direction:column;gap:4px}}
-.pc-price{{font-size:1.1rem;font-weight:700;color:var(--green)}}
-.pc-status{{font-size:0.7rem;font-family:var(--mono);text-transform:uppercase}}
-.st-ok{{color:var(--green)}}
-.st-out{{color:var(--red);background:rgba(248,81,73,0.1);padding:2px 8px;border-radius:6px;border:1px solid rgba(248,81,73,0.3)}}
-.pc-actions{{display:flex;gap:8px}}
-.btn-detail{{padding:8px 14px;border:1px solid var(--surface3);border-radius:10px;background:transparent;
-  color:var(--text2);font-size:0.78rem;font-family:var(--font);cursor:pointer;transition:all 0.2s}}
-.btn-detail:hover{{border-color:var(--accent);color:var(--accent)}}
-.btn-cart{{padding:8px 16px;border:none;border-radius:10px;background:var(--accent2);color:#fff;
-  font-size:0.78rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:all 0.2s}}
-.btn-cart:hover{{background:var(--accent)}}
-.btn-cart:disabled{{background:var(--surface3);color:var(--text2);cursor:not-allowed}}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.product-card{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius);padding:18px;
+  transition:all 0.3s;position:relative;overflow:hidden}
+.product-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 30px rgba(88,166,255,0.06)}
+.product-card[data-available="0"]{opacity:0.55}
+.pc-top{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}
+.pc-icon{font-size:1.6rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  background:var(--surface2);border-radius:12px;flex-shrink:0}
+.pc-info{flex:1;min-width:0}
+.pc-name{font-size:0.95rem;font-weight:600;line-height:1.3;margin-bottom:4px}
+.pc-spec{font-size:0.72rem;color:var(--text2);font-family:var(--mono)}
+.pc-cat{display:inline-block;font-size:0.65rem;padding:2px 8px;border-radius:8px;margin-top:6px;font-weight:500}
+.pc-bottom{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.pc-price-status{display:flex;flex-direction:column;gap:4px}
+.pc-price{font-size:1.1rem;font-weight:700;color:var(--green)}
+.pc-status{font-size:0.7rem;font-family:var(--mono);text-transform:uppercase}
+.st-ok{color:var(--green)}
+.st-out{color:var(--red);background:rgba(248,81,73,0.1);padding:2px 8px;border-radius:6px;border:1px solid rgba(248,81,73,0.3)}
+.pc-actions{display:flex;gap:8px}
+.btn-detail{padding:8px 14px;border:1px solid var(--surface3);border-radius:10px;background:transparent;
+  color:var(--text2);font-size:0.78rem;font-family:var(--font);cursor:pointer;transition:all 0.2s}
+.btn-detail:hover{border-color:var(--accent);color:var(--accent)}
+.btn-cart{padding:8px 16px;border:none;border-radius:10px;background:var(--accent2);color:#fff;
+  font-size:0.78rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:all 0.2s}
+.btn-cart:hover{background:var(--accent)}
+.btn-cart:disabled{background:var(--surface3);color:var(--text2);cursor:not-allowed}
 
 /* ── CEP ──────────────────────────────────────────── */
-.cep-section{{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius);padding:20px;margin:24px 0}}
-.cep-section h3{{font-size:0.95rem;margin-bottom:12px}}
-.cep-row{{display:flex;gap:10px}}
-.cep-row input{{flex:1}}
-.cep-row button{{white-space:nowrap}}
-#resultado-frete{{margin-top:10px;font-size:0.85rem;color:var(--accent);font-weight:600}}
+.cep-section{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius);padding:20px;margin:24px 0}
+.cep-section h3{font-size:0.95rem;margin-bottom:12px}
+.cep-row{display:flex;gap:10px}
+.cep-row input{flex:1}
+.cep-row button{white-space:nowrap}
+#resultado-frete{margin-top:10px;font-size:0.85rem;color:var(--accent);font-weight:600}
 
 /* ── MODAL ────────────────────────────────────────── */
-.modal-overlay{{display:none;position:fixed;z-index:2000;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);overflow-y:auto}}
-.modal-box{{background:var(--surface);border:1px solid var(--surface3);margin:6% auto;padding:28px;
-  width:92%;max-width:520px;border-radius:20px;position:relative}}
-.modal-box h2{{font-size:1.2rem;margin-bottom:6px;background:linear-gradient(135deg,var(--accent),var(--pink));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent}}
-.modal-body{{background:var(--surface2);padding:16px;border-radius:12px;border-left:4px solid var(--accent);
-  margin:16px 0;font-size:0.9rem;line-height:1.6;color:var(--text2)}}
-.modal-close{{width:100%;padding:12px;border:none;border-radius:12px;background:var(--surface3);color:var(--text);
-  font-family:var(--font);font-weight:600;cursor:pointer;font-size:0.9rem;transition:background 0.2s}}
-.modal-close:hover{{background:var(--surface2)}}
+.modal-overlay{display:none;position:fixed;z-index:2000;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);overflow-y:auto}
+.modal-box{background:var(--surface);border:1px solid var(--surface3);margin:6% auto;padding:28px;
+  width:92%;max-width:520px;border-radius:20px;position:relative}
+.modal-box h2{font-size:1.2rem;margin-bottom:6px;background:linear-gradient(135deg,var(--accent),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.modal-body{background:var(--surface2);padding:16px;border-radius:12px;border-left:4px solid var(--accent);
+  margin:16px 0;font-size:0.9rem;line-height:1.6;color:var(--text2)}
+.modal-close{width:100%;padding:12px;border:none;border-radius:12px;background:var(--surface3);color:var(--text);
+  font-family:var(--font);font-weight:600;cursor:pointer;font-size:0.9rem;transition:background 0.2s}
+.modal-close:hover{background:var(--surface2)}
 
 /* ── WHATSAPP FAB ─────────────────────────────────── */
-.whatsapp-fab{{position:fixed;bottom:94px;right:24px;z-index:950;width:58px;height:58px;border-radius:50%;
+.whatsapp-fab{position:fixed;bottom:94px;right:24px;z-index:950;width:58px;height:58px;border-radius:50%;
   background:linear-gradient(135deg,#25D366,#128C7E);border:none;color:#fff;
   cursor:pointer;box-shadow:0 4px 24px rgba(37,211,102,0.35);display:flex;align-items:center;justify-content:center;
-  transition:transform 0.2s;text-decoration:none}}
-.whatsapp-fab:hover{{transform:scale(1.08)}}
+  transition:transform 0.2s;text-decoration:none}
+.whatsapp-fab:hover{transform:scale(1.08)}
 
 
 /* ── CART ─────────────────────────────────────────── */
-.cart-fab{{position:fixed;bottom:24px;right:24px;z-index:900;width:58px;height:58px;border-radius:50%;
+.cart-fab{position:fixed;bottom:24px;right:24px;z-index:900;width:58px;height:58px;border-radius:50%;
   background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;color:#fff;font-size:1.4rem;
-  cursor:pointer;box-shadow:0 4px 24px rgba(88,166,255,0.3);display:none;align-items:center;justify-content:center;transition:transform 0.2s}}
-.cart-fab:hover{{transform:scale(1.08)}}
-.cart-fab .badge{{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:0.65rem;
-  width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700}}
-.cart-panel{{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--surface3);
+  cursor:pointer;box-shadow:0 4px 24px rgba(88,166,255,0.3);display:none;align-items:center;justify-content:center;transition:transform 0.2s}
+.cart-fab:hover{transform:scale(1.08)}
+.cart-fab .badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:0.65rem;
+  width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700}
+.cart-panel{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--surface3);
   border-radius:20px 20px 0 0;z-index:1000;display:none;box-shadow:0 -8px 40px rgba(0,0,0,0.4);
-  max-height:80vh;overflow-y:auto;padding:20px}}
-@media(min-width:768px){{.cart-panel{{width:420px;left:auto;right:24px;bottom:24px;border-radius:20px}}}}
-.cart-panel h3{{font-size:1rem;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}}
-.cart-panel h3 button{{background:none;border:none;color:var(--text2);font-size:1.4rem;cursor:pointer}}
-.cart-list{{max-height:180px;overflow-y:auto;margin:10px 0;background:var(--surface2);border-radius:12px;padding:6px}}
-.cart-list::-webkit-scrollbar{{width:4px}}
-.cart-list::-webkit-scrollbar-thumb{{background:var(--surface3);border-radius:4px}}
-.cart-item{{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid var(--surface3);font-size:0.82rem}}
-.cart-item:last-child{{border:none}}
-.cart-item-promo-label{{font-size:0.65rem;color:#ffc107;margin-left:4px}}
-.btn-rm{{background:var(--red);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;font-weight:700;font-size:0.75rem;margin-left:8px}}
-.coupon-row{{display:flex;gap:8px;margin:12px 0}}
-.coupon-row input{{flex:1;padding:10px;border:1px solid var(--surface3);border-radius:10px;background:var(--surface2);color:var(--text);font-family:var(--font);font-size:0.8rem}}
-.coupon-row button{{padding:10px 16px;border:none;border-radius:10px;background:var(--gold);color:#000;font-weight:700;font-size:0.8rem;cursor:pointer}}
-.coupon-note{{font-size:0.72rem;color:var(--text2);margin:-8px 0 8px;line-height:1.4}}
-.ship-row{{display:flex;justify-content:space-between;align-items:center;font-size:0.82rem;color:var(--gold);font-weight:600;margin:6px 0}}
-.discount-line{{display:none;justify-content:space-between;color:var(--gold);font-size:0.85rem;margin:4px 0}}
-.total-row{{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:700;padding-top:10px;border-top:1px solid var(--surface3);margin-top:8px}}
-.btn-checkout{{width:100%;padding:14px;border:none;border-radius:14px;font-weight:700;font-size:0.95rem;
-  background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;cursor:pointer;margin-top:10px;font-family:var(--font);transition:opacity 0.2s}}
-.btn-checkout:hover{{opacity:0.85}}
-.form-group{{margin-bottom:12px}}
-.form-group input,.form-group select{{width:100%;padding:12px;border:1px solid var(--surface3);border-radius:10px;
-  background:var(--surface2);color:var(--text);font-family:var(--font);font-size:0.9rem}}
-.form-group input::placeholder{{color:var(--text2)}}
-.form-row{{display:flex;gap:10px;margin-bottom:12px}}
-.form-row input{{flex:1}}
-.no-results{{text-align:center;padding:60px 20px;color:var(--text2)}}
-.no-results span{{font-size:2rem;display:block;margin-bottom:12px}}
-@media(max-width:600px){{
-  .product-grid{{grid-template-columns:1fr}}
-  .logo-text{{font-size:1.8rem}}
-  .feat-card{{min-width:240px}}
-}}
+  max-height:80vh;overflow-y:auto;padding:20px}
+@media(min-width:768px){.cart-panel{width:420px;left:auto;right:24px;bottom:24px;border-radius:20px}}
+.cart-panel h3{font-size:1rem;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.cart-panel h3 button{background:none;border:none;color:var(--text2);font-size:1.4rem;cursor:pointer}
+.cart-list{max-height:180px;overflow-y:auto;margin:10px 0;background:var(--surface2);border-radius:12px;padding:6px}
+.cart-list::-webkit-scrollbar{width:4px}
+.cart-list::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:4px}
+.cart-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid var(--surface3);font-size:0.82rem}
+.cart-item:last-child{border:none}
+.cart-item-promo-label{font-size:0.65rem;color:#ffc107;margin-left:4px}
+.btn-rm{background:var(--red);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;font-weight:700;font-size:0.75rem;margin-left:8px}
+.coupon-row{display:flex;gap:8px;margin:12px 0}
+.coupon-row input{flex:1;padding:10px;border:1px solid var(--surface3);border-radius:10px;background:var(--surface2);color:var(--text);font-family:var(--font);font-size:0.8rem}
+.coupon-row button{padding:10px 16px;border:none;border-radius:10px;background:var(--gold);color:#000;font-weight:700;font-size:0.8rem;cursor:pointer}
+.coupon-note{font-size:0.72rem;color:var(--text2);margin:-8px 0 8px;line-height:1.4}
+.ship-row{display:flex;justify-content:space-between;align-items:center;font-size:0.82rem;color:var(--gold);font-weight:600;margin:6px 0}
+.discount-line{display:none;justify-content:space-between;color:var(--gold);font-size:0.85rem;margin:4px 0}
+.total-row{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:700;padding-top:10px;border-top:1px solid var(--surface3);margin-top:8px}
+.btn-checkout{width:100%;padding:14px;border:none;border-radius:14px;font-weight:700;font-size:0.95rem;
+  background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;cursor:pointer;margin-top:10px;font-family:var(--font);transition:opacity 0.2s}
+.btn-checkout:hover{opacity:0.85}
+.form-group{margin-bottom:12px}
+.form-group input,.form-group select{width:100%;padding:12px;border:1px solid var(--surface3);border-radius:10px;
+  background:var(--surface2);color:var(--text);font-family:var(--font);font-size:0.9rem}
+.form-group input::placeholder{color:var(--text2)}
+.form-row{display:flex;gap:10px;margin-bottom:12px}
+.form-row input{flex:1}
+.no-results{text-align:center;padding:60px 20px;color:var(--text2)}
+.no-results span{font-size:2rem;display:block;margin-bottom:12px}
+@media(max-width:600px){
+  .product-grid{grid-template-columns:1fr}
+  .logo-text{font-size:1.8rem}
+  .feat-card{min-width:240px}
+}
 
 /* ===== MODAL G-LAB ===== */
-#glab-modal-overlay {{
+#glab-modal-overlay {
   position: fixed; inset: 0; z-index: 9999;
   background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
   padding: 16px; animation: glabFade .3s ease;
-}}
-#glab-modal {{
+}
+#glab-modal {
   position: relative; width: 100%; max-width: 640px;
   border-radius: 20px; overflow: hidden;
   border: 1px solid rgba(220,38,38,0.4);
@@ -469,51 +231,51 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
   background-size: cover; background-position: center;
   color: #fff; padding: 40px 32px;
   animation: glabZoom .3s ease;
-}}
-#glab-close {{
+}
+#glab-close {
   position: absolute; top: 16px; right: 16px;
   width: 38px; height: 38px; border-radius: 50%;
   background: rgba(255,255,255,0.1); color:#fff;
   border: none; cursor: pointer; font-size: 20px;
   display: flex; align-items: center; justify-content: center;
   transition: all .2s;
-}}
-#glab-close:hover {{ background: #dc2626; transform: scale(1.1); }}
-.glab-eyebrow {{
+}
+#glab-close:hover { background: #dc2626; transform: scale(1.1); }
+.glab-eyebrow {
   color:#ef4444; letter-spacing:.3em; font-size:12px;
   font-weight:600; text-transform:uppercase; text-align:center;
   margin-bottom: 12px;
-}}
-.glab-title {{
+}
+.glab-title {
   text-align:center; font-size: 32px; font-weight: 800;
   margin: 0 0 8px; letter-spacing:-0.02em;
-}}
-.glab-title span {{ color:#dc2626; }}
-.glab-divider {{ width:64px; height:2px; background:#dc2626; margin: 16px auto 28px; }}
-.glab-list {{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:14px; }}
-.glab-item {{
+}
+.glab-title span { color:#dc2626; }
+.glab-divider { width:64px; height:2px; background:#dc2626; margin: 16px auto 28px; }
+.glab-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:14px; }
+.glab-item {
   display:flex; gap:14px; padding:16px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 12px; transition: all .2s;
-}}
-.glab-item:hover {{ border-color: rgba(220,38,38,0.5); background: rgba(255,255,255,0.07); }}
-.glab-icon {{
+}
+.glab-item:hover { border-color: rgba(220,38,38,0.5); background: rgba(255,255,255,0.07); }
+.glab-icon {
   width:44px; height:44px; border-radius:10px; flex-shrink:0;
   background: rgba(220,38,38,0.15);
   display:flex; align-items:center; justify-content:center; font-size:24px;
-}}
-.glab-item h3 {{ margin:0 0 4px; font-size:16px; font-weight:600; }}
-.glab-item p  {{ margin:0; font-size:14px; color: rgba(255,255,255,0.7); line-height:1.5; }}
-.glab-btn {{
+}
+.glab-item h3 { margin:0 0 4px; font-size:16px; font-weight:600; }
+.glab-item p  { margin:0; font-size:14px; color: rgba(255,255,255,0.7); line-height:1.5; }
+.glab-btn {
   margin-top: 28px; width:100%; padding: 14px;
   background:#dc2626; color:#fff; border:none; border-radius:12px;
   font-weight:600; text-transform:uppercase; letter-spacing:.1em;
   font-size:14px; cursor:pointer; transition:all .2s;
-}}
-.glab-btn:hover {{ background:#b91c1c; box-shadow: 0 0 30px rgba(220,38,38,0.6); }}
-@keyframes glabFade {{ from{{opacity:0}} to{{opacity:1}} }}
-@keyframes glabZoom {{ from{{opacity:0; transform:scale(.95)}} to{{opacity:1; transform:scale(1)}} }}
+}
+.glab-btn:hover { background:#b91c1c; box-shadow: 0 0 30px rgba(220,38,38,0.6); }
+@keyframes glabFade { from{opacity:0} to{opacity:1} }
+@keyframes glabZoom { from{opacity:0; transform:scale(.95)} to{opacity:1; transform:scale(1)} }
 
 
 </style>
@@ -594,10 +356,1480 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
     <button class="toggle-avail" id="toggle-avail" onclick="toggleAvail()">Apenas Disponíveis</button>
   </div>
   <div class="cat-filters" id="cat-filters">
-    {cat_buttons_html}
+    <button class="cat-btn active" data-cat="all" onclick="filtrarCat('all')">Todos</button>
+<button class="cat-btn" data-cat="Acessório" onclick="filtrarCat('Acessório')" style="--cat-color:#9e9e9e">Acessório</button>
+<button class="cat-btn" data-cat="Cognitivo" onclick="filtrarCat('Cognitivo')" style="--cat-color:#00bcd4">Cognitivo</button>
+<button class="cat-btn" data-cat="Emagrecimento" onclick="filtrarCat('Emagrecimento')" style="--cat-color:#ffc107">Emagrecimento</button>
+<button class="cat-btn" data-cat="Estética" onclick="filtrarCat('Estética')" style="--cat-color:#e91e63">Estética</button>
+<button class="cat-btn" data-cat="Hormônios" onclick="filtrarCat('Hormônios')" style="--cat-color:#0096ff">Hormônios</button>
+<button class="cat-btn" data-cat="Imunidade" onclick="filtrarCat('Imunidade')" style="--cat-color:#9c27b0">Imunidade</button>
+<button class="cat-btn" data-cat="Longevidade" onclick="filtrarCat('Longevidade')" style="--cat-color:#c49b68">Longevidade</button>
+<button class="cat-btn" data-cat="Metabolismo" onclick="filtrarCat('Metabolismo')" style="--cat-color:#ff6b35">Metabolismo</button>
+<button class="cat-btn" data-cat="Outro" onclick="filtrarCat('Outro')" style="--cat-color:#9e9e9e">Outro</button>
+<button class="cat-btn" data-cat="Recuperação" onclick="filtrarCat('Recuperação')" style="--cat-color:#4caf50">Recuperação</button>
+<button class="cat-btn" data-cat="Sexual" onclick="filtrarCat('Sexual')" style="--cat-color:#f44336">Sexual</button>
+
   </div>
   <div class="product-grid" id="product-grid">
-    {table_rows}
+    
+        <div class="product-card" data-cat="Metabolismo" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🔥</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">AOD 9604 2 MG</h3>
+                    <span class="pc-spec">2 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ff6b35;background:rgba(255,107,53,0.12);border:1px solid #ff6b35;">Metabolismo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 225.00</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(0)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(0)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Metabolismo" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🔥</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">AOD 9604 5 MG</h3>
+                    <span class="pc-spec">5 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ff6b35;background:rgba(255,107,53,0.12);border:1px solid #ff6b35;">Metabolismo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 400.92</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(1)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(1)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Metabolismo" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🔥</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">AOD 9604 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ff6b35;background:rgba(255,107,53,0.12);border:1px solid #ff6b35;">Metabolismo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 670.92</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(2)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(2)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Recuperação" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">🩹</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">ARA 290 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#4caf50;background:rgba(76,175,80,0.12);border:1px solid #4caf50;">Recuperação</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 333.96</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(3)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(3)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Acessório" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">💧</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Bacteriostatic Water 3 ML</h3>
+                    <span class="pc-spec">3 ML</span>
+                    <span class="pc-cat"
+                          style="color:#9e9e9e;background:rgba(158,158,158,0.12);border:1px solid #9e9e9e;">Acessório</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 45.00</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(4)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(4)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Recuperação" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">🩹</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">BPC-157 5 MG</h3>
+                    <span class="pc-spec">5 MG</span>
+                    <span class="pc-cat"
+                          style="color:#4caf50;background:rgba(76,175,80,0.12);border:1px solid #4caf50;">Recuperação</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 300.45</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(5)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(5)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Recuperação" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🩹</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">BPC-157 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#4caf50;background:rgba(76,175,80,0.12);border:1px solid #4caf50;">Recuperação</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 570.46</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(6)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(6)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Outro" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">📦</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Case</h3>
+                    <span class="pc-spec">9 UNI</span>
+                    <span class="pc-cat"
+                          style="color:#9e9e9e;background:rgba(158,158,158,0.12);border:1px solid #9e9e9e;">Outro</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 63.00</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(7)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(7)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Outro" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">📦</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">CBL 514 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#9e9e9e;background:rgba(158,158,158,0.12);border:1px solid #9e9e9e;">Outro</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 697.00</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(8)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(8)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Hormônios" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">💉</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">CJC-1295 2 MG</h3>
+                    <span class="pc-spec">2 MG</span>
+                    <span class="pc-cat"
+                          style="color:#0096ff;background:rgba(0,150,255,0.12);border:1px solid #0096ff;">Hormônios</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 175.20</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(9)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(9)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Hormônios" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">💉</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">CJC-1295 + Ipamorelin 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#0096ff;background:rgba(0,150,255,0.12);border:1px solid #0096ff;">Hormônios</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 796.02</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(10)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(10)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Cognitivo" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">🧠</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">DSIP 5 MG</h3>
+                    <span class="pc-spec">5 MG</span>
+                    <span class="pc-cat"
+                          style="color:#00bcd4;background:rgba(0,188,212,0.12);border:1px solid #00bcd4;">Cognitivo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 248.86</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(11)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(11)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Cognitivo" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">🧠</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">DSIP 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#00bcd4;background:rgba(0,188,212,0.12);border:1px solid #00bcd4;">Cognitivo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 605.71</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(12)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(12)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Longevidade" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">⏳</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Epithalon 50 MG</h3>
+                    <span class="pc-spec">50 MG</span>
+                    <span class="pc-cat"
+                          style="color:#c49b68;background:rgba(121,85,72,0.12);border:1px solid #c49b68;">Longevidade</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 623.13</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(13)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(13)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Estética" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">✨</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">GHK-Cu 50 MG</h3>
+                    <span class="pc-spec">50 MG</span>
+                    <span class="pc-cat"
+                          style="color:#e91e63;background:rgba(233,30,99,0.12);border:1px solid #e91e63;">Estética</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 535.02</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(14)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(14)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Estética" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">✨</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">GHK-Cu 100 MG</h3>
+                    <span class="pc-spec">100 MG</span>
+                    <span class="pc-cat"
+                          style="color:#e91e63;background:rgba(233,30,99,0.12);border:1px solid #e91e63;">Estética</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 639.20</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(15)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(15)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Estética" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">✨</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">GLOW 70 MG</h3>
+                    <span class="pc-spec">70 MG</span>
+                    <span class="pc-cat"
+                          style="color:#e91e63;background:rgba(233,30,99,0.12);border:1px solid #e91e63;">Estética</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 824.40</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(16)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(16)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Metabolismo" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🔥</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">HGH Fragment 176-191 5 MG</h3>
+                    <span class="pc-spec">5 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ff6b35;background:rgba(255,107,53,0.12);border:1px solid #ff6b35;">Metabolismo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 441.33</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(17)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(17)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Metabolismo" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🔥</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">HGH Fragment 176-191 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ff6b35;background:rgba(255,107,53,0.12);border:1px solid #ff6b35;">Metabolismo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 630.00</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(18)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(18)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Hormônios" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">💉</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">IGF-1 LR3 1 MG</h3>
+                    <span class="pc-spec">1 MG</span>
+                    <span class="pc-cat"
+                          style="color:#0096ff;background:rgba(0,150,255,0.12);border:1px solid #0096ff;">Hormônios</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 617.97</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(19)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(19)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Hormônios" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">💉</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Ipamorelin 5 MG</h3>
+                    <span class="pc-spec">5 MG</span>
+                    <span class="pc-cat"
+                          style="color:#0096ff;background:rgba(0,150,255,0.12);border:1px solid #0096ff;">Hormônios</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 378.17</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(20)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(20)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Hormônios" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">💉</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Ipamorelin 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#0096ff;background:rgba(0,150,255,0.12);border:1px solid #0096ff;">Hormônios</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 585.45</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(21)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(21)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Recuperação" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🩹</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">KLOW 80 MG</h3>
+                    <span class="pc-spec">80 MG</span>
+                    <span class="pc-cat"
+                          style="color:#4caf50;background:rgba(76,175,80,0.12);border:1px solid #4caf50;">Recuperação</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 891.00</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(22)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(22)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Imunidade" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🛡️</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">KPV 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#9c27b0;background:rgba(156,39,176,0.12);border:1px solid #9c27b0;">Imunidade</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 434.47</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(23)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(23)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Metabolismo" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🔥</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">MOTS-c 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ff6b35;background:rgba(255,107,53,0.12);border:1px solid #ff6b35;">Metabolismo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 549.20</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(24)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(24)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Metabolismo" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🔥</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">MOTS-c 40 MG</h3>
+                    <span class="pc-spec">40 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ff6b35;background:rgba(255,107,53,0.12);border:1px solid #ff6b35;">Metabolismo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 1,926.00</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(25)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(25)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Longevidade" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">⏳</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">NAD+ 100 MG</h3>
+                    <span class="pc-spec">100 MG</span>
+                    <span class="pc-cat"
+                          style="color:#c49b68;background:rgba(121,85,72,0.12);border:1px solid #c49b68;">Longevidade</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 542.70</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(26)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(26)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Longevidade" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">⏳</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">NAD+ 1000 MG</h3>
+                    <span class="pc-spec">1000 MG</span>
+                    <span class="pc-cat"
+                          style="color:#c49b68;background:rgba(121,85,72,0.12);border:1px solid #c49b68;">Longevidade</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 1,000.00</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(27)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(27)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Cognitivo" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">🧠</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Oxytocin 2 MG</h3>
+                    <span class="pc-spec">2 MG</span>
+                    <span class="pc-cat"
+                          style="color:#00bcd4;background:rgba(0,188,212,0.12);border:1px solid #00bcd4;">Cognitivo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 108.00</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(28)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(28)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Cognitivo" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">🧠</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Pinealon 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#00bcd4;background:rgba(0,188,212,0.12);border:1px solid #00bcd4;">Cognitivo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 457.36</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(29)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(29)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Sexual" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">❤️</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">PT-141 Bremelanotide 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#f44336;background:rgba(244,67,54,0.12);border:1px solid #f44336;">Sexual</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 495.60</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(30)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(30)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Emagrecimento" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">⚖️</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Retatrutide 5 MG</h3>
+                    <span class="pc-spec">5 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ffc107;background:rgba(255,193,7,0.12);border:1px solid #ffc107;">Emagrecimento</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 363.82</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(31)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(31)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Emagrecimento" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">⚖️</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Retatrutide 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ffc107;background:rgba(255,193,7,0.12);border:1px solid #ffc107;">Emagrecimento</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 493.97</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(32)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(32)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Emagrecimento" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">⚖️</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Retatrutide 30 MG</h3>
+                    <span class="pc-spec">30 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ffc107;background:rgba(255,193,7,0.12);border:1px solid #ffc107;">Emagrecimento</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 1,247.40</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(33)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(33)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Emagrecimento" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">⚖️</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Retatrutide 60 MG</h3>
+                    <span class="pc-spec">60 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ffc107;background:rgba(255,193,7,0.12);border:1px solid #ffc107;">Emagrecimento</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 1,746.36</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(34)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(34)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Cognitivo" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🧠</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Selank 5 MG</h3>
+                    <span class="pc-spec">5 MG</span>
+                    <span class="pc-cat"
+                          style="color:#00bcd4;background:rgba(0,188,212,0.12);border:1px solid #00bcd4;">Cognitivo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 418.09</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(35)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(35)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Cognitivo" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🧠</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Selank 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#00bcd4;background:rgba(0,188,212,0.12);border:1px solid #00bcd4;">Cognitivo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 688.09</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(36)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(36)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Emagrecimento" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">⚖️</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Semaglutide 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ffc107;background:rgba(255,193,7,0.12);border:1px solid #ffc107;">Emagrecimento</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 560.71</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(37)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(37)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Emagrecimento" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">⚖️</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Semaglutide 30 MG</h3>
+                    <span class="pc-spec">30 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ffc107;background:rgba(255,193,7,0.12);border:1px solid #ffc107;">Emagrecimento</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 1,682.12</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(38)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(38)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Cognitivo" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🧠</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Semax 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#00bcd4;background:rgba(0,188,212,0.12);border:1px solid #00bcd4;">Cognitivo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 418.09</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(39)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(39)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Hormônios" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">💉</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Sermorelin 5 MG</h3>
+                    <span class="pc-spec">5 MG</span>
+                    <span class="pc-cat"
+                          style="color:#0096ff;background:rgba(0,150,255,0.12);border:1px solid #0096ff;">Hormônios</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 423.90</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(40)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(40)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Hormônios" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">💉</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Sermorelin 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#0096ff;background:rgba(0,150,255,0.12);border:1px solid #0096ff;">Hormônios</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 542.70</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(41)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(41)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Metabolismo" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">🔥</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">SLU PP 5 MG</h3>
+                    <span class="pc-spec">5 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ff6b35;background:rgba(255,107,53,0.12);border:1px solid #ff6b35;">Metabolismo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 708.18</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(42)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(42)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Metabolismo" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">🔥</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">SLU PP 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ff6b35;background:rgba(255,107,53,0.12);border:1px solid #ff6b35;">Metabolismo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 1,524.37</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(43)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(43)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Longevidade" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">⏳</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">SS-31 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#c49b68;background:rgba(121,85,72,0.12);border:1px solid #c49b68;">Longevidade</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 445.50</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(44)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(44)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Longevidade" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">⏳</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">SS-31 50 MG</h3>
+                    <span class="pc-spec">50 MG</span>
+                    <span class="pc-cat"
+                          style="color:#c49b68;background:rgba(121,85,72,0.12);border:1px solid #c49b68;">Longevidade</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 1,167.30</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(45)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(45)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Recuperação" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">🩹</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">TB-500 5 MG</h3>
+                    <span class="pc-spec">5 MG</span>
+                    <span class="pc-cat"
+                          style="color:#4caf50;background:rgba(76,175,80,0.12);border:1px solid #4caf50;">Recuperação</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 226.80</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(46)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(46)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Recuperação" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🩹</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">TB-500 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#4caf50;background:rgba(76,175,80,0.12);border:1px solid #4caf50;">Recuperação</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 561.60</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(47)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(47)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Recuperação" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🩹</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">TB-500 + BPC blend 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#4caf50;background:rgba(76,175,80,0.12);border:1px solid #4caf50;">Recuperação</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 780.30</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(48)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(48)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Metabolismo" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🔥</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Tesamorelin 5 MG</h3>
+                    <span class="pc-spec">5 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ff6b35;background:rgba(255,107,53,0.12);border:1px solid #ff6b35;">Metabolismo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 300.00</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(49)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(49)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Metabolismo" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">🔥</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Tesamorelin 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ff6b35;background:rgba(255,107,53,0.12);border:1px solid #ff6b35;">Metabolismo</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 560.04</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(50)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(50)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Emagrecimento" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">⚖️</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Tirzepatide 10 MG</h3>
+                    <span class="pc-spec">10 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ffc107;background:rgba(255,193,7,0.12);border:1px solid #ffc107;">Emagrecimento</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 550.00</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(51)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(51)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Emagrecimento" data-available="0">
+            <div class="pc-top">
+                <div class="pc-icon">⚖️</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Tirzepatide 30 MG</h3>
+                    <span class="pc-spec">30 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ffc107;background:rgba(255,193,7,0.12);border:1px solid #ffc107;">Emagrecimento</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 1,097.71</span>
+                </div>
+                    <span class="pc-status st-out">EM ESPERA</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(52)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(52)" disabled>
+                        Indisponível
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" data-cat="Emagrecimento" data-available="1">
+            <div class="pc-top">
+                <div class="pc-icon">⚖️</div>
+                <div class="pc-info">
+                    <h3 class="pc-name">Tirzepatide 60 MG</h3>
+                    <span class="pc-spec">60 MG</span>
+                    <span class="pc-cat"
+                          style="color:#ffc107;background:rgba(255,193,7,0.12);border:1px solid #ffc107;">Emagrecimento</span>
+                </div>
+            </div>
+            <div class="pc-bottom">
+                <div class="pc-price-status">
+                    
+                <div class="pc-price-wrap">
+                  <span class="pc-price">R$ 1,546.78</span>
+                </div>
+                    <span class="pc-status st-ok">DISPONÍVEL</span>
+                </div>
+                <div class="pc-actions">
+                    <button class="btn-detail" onclick="abrirInfo(53)">Detalhes</button>
+                    <button class="btn-cart" onclick="adicionar(53)" >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+
   </div>
   <div class="no-results" id="no-results" style="display:none">
     <span>🔍</span>
@@ -728,7 +1960,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
 
 <script>
 // ─── DATA (server-rendered, all values sanitized in Python before embed) ───────
-const PRODUTOS = {js_produtos};
+const PRODUTOS = [{"id": 0, "nome": "AOD 9604 2 MG", "espec": "2 MG", "precoOrig": 225.0, "preco": 225.0, "promoPct": 0.0, "info": "Análogo Lipolítico do hGH: Focado no isolamento das propriedades de queima de gordura do GH sem induzir efeitos hiperglicêmicos. Aplicado em estudos de obesidade e regeneração de cartilagem.", "cat": "Metabolismo", "icon": "🔥", "catBg": "rgba(255,107,53,0.12)", "catBorder": "#ff6b35", "catText": "#ff6b35", "available": true, "imagem": "imagens_produtos/AOD 9604 2 MG.webp"}, {"id": 1, "nome": "AOD 9604 5 MG", "espec": "5 MG", "precoOrig": 400.92300000000006, "preco": 400.92300000000006, "promoPct": 0.0, "info": "Análogo Lipolítico do hGH: Focado no isolamento das propriedades de queima de gordura do GH sem induzir efeitos hiperglicêmicos. Aplicado em estudos de obesidade e regeneração de cartilagem.", "cat": "Metabolismo", "icon": "🔥", "catBg": "rgba(255,107,53,0.12)", "catBorder": "#ff6b35", "catText": "#ff6b35", "available": true, "imagem": "imagens_produtos/AOD 9604 5 MG.webp"}, {"id": 2, "nome": "AOD 9604 10 MG", "espec": "10 MG", "precoOrig": 670.923, "preco": 670.923, "promoPct": 0.0, "info": "Análogo Lipolítico do hGH: Focado no isolamento das propriedades de queima de gordura do GH sem induzir efeitos hiperglicêmicos. Aplicado em estudos de obesidade e regeneração de cartilagem.", "cat": "Metabolismo", "icon": "🔥", "catBg": "rgba(255,107,53,0.12)", "catBorder": "#ff6b35", "catText": "#ff6b35", "available": true, "imagem": "imagens_produtos/AOD 9604 10 MG.webp"}, {"id": 3, "nome": "ARA 290 10 MG", "espec": "10 MG", "precoOrig": 333.963, "preco": 333.963, "promoPct": 0.0, "info": "Agonista de Receptor de Reparo Inato: Derivado da eritropoietina sem efeitos hematológicos. Pesquisado para dor neuropática severa e regeneração nervosa periférica.", "cat": "Recuperação", "icon": "🩹", "catBg": "rgba(76,175,80,0.12)", "catBorder": "#4caf50", "catText": "#4caf50", "available": false, "imagem": "imagens_produtos/ARA 290 10 MG.webp"}, {"id": 4, "nome": "Bacteriostatic Water 3 ML", "espec": "3 ML", "precoOrig": 45.0, "preco": 45.0, "promoPct": 0.0, "info": "Solvente Bacteriostático: Água com 0,9% de Álcool Benzílico. Impede proliferação bacteriana, permitindo uso seguro por até 30 dias.", "cat": "Acessório", "icon": "💧", "catBg": "rgba(158,158,158,0.12)", "catBorder": "#9e9e9e", "catText": "#9e9e9e", "available": true, "imagem": "imagens_produtos/Bacteriostatic Water 3 ML.webp"}, {"id": 5, "nome": "BPC-157 5 MG", "espec": "5 MG", "precoOrig": 300.4533, "preco": 300.4533, "promoPct": 0.0, "info": "Pentadecapeptídeo Gástrico: Acelera a angiogênese e cicatrização. Estudado para cura de rupturas de tendões, ligamentos, danos musculares e tecidos moles.", "cat": "Recuperação", "icon": "🩹", "catBg": "rgba(76,175,80,0.12)", "catBorder": "#4caf50", "catText": "#4caf50", "available": false, "imagem": "imagens_produtos/BPC-157 5 MG.webp"}, {"id": 6, "nome": "BPC-157 10 MG", "espec": "10 MG", "precoOrig": 570.456, "preco": 570.456, "promoPct": 0.0, "info": "Pentadecapeptídeo Gástrico: Acelera a angiogênese e cicatrização. Estudado para cura de rupturas de tendões, ligamentos, danos musculares e tecidos moles.", "cat": "Recuperação", "icon": "🩹", "catBg": "rgba(76,175,80,0.12)", "catBorder": "#4caf50", "catText": "#4caf50", "available": true, "imagem": "imagens_produtos/BPC-157 10 MG.webp"}, {"id": 7, "nome": "Case", "espec": "9 UNI", "precoOrig": 63.0, "preco": 63.0, "promoPct": 0.0, "info": "Informação técnica não disponível.", "cat": "Outro", "icon": "📦", "catBg": "rgba(158,158,158,0.12)", "catBorder": "#9e9e9e", "catText": "#9e9e9e", "available": true, "imagem": "imagens_produtos/Case.webp"}, {"id": 8, "nome": "CBL 514 10 MG", "espec": "10 MG", "precoOrig": 697.0, "preco": 697.0, "promoPct": 0.0, "info": "Informação técnica não disponível.", "cat": "Outro", "icon": "📦", "catBg": "rgba(158,158,158,0.12)", "catBorder": "#9e9e9e", "catText": "#9e9e9e", "available": true, "imagem": "imagens_produtos/CBL 514 10 MG.webp"}, {"id": 9, "nome": "CJC-1295 2 MG", "espec": "2 MG", "precoOrig": 175.20300000000003, "preco": 175.20300000000003, "promoPct": 0.0, "info": "Secretagogo de GH de Longa Duração: Análogo do GHRH que aumenta secreção de GH e IGF-1. Aplicado em antienvelhecimento, melhora da composição corporal e síntese proteica acelerada.", "cat": "Hormônios", "icon": "💉", "catBg": "rgba(0,150,255,0.12)", "catBorder": "#0096ff", "catText": "#0096ff", "available": false, "imagem": "imagens_produtos/CJC-1295 2 MG.webp"}, {"id": 10, "nome": "CJC-1295 + Ipamorelin 10 MG", "espec": "10 MG", "precoOrig": 796.023, "preco": 796.023, "promoPct": 0.0, "info": "Secretagogo de GH de Longa Duração: Análogo do GHRH que aumenta secreção de GH e IGF-1. Aplicado em antienvelhecimento, melhora da composição corporal e síntese proteica acelerada.", "cat": "Hormônios", "icon": "💉", "catBg": "rgba(0,150,255,0.12)", "catBorder": "#0096ff", "catText": "#0096ff", "available": true, "imagem": "imagens_produtos/CJC-1295 + Ipamorelin 10 MG.webp"}, {"id": 11, "nome": "DSIP 5 MG", "espec": "5 MG", "precoOrig": 248.85629999999995, "preco": 248.85629999999995, "promoPct": 0.0, "info": "Indutor de Sono Delta: Neuromodulador que sincroniza ritmos biológicos, promove sono profundo e mitiga sintomas de estresse emocional.", "cat": "Cognitivo", "icon": "🧠", "catBg": "rgba(0,188,212,0.12)", "catBorder": "#00bcd4", "catText": "#00bcd4", "available": false, "imagem": "imagens_produtos/DSIP 5 MG.webp"}, {"id": 12, "nome": "DSIP 10 MG", "espec": "10 MG", "precoOrig": 605.7126000000001, "preco": 605.7126000000001, "promoPct": 0.0, "info": "Indutor de Sono Delta: Neuromodulador que sincroniza ritmos biológicos, promove sono profundo e mitiga sintomas de estresse emocional.", "cat": "Cognitivo", "icon": "🧠", "catBg": "rgba(0,188,212,0.12)", "catBorder": "#00bcd4", "catText": "#00bcd4", "available": false, "imagem": "imagens_produtos/DSIP 10 MG.webp"}, {"id": 13, "nome": "Epithalon 50 MG", "espec": "50 MG", "precoOrig": 623.133, "preco": 623.133, "promoPct": 0.0, "info": "Ativador da Telomerase: Induz o alongamento dos telômeros. Focado na extensão da vida celular e restauração da secreção de melatonina.", "cat": "Longevidade", "icon": "⏳", "catBg": "rgba(121,85,72,0.12)", "catBorder": "#c49b68", "catText": "#c49b68", "available": false, "imagem": "imagens_produtos/Epithalon 50 MG.webp"}, {"id": 14, "nome": "GHK-Cu 50 MG", "espec": "50 MG", "precoOrig": 535.023, "preco": 535.023, "promoPct": 0.0, "info": "Complexo Peptídeo-Cobre: Atua na remodelação do DNA e síntese de colágeno I e III. Possui propriedades antioxidantes e anti-inflamatórias para pele e tecidos conectivos.", "cat": "Estética", "icon": "✨", "catBg": "rgba(233,30,99,0.12)", "catBorder": "#e91e63", "catText": "#e91e63", "available": true, "imagem": "imagens_produtos/GHK-Cu 50 MG.webp"}, {"id": 15, "nome": "GHK-Cu 100 MG", "espec": "100 MG", "precoOrig": 639.1980000000001, "preco": 639.1980000000001, "promoPct": 0.0, "info": "Complexo Peptídeo-Cobre: Atua na remodelação do DNA e síntese de colágeno I e III. Possui propriedades antioxidantes e anti-inflamatórias para pele e tecidos conectivos.", "cat": "Estética", "icon": "✨", "catBg": "rgba(233,30,99,0.12)", "catBorder": "#e91e63", "catText": "#e91e63", "available": true, "imagem": "imagens_produtos/GHK-Cu 100 MG.webp"}, {"id": 16, "nome": "GLOW 70 MG", "espec": "70 MG", "precoOrig": 824.4, "preco": 824.4, "promoPct": 0.0, "info": "Bioestimulação Dérmica (GHK-Cu + BPC + TB): Blend estético-regenerativo focado em rejuvenescimento cutâneo, redução de cicatrizes e regeneração da matriz extracelular.", "cat": "Estética", "icon": "✨", "catBg": "rgba(233,30,99,0.12)", "catBorder": "#e91e63", "catText": "#e91e63", "available": true, "imagem": "imagens_produtos/GLOW 70 MG.webp"}, {"id": 17, "nome": "HGH Fragment 176-191 5 MG", "espec": "5 MG", "precoOrig": 441.333, "preco": 441.333, "promoPct": 0.0, "info": "Modulador de Lipídios: Parte terminal do GH responsável pela quebra de gordura. Mostra capacidade de inibir a formação de nova gordura e acelerar a lipólise visceral sem alterar a insulina.", "cat": "Metabolismo", "icon": "🔥", "catBg": "rgba(255,107,53,0.12)", "catBorder": "#ff6b35", "catText": "#ff6b35", "available": true, "imagem": "imagens_produtos/HGH Fragment 176-191 5 MG.webp"}, {"id": 18, "nome": "HGH Fragment 176-191 10 MG", "espec": "10 MG", "precoOrig": 630.0, "preco": 630.0, "promoPct": 0.0, "info": "Modulador de Lipídios: Parte terminal do GH responsável pela quebra de gordura. Mostra capacidade de inibir a formação de nova gordura e acelerar a lipólise visceral sem alterar a insulina.", "cat": "Metabolismo", "icon": "🔥", "catBg": "rgba(255,107,53,0.12)", "catBorder": "#ff6b35", "catText": "#ff6b35", "available": true, "imagem": "imagens_produtos/HGH Fragment 176-191 10 MG.webp"}, {"id": 19, "nome": "IGF-1 LR3 1 MG", "espec": "1 MG", "precoOrig": 617.9733000000001, "preco": 617.9733000000001, "promoPct": 0.0, "info": "Análogo de IGF-1 de Meia-vida Longa: Permanece ativo por até 20 horas. Principal mediador da hiperplasia (criação de novas fibras musculares) e transporte de acesso de aminoácidos.", "cat": "Hormônios", "icon": "💉", "catBg": "rgba(0,150,255,0.12)", "catBorder": "#0096ff", "catText": "#0096ff", "available": false, "imagem": "imagens_produtos/IGF-1 LR3 1 MG.webp"}, {"id": 20, "nome": "Ipamorelin 5 MG", "espec": "5 MG", "precoOrig": 378.171, "preco": 378.171, "promoPct": 0.0, "info": "Agonista de Grelina Seletivo: Estimula a liberação pulsátil de GH sem elevar cortisol ou prolactina. Seguro para indução de anabolismo e melhora da density mineral óssea.", "cat": "Hormônios", "icon": "💉", "catBg": "rgba(0,150,255,0.12)", "catBorder": "#0096ff", "catText": "#0096ff", "available": true, "imagem": "imagens_produtos/Ipamorelin 5 MG.webp"}, {"id": 21, "nome": "Ipamorelin 10 MG", "espec": "10 MG", "precoOrig": 585.45, "preco": 585.45, "promoPct": 0.0, "info": "Agonista de Grelina Seletivo: Estimula a liberação pulsátil de GH sem elevar cortisol ou prolactina. Seguro para indução de anabolismo e melhora da density mineral óssea.", "cat": "Hormônios", "icon": "💉", "catBg": "rgba(0,150,255,0.12)", "catBorder": "#0096ff", "catText": "#0096ff", "available": false, "imagem": "imagens_produtos/Ipamorelin 10 MG.webp"}, {"id": 22, "nome": "KLOW 80 MG", "espec": "80 MG", "precoOrig": 891.0, "preco": 891.0, "promoPct": 0.0, "info": "Quarteto de Reparo Profundo (GHK+BPC+TB+KPV): Projetado para sinalização celular máxima em remodelação de tecidos complexos e equilíbrio imunológico.", "cat": "Recuperação", "icon": "🩹", "catBg": "rgba(76,175,80,0.12)", "catBorder": "#4caf50", "catText": "#4caf50", "available": true, "imagem": "imagens_produtos/KLOW 80 MG.webp"}, {"id": 23, "nome": "KPV 10 MG", "espec": "10 MG", "precoOrig": 434.466, "preco": 434.466, "promoPct": 0.0, "info": "Tripeptídeo Anti-inflamatório: Inibe vias inflamatórias (NF-κB). Possui propriedades antimicrobianas e é utilizado em estudos sobre dermatite e colite.", "cat": "Imunidade", "icon": "🛡️", "catBg": "rgba(156,39,176,0.12)", "catBorder": "#9c27b0", "catText": "#9c27b0", "available": true, "imagem": "imagens_produtos/KPV 10 MG.webp"}, {"id": 24, "nome": "MOTS-c 10 MG", "espec": "10 MG", "precoOrig": 549.1980000000001, "preco": 549.1980000000001, "promoPct": 0.0, "info": "Peptídeo Derivado da Mitocôndria: Regulador hormonal do metabolismo sistêmico. Melhora a homeostase da glicose e combate a resistência à insulina via ativação da via AMPK.", "cat": "Metabolismo", "icon": "🔥", "catBg": "rgba(255,107,53,0.12)", "catBorder": "#ff6b35", "catText": "#ff6b35", "available": true, "imagem": "imagens_produtos/MOTS-c 10 MG.webp"}, {"id": 25, "nome": "MOTS-c 40 MG", "espec": "40 MG", "precoOrig": 1926.0, "preco": 1926.0, "promoPct": 0.0, "info": "Peptídeo Derivado da Mitocôndria: Regulador hormonal do metabolismo sistêmico. Melhora a homeostase da glicose e combate a resistência à insulina via ativação da via AMPK.", "cat": "Metabolismo", "icon": "🔥", "catBg": "rgba(255,107,53,0.12)", "catBorder": "#ff6b35", "catText": "#ff6b35", "available": true, "imagem": "imagens_produtos/MOTS-c 40 MG.webp"}, {"id": 26, "nome": "NAD+ 100 MG", "espec": "100 MG", "precoOrig": 542.7, "preco": 542.7, "promoPct": 0.0, "info": "Coenzima de Vitalidade: Essencial para reparação do DNA e sirtuínas. Associado à reversão de marcadores de envelhecimento e aumento da energia celular.", "cat": "Longevidade", "icon": "⏳", "catBg": "rgba(121,85,72,0.12)", "catBorder": "#c49b68", "catText": "#c49b68", "available": false, "imagem": "imagens_produtos/NAD+ 100 MG.webp"}, {"id": 27, "nome": "NAD+ 1000 MG", "espec": "1000 MG", "precoOrig": 1000.0, "preco": 1000.0, "promoPct": 0.0, "info": "Coenzima de Vitalidade: Essencial para reparação do DNA e sirtuínas. Associado à reversão de marcadores de envelhecimento e aumento da energia celular.", "cat": "Longevidade", "icon": "⏳", "catBg": "rgba(121,85,72,0.12)", "catBorder": "#c49b68", "catText": "#c49b68", "available": true, "imagem": "imagens_produtos/NAD+ 1000 MG.webp"}, {"id": 28, "nome": "Oxytocin 2 MG", "espec": "2 MG", "precoOrig": 108.0, "preco": 108.0, "promoPct": 0.0, "info": "Neuromodulador Social: Regula confiança, redução de medo e ansiedade social. Explorado também na regulação do apetite por carboidratos.", "cat": "Cognitivo", "icon": "🧠", "catBg": "rgba(0,188,212,0.12)", "catBorder": "#00bcd4", "catText": "#00bcd4", "available": false, "imagem": "imagens_produtos/Oxytocin 2 MG.webp"}, {"id": 29, "nome": "Pinealon 10 MG", "espec": "10 MG", "precoOrig": 457.362, "preco": 457.362, "promoPct": 0.0, "info": "Bioregulador de Cadeia Curta: Atua na expressão gênica neuronal. Restaura o ritmo circadiano e protege contra o estresse oxidativo cerebral.", "cat": "Cognitivo", "icon": "🧠", "catBg": "rgba(0,188,212,0.12)", "catBorder": "#00bcd4", "catText": "#00bcd4", "available": false, "imagem": "imagens_produtos/Pinealon 10 MG.webp"}, {"id": 30, "nome": "PT-141 Bremelanotide 10 MG", "espec": "10 MG", "precoOrig": 495.60299999999995, "preco": 495.60299999999995, "promoPct": 0.0, "info": "Tratamento de Disfunção Sexual: Atua via SNC nos centros de excitação do cérebro. Indicado para desejo sexual hipoativo.", "cat": "Sexual", "icon": "❤️", "catBg": "rgba(244,67,54,0.12)", "catBorder": "#f44336", "catText": "#f44336", "available": true, "imagem": "imagens_produtos/PT-141 Bremelanotide 10 MG.webp"}, {"id": 31, "nome": "Retatrutide 5 MG", "espec": "5 MG", "precoOrig": 363.825, "preco": 363.825, "promoPct": 0.0, "info": "Agonista Triplo (GIP/GLP-1/GCGR): Aumenta o gasto calórico basal e a oxidação de gordura no fígado. Promete perdas de peso superiores a 24%.", "cat": "Emagrecimento", "icon": "⚖️", "catBg": "rgba(255,193,7,0.12)", "catBorder": "#ffc107", "catText": "#ffc107", "available": false, "imagem": "imagens_produtos/Retatrutide 5 MG.webp"}, {"id": 32, "nome": "Retatrutide 10 MG", "espec": "10 MG", "precoOrig": 493.9704000000001, "preco": 493.9704000000001, "promoPct": 0.0, "info": "Agonista Triplo (GIP/GLP-1/GCGR): Aumenta o gasto calórico basal e a oxidação de gordura no fígado. Promete perdas de peso superiores a 24%.", "cat": "Emagrecimento", "icon": "⚖️", "catBg": "rgba(255,193,7,0.12)", "catBorder": "#ffc107", "catText": "#ffc107", "available": false, "imagem": "imagens_produtos/Retatrutide 10 MG.webp"}, {"id": 33, "nome": "Retatrutide 30 MG", "espec": "30 MG", "precoOrig": 1247.4, "preco": 1247.4, "promoPct": 0.0, "info": "Agonista Triplo (GIP/GLP-1/GCGR): Aumenta o gasto calórico basal e a oxidação de gordura no fígado. Promete perdas de peso superiores a 24%.", "cat": "Emagrecimento", "icon": "⚖️", "catBg": "rgba(255,193,7,0.12)", "catBorder": "#ffc107", "catText": "#ffc107", "available": false, "imagem": "imagens_produtos/Retatrutide 30 MG.webp"}, {"id": 34, "nome": "Retatrutide 60 MG", "espec": "60 MG", "precoOrig": 1746.3600000000004, "preco": 1746.3600000000004, "promoPct": 0.0, "info": "Agonista Triplo (GIP/GLP-1/GCGR): Aumenta o gasto calórico basal e a oxidação de gordura no fígado. Promete perdas de peso superiores a 24%.", "cat": "Emagrecimento", "icon": "⚖️", "catBg": "rgba(255,193,7,0.12)", "catBorder": "#ffc107", "catText": "#ffc107", "available": true, "imagem": "imagens_produtos/Retatrutide 60 MG.webp"}, {"id": 35, "nome": "Selank 5 MG", "espec": "5 MG", "precoOrig": 418.086, "preco": 418.086, "promoPct": 0.0, "info": "Ansiolítico Regulador: Modula serotonina e norepinefrina. Reduz ansiedade e melhora o foco cognitivo sem o efeito sedativo dos ansiolíticos comuns.", "cat": "Cognitivo", "icon": "🧠", "catBg": "rgba(0,188,212,0.12)", "catBorder": "#00bcd4", "catText": "#00bcd4", "available": true, "imagem": "imagens_produtos/Selank 5 MG.webp"}, {"id": 36, "nome": "Selank 10 MG", "espec": "10 MG", "precoOrig": 688.086, "preco": 688.086, "promoPct": 0.0, "info": "Ansiolítico Regulador: Modula serotonina e norepinefrina. Reduz ansiedade e melhora o foco cognitivo sem o efeito sedativo dos ansiolíticos comuns.", "cat": "Cognitivo", "icon": "🧠", "catBg": "rgba(0,188,212,0.12)", "catBorder": "#00bcd4", "catText": "#00bcd4", "available": true, "imagem": "imagens_produtos/Selank 10 MG.webp"}, {"id": 37, "nome": "Semaglutide 10 MG", "espec": "10 MG", "precoOrig": 560.7063, "preco": 560.7063, "promoPct": 0.0, "info": "Agonista de GLP-1: Retarda o esvaziamento gástrico e sinaliza saciedade ao hipotálamo. Base para tratamento de obesidade e controle glicêmico.", "cat": "Emagrecimento", "icon": "⚖️", "catBg": "rgba(255,193,7,0.12)", "catBorder": "#ffc107", "catText": "#ffc107", "available": false, "imagem": "imagens_produtos/Semaglutide 10 MG.webp"}, {"id": 38, "nome": "Semaglutide 30 MG", "espec": "30 MG", "precoOrig": 1682.118, "preco": 1682.118, "promoPct": 0.0, "info": "Agonista de GLP-1: Retarda o esvaziamento gástrico e sinaliza saciedade ao hipotálamo. Base para tratamento de obesidade e controle glicêmico.", "cat": "Emagrecimento", "icon": "⚖️", "catBg": "rgba(255,193,7,0.12)", "catBorder": "#ffc107", "catText": "#ffc107", "available": false, "imagem": "imagens_produtos/Semaglutide 30 MG.webp"}, {"id": 39, "nome": "Semax 10 MG", "espec": "10 MG", "precoOrig": 418.086, "preco": 418.086, "promoPct": 0.0, "info": "Nootrópico Neuroprotetor: Eleva níveis de BDNF e NGF no hipocampo. Aplicado em recuperação pós-AVC e otimização do aprendizado sob estresse.", "cat": "Cognitivo", "icon": "🧠", "catBg": "rgba(0,188,212,0.12)", "catBorder": "#00bcd4", "catText": "#00bcd4", "available": true, "imagem": "imagens_produtos/Semax 10 MG.webp"}, {"id": 40, "nome": "Sermorelin 5 MG", "espec": "5 MG", "precoOrig": 423.90000000000003, "preco": 423.90000000000003, "promoPct": 0.0, "info": "Estimulador de Eixo Natural: Mimetiza o GHRH natural. Promove melhorias na qualidade do sono profundo, vitalidade da pele e recuperação pós-esforço.", "cat": "Hormônios", "icon": "💉", "catBg": "rgba(0,150,255,0.12)", "catBorder": "#0096ff", "catText": "#0096ff", "available": true, "imagem": "imagens_produtos/Sermorelin 5 MG.webp"}, {"id": 41, "nome": "Sermorelin 10 MG", "espec": "10 MG", "precoOrig": 542.7, "preco": 542.7, "promoPct": 0.0, "info": "Estimulador de Eixo Natural: Mimetiza o GHRH natural. Promove melhorias na qualidade do sono profundo, vitalidade da pele e recuperação pós-esforço.", "cat": "Hormônios", "icon": "💉", "catBg": "rgba(0,150,255,0.12)", "catBorder": "#0096ff", "catText": "#0096ff", "available": false, "imagem": "imagens_produtos/Sermorelin 10 MG.webp"}, {"id": 42, "nome": "SLU PP 5 MG", "espec": "5 MG", "precoOrig": 708.183, "preco": 708.183, "promoPct": 0.0, "info": "Agonista Pan-ERR (Pílula do Exercício): Ativa receptores ERRα, β, γ. Aumenta drasticamente a biogênese mitocondrial e a resistência física, comparável ao treino de alta intensidade.", "cat": "Metabolismo", "icon": "🔥", "catBg": "rgba(255,107,53,0.12)", "catBorder": "#ff6b35", "catText": "#ff6b35", "available": false, "imagem": "imagens_produtos/SLU PP 5 MG.webp"}, {"id": 43, "nome": "SLU PP 10 MG", "espec": "10 MG", "precoOrig": 1524.366, "preco": 1524.366, "promoPct": 0.0, "info": "Agonista Pan-ERR (Pílula do Exercício): Ativa receptores ERRα, β, γ. Aumenta drasticamente a biogênese mitocondrial e a resistência física, comparável ao treino de alta intensidade.", "cat": "Metabolismo", "icon": "🔥", "catBg": "rgba(255,107,53,0.12)", "catBorder": "#ff6b35", "catText": "#ff6b35", "available": false, "imagem": "imagens_produtos/SLU PP 10 MG.webp"}, {"id": 44, "nome": "SS-31 10 MG", "espec": "10 MG", "precoOrig": 445.5, "preco": 445.5, "promoPct": 0.0, "info": "Protetor de Cardiolipina: Previne a formação de radicais livres na mitocôndria e restaura a produção de ATP.", "cat": "Longevidade", "icon": "⏳", "catBg": "rgba(121,85,72,0.12)", "catBorder": "#c49b68", "catText": "#c49b68", "available": true, "imagem": "imagens_produtos/SS-31 10 MG.webp"}, {"id": 45, "nome": "SS-31 50 MG", "espec": "50 MG", "precoOrig": 1167.3, "preco": 1167.3, "promoPct": 0.0, "info": "Protetor de Cardiolipina: Previne a formação de radicais livres na mitocôndria e restaura a produção de ATP.", "cat": "Longevidade", "icon": "⏳", "catBg": "rgba(121,85,72,0.12)", "catBorder": "#c49b68", "catText": "#c49b68", "available": true, "imagem": "imagens_produtos/SS-31 50 MG.webp"}, {"id": 46, "nome": "TB-500 5 MG", "espec": "5 MG", "precoOrig": 226.8, "preco": 226.8, "promoPct": 0.0, "info": "Timosina Beta-4 Sintética: Essencial para migração celular e reparo de tecidos. Promove formação de novos vasos e reduz inflamação articular e miocárdica.", "cat": "Recuperação", "icon": "🩹", "catBg": "rgba(76,175,80,0.12)", "catBorder": "#4caf50", "catText": "#4caf50", "available": false, "imagem": "imagens_produtos/TB-500 5 MG.webp"}, {"id": 47, "nome": "TB-500 10 MG", "espec": "10 MG", "precoOrig": 561.6, "preco": 561.6, "promoPct": 0.0, "info": "Timosina Beta-4 Sintética: Essencial para migração celular e reparo de tecidos. Promove formação de novos vasos e reduz inflamação articular e miocárdica.", "cat": "Recuperação", "icon": "🩹", "catBg": "rgba(76,175,80,0.12)", "catBorder": "#4caf50", "catText": "#4caf50", "available": true, "imagem": "imagens_produtos/TB-500 10 MG.webp"}, {"id": 48, "nome": "TB-500 + BPC blend 10 MG", "espec": "10 MG", "precoOrig": 780.3000000000001, "preco": 780.3000000000001, "promoPct": 0.0, "info": "Timosina Beta-4 Sintética: Essencial para migração celular e reparo de tecidos. Promove formação de novos vasos e reduz inflamação articular e miocárdica.", "cat": "Recuperação", "icon": "🩹", "catBg": "rgba(76,175,80,0.12)", "catBorder": "#4caf50", "catText": "#4caf50", "available": true, "imagem": "imagens_produtos/TB-500 + BPC blend 10 MG.webp"}, {"id": 49, "nome": "Tesamorelin 5 MG", "espec": "5 MG", "precoOrig": 300.0, "preco": 300.0, "promoPct": 0.0, "info": "Redutor de Lipodistrofia: Único aprovado para reduzir gordura visceral abdominal severa.", "cat": "Metabolismo", "icon": "🔥", "catBg": "rgba(255,107,53,0.12)", "catBorder": "#ff6b35", "catText": "#ff6b35", "available": true, "imagem": "imagens_produtos/Tesamorelin 5 MG.webp"}, {"id": 50, "nome": "Tesamorelin 10 MG", "espec": "10 MG", "precoOrig": 560.043, "preco": 560.043, "promoPct": 0.0, "info": "Redutor de Lipodistrofia: Único aprovado para reduzir gordura visceral abdominal severa.", "cat": "Metabolismo", "icon": "🔥", "catBg": "rgba(255,107,53,0.12)", "catBorder": "#ff6b35", "catText": "#ff6b35", "available": true, "imagem": "imagens_produtos/Tesamorelin 10 MG.webp"}, {"id": 51, "nome": "Tirzepatide 10 MG", "espec": "10 MG", "precoOrig": 550.0, "preco": 550.0, "promoPct": 0.0, "info": "Agonista Dual GIP/GLP-1: Supera a Semaglutida na perda de peso. Promove saciedade central e melhora drástica na sensibilidade à insulina.", "cat": "Emagrecimento", "icon": "⚖️", "catBg": "rgba(255,193,7,0.12)", "catBorder": "#ffc107", "catText": "#ffc107", "available": false, "imagem": "imagens_produtos/Tirzepatide 10 MG.webp"}, {"id": 52, "nome": "Tirzepatide 30 MG", "espec": "30 MG", "precoOrig": 1097.712, "preco": 1097.712, "promoPct": 0.0, "info": "Agonista Dual GIP/GLP-1: Supera a Semaglutida na perda de peso. Promove saciedade central e melhora drástica na sensibilidade à insulina.", "cat": "Emagrecimento", "icon": "⚖️", "catBg": "rgba(255,193,7,0.12)", "catBorder": "#ffc107", "catText": "#ffc107", "available": false, "imagem": "imagens_produtos/Tirzepatide 30 MG.webp"}, {"id": 53, "nome": "Tirzepatide 60 MG", "espec": "60 MG", "precoOrig": 1546.7760000000003, "preco": 1546.7760000000003, "promoPct": 0.0, "info": "Agonista Dual GIP/GLP-1: Supera a Semaglutida na perda de peso. Promove saciedade central e melhora drástica na sensibilidade à insulina.", "cat": "Emagrecimento", "icon": "⚖️", "catBg": "rgba(255,193,7,0.12)", "catBorder": "#ffc107", "catText": "#ffc107", "available": true, "imagem": "imagens_produtos/Tirzepatide 60 MG.webp"}];
 
 // ─── STATE ─────────────────────────────────────────────────────────────────────
 let carrinho    = [];
@@ -737,16 +1969,16 @@ let cupomAtivo  = null;
 let catAtual    = "all";
 let apenasDisp  = false;
 
-const REGIOES = {{
+const REGIOES = {
   SUL:           ['PR','SC','RS'],
   SUDESTE:       ['SP','RJ','MG','ES'],
   'CENTRO-OESTE':['DF','GO','MT','MS'],
   NORTE:         ['AM','RR','AP','PA','TO','RO','AC'],
   NORDESTE:      ['BA','SE','AL','PE','PB','RN','CE','PI','MA'],
-}};
+};
 
 // Whitelisted coupon table (codes → discount fraction, 0..1)
-const CUPONS = {{
+const CUPONS = {
   'BRUNA5': 0.05,'GILMARA5':0.05,'DAFNE10':0.10,'NOS5':0.05,'ROGERIO5':0.05,
   'ANDERSON5':0.05,'JAQUE5':0.05,'CABRAL5':0.05,'KARLINHA5':0.05,'LUD5':0.05,'CASSIA5':0.05,
   'THAIS5':0.05,'NATAN':0.00000000001,'LIRICY5':0.05,'ANDREAFLEURY':0.05,'ANA5':0.05,
@@ -754,7 +1986,7 @@ const CUPONS = {{
   'RAYSSA5':0.05,'PATRICIA5':0.05,'LU5':0.05, 'RAFA5':0.05, 'WAWA':0.05, 'DUDA5':0.05, 
   'ALYNE5':0.05, 'JRCREMONEZ':0.05, 'ZAMA5':0.05, 'JENNI5':0.05, 'DJU5':0.05, 
   'DUDA10':0.10, 'ZAMA10':0.10, 'JENNI10':0.10, 'DJU10':0.10, 'ALYNE5':0.10, 'BRUNA10':0.10, 'GILMARA10':0.10, 
-}};
+};
 
 // ─── SECURITY HELPERS ──────────────────────────────────────────────────────────
 /**
@@ -762,51 +1994,51 @@ const CUPONS = {{
  * All user-facing strings from PRODUTOS already HTML-escaped server-side;
  * here we use textContent for an extra client-side safety net.
  */
-function setText(id, val) {{
+function setText(id, val) {
   const el = document.getElementById(id);
   if (el) el.textContent = val;
-}}
+}
 
-function sanitizarEntrada(str, maxLen = 300) {{
+function sanitizarEntrada(str, maxLen = 300) {
   if (typeof str !== 'string') str = String(str);
   // Strip anything that looks like a tag or JS protocol
   str = str.replace(/<[^>]*>/g, '').replace(/javascript:/gi, '').replace(/on\w+=/gi, '');
   return str.slice(0, maxLen).trim();
-}}
+}
 
 // ─── FEATURED ──────────────────────────────────────────────────────────────────
-function gerarDestaques() {{
+function gerarDestaques() {
   // Only AVAILABLE items appear in featured
   const avail = PRODUTOS.filter(p => p.available);
   if (!avail.length) return;
 
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-  const shuffled  = [...avail].sort((a, b) => {{
+  const shuffled  = [...avail].sort((a, b) => {
     const ha = ((a.id + 1) * 2654435761 + dayOfYear * 31) % 4294967296;
     const hb = ((b.id + 1) * 2654435761 + dayOfYear * 31) % 4294967296;
     return ha - hb;
-  }});
+  });
   const picks     = shuffled.slice(0, 6);
   const container = document.getElementById('featured-scroll');
 
-  picks.forEach(p => {{
+  picks.forEach(p => {
     const card = document.createElement('div');
     card.className = 'feat-card' + (p.promoPct > 0 ? ' promo-card' : '');
 
     // Build price section safely
     let priceHTML = '';
-    if (p.promoPct > 0) {{
+    if (p.promoPct > 0) {
       const pctLabel = Math.round(p.promoPct * 100) + '% OFF';
       priceHTML = `<div class="feat-price-wrap promo">
-        <span class="feat-badge">${{pctLabel}}</span>
-        <span class="feat-orig">R$ ${{p.precoOrig.toFixed(2)}}</span>
-        <span class="feat-price">R$ ${{p.preco.toFixed(2)}}</span>
+        <span class="feat-badge">${pctLabel}</span>
+        <span class="feat-orig">R$ ${p.precoOrig.toFixed(2)}</span>
+        <span class="feat-price">R$ ${p.preco.toFixed(2)}</span>
       </div>`;
-    }} else {{
+    } else {
       priceHTML = `<div class="feat-price-wrap">
-        <span class="feat-price">R$ ${{p.preco.toFixed(2)}}</span>
+        <span class="feat-price">R$ ${p.preco.toFixed(2)}</span>
       </div>`;
-    }}
+    }
 
     // Use textContent for user-data fields; only controlled strings in innerHTML
     card.innerHTML = `
@@ -814,7 +2046,7 @@ function gerarDestaques() {{
       <div class="feat-name"></div>
       <div class="feat-spec"></div>
       <div class="feat-desc"></div>
-      ${{priceHTML}}
+      ${priceHTML}
       <button class="feat-btn">Adicionar ao Carrinho</button>
     `;
     card.querySelector('.feat-icon').textContent = p.icon;
@@ -824,27 +2056,27 @@ function gerarDestaques() {{
     card.querySelector('.feat-btn').addEventListener('click', () => adicionar(p.id));
 
     container.appendChild(card);
-  }});
-}}
+  });
+}
 
 // ─── FILTERING ─────────────────────────────────────────────────────────────────
-function filtrarCat(cat) {{
+function filtrarCat(cat) {
   catAtual = cat;
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
   filtrarProdutos();
-}}
+}
 
-function toggleAvail() {{
+function toggleAvail() {
   apenasDisp = !apenasDisp;
   document.getElementById('toggle-avail').classList.toggle('active', apenasDisp);
   filtrarProdutos();
-}}
+}
 
-function filtrarProdutos() {{
+function filtrarProdutos() {
   const q     = document.getElementById('search-input').value.toLowerCase();
   const cards = document.querySelectorAll('.product-card');
   let visible = 0;
-  cards.forEach(c => {{
+  cards.forEach(c => {
     const name      = c.querySelector('.pc-name').textContent.toLowerCase();
     const cat       = c.dataset.cat;
     const avail     = c.dataset.available === '1';
@@ -854,12 +2086,12 @@ function filtrarProdutos() {{
     const show        = matchSearch && matchCat && matchAvail;
     c.style.display   = show ? '' : 'none';
     if (show) visible++;
-  }});
+  });
   document.getElementById('no-results').style.display = visible === 0 ? '' : 'none';
-}}
+}
 
 // ─── MODAL INFO ────────────────────────────────────────────────────────────────
-function abrirInfo(id) {{
+function abrirInfo(id) {
   // id comes from our own rendered integer — safe, but still guard
   const pid = parseInt(id, 10);
   if (isNaN(pid)) return;
@@ -875,45 +2107,45 @@ function abrirInfo(id) {{
   img.src = encodeURI(safeSrc);
   img.style.display = 'block';
   document.getElementById('modalInfo').style.display = 'block';
-}}
-function fecharInfo() {{ document.getElementById('modalInfo').style.display = 'none'; }}
-function abrirCertificados() {{ document.getElementById('modalCertificados').style.display = 'block'; }}
-function fecharCertificados() {{ document.getElementById('modalCertificados').style.display = 'none'; }}
-function abrirReconstituicao() {{ document.getElementById('modalReconstituicao').style.display = 'block'; }}
-function fecharReconstituicao() {{ document.getElementById('modalReconstituicao').style.display = 'none'; }}  
-function abrirGuiaCalculo() {{ document.getElementById('modalGuiaCalculo').style.display = 'block'; }}
-function fecharGuiaCalculo() {{ document.getElementById('modalGuiaCalculo').style.display = 'none'; }}
+}
+function fecharInfo() { document.getElementById('modalInfo').style.display = 'none'; }
+function abrirCertificados() { document.getElementById('modalCertificados').style.display = 'block'; }
+function fecharCertificados() { document.getElementById('modalCertificados').style.display = 'none'; }
+function abrirReconstituicao() { document.getElementById('modalReconstituicao').style.display = 'block'; }
+function fecharReconstituicao() { document.getElementById('modalReconstituicao').style.display = 'none'; }  
+function abrirGuiaCalculo() { document.getElementById('modalGuiaCalculo').style.display = 'block'; }
+function fecharGuiaCalculo() { document.getElementById('modalGuiaCalculo').style.display = 'none'; }
 
 
 // ─── CART ──────────────────────────────────────────────────────────────────────
-function adicionar(id) {{
+function adicionar(id) {
   const pid = parseInt(id, 10);
   if (isNaN(pid)) return;
   const p = PRODUTOS.find(x => x.id === pid);
   if (!p || !p.available) return;
   const ex = carrinho.find(i => i.id === pid);
-  if (ex) ex.qtd += 1; else carrinho.push({{ ...p, qtd: 1 }});
+  if (ex) ex.qtd += 1; else carrinho.push({ ...p, qtd: 1 });
   atualizarCarrinho();
-}}
+}
 
-function remover(id) {{
+function remover(id) {
   const pid = parseInt(id, 10);
   if (isNaN(pid)) return;
   const ex = carrinho.find(x => x.id === pid);
-  if (ex) {{
+  if (ex) {
     if (ex.qtd > 1) ex.qtd--;
     else carrinho = carrinho.filter(x => x.id !== pid);
-  }}
+  }
   if (!carrinho.length) removerFrete();
   atualizarCarrinho();
-}}
+}
 
-function toggleCartPanel() {{
+function toggleCartPanel() {
   const p = document.getElementById('cart-panel');
   p.style.display = p.style.display === 'block' ? 'none' : 'block';
-}}
+}
 
-function atualizarCarrinho() {{
+function atualizarCarrinho() {
   const list     = document.getElementById('cart-list');
   const panel    = document.getElementById('cart-panel');
   const fab      = document.getElementById('cart-fab');
@@ -928,7 +2160,7 @@ function atualizarCarrinho() {{
   let subtotalNormal = 0;   // items without promo (coupon applies here)
   let subtotalPromo  = 0;   // items with promo   (coupon does NOT apply)
 
-  carrinho.forEach(item => {{
+  carrinho.forEach(item => {
     const vt = item.preco * item.qtd;
     if (item.promoPct > 0) subtotalPromo  += vt;
     else                    subtotalNormal += vt;
@@ -945,12 +2177,12 @@ function atualizarCarrinho() {{
     left.appendChild(nameSpan);
     left.appendChild(nameTxt);
 
-    if (item.promoPct > 0) {{
+    if (item.promoPct > 0) {
       const promoLbl = document.createElement('span');
       promoLbl.className   = 'cart-item-promo-label';
       promoLbl.textContent = '🏷️ ' + Math.round(item.promoPct * 100) + '% OFF';
       left.appendChild(promoLbl);
-    }}
+    }
 
     const priceTxt = document.createTextNode('R$ ' + vt.toFixed(2) + ' ');
     const rmBtn    = document.createElement('button');
@@ -963,32 +2195,32 @@ function atualizarCarrinho() {{
     row.appendChild(left);
     row.appendChild(right);
     list.appendChild(row);
-  }});
+  });
 
   // Coupon only affects non-promo subtotal
   let desc = 0;
   const noteEl = document.getElementById('coupon-note');
-  if (cupomAtivo) {{
+  if (cupomAtivo) {
     desc = subtotalNormal * cupomAtivo.desc;
     const hasPromoItems = carrinho.some(i => i.promoPct > 0);
-    if (hasPromoItems && subtotalNormal === 0) {{
+    if (hasPromoItems && subtotalNormal === 0) {
       noteEl.textContent  = '⚠️ Cupom não aplicável: todos os itens já estão em promoção.';
       noteEl.style.display = 'block';
-    }} else if (hasPromoItems) {{
+    } else if (hasPromoItems) {
       noteEl.textContent  = 'ℹ️ Cupom aplicado apenas aos itens sem promoção.';
       noteEl.style.display = 'block';
-    }} else {{
+    } else {
       noteEl.style.display = 'none';
-    }}
-  }} else {{
+    }
+  } else {
     noteEl.style.display = 'none';
-  }}
+  }
 
   document.getElementById('discount-row').style.display = (cupomAtivo && desc > 0) ? 'flex' : 'none';
-  if (cupomAtivo) {{
+  if (cupomAtivo) {
     document.getElementById('discount-name').textContent = cupomAtivo.nome;
     document.getElementById('discount-val').textContent  = desc.toFixed(2);
-  }}
+  }
 
   const sc = document.getElementById('ship-info-container');
   sc.style.display = freteV > 0 ? 'flex' : 'none';
@@ -996,67 +2228,67 @@ function atualizarCarrinho() {{
 
 
   const total = subtotalNormal + subtotalPromo - desc + freteV;
-  document.getElementById('total-val').textContent = total.toLocaleString('pt-BR', {{minimumFractionDigits:2}});
-}}
+  document.getElementById('total-val').textContent = total.toLocaleString('pt-BR', {minimumFractionDigits:2});
+}
 
-function removerFrete() {{
+function removerFrete() {
   freteV = 0; freteD = "";
   document.getElementById('resultado-frete').textContent = "";
   document.getElementById('cep-destino').value           = "";
   atualizarCarrinho();
-}}
+}
 
 // ─── CUPOM ─────────────────────────────────────────────────────────────────────
-function aplicarCupom() {{
+function aplicarCupom() {
   // Only accept alphanumeric codes up to 30 chars
   const raw  = document.getElementById('coupon-code').value;
   const code = raw.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 30);
 
-  if (CUPONS[code] !== undefined) {{
-    cupomAtivo = {{ nome: code, desc: CUPONS[code] }};
+  if (CUPONS[code] !== undefined) {
+    cupomAtivo = { nome: code, desc: CUPONS[code] };
     alert("✅ Cupom aplicado!");
-  }} else {{
+  } else {
     cupomAtivo = null;
     alert("❌ Cupom inválido.");
-  }}
+  }
   atualizarCarrinho();
-}}
+}
 
 // ─── FRETE ─────────────────────────────────────────────────────────────────────
-async function buscarDadosCep(cep) {{
+async function buscarDadosCep(cep) {
   // Only 8-digit CEPs — already validated by caller
-  try {{
-    const r = await fetch(`https://viacep.com.br/ws/${{encodeURIComponent(cep)}}/json/`);
+  try {
+    const r = await fetch(`https://viacep.com.br/ws/${encodeURIComponent(cep)}/json/`);
     const d = await r.json();
-    if (!d.erro) return {{ localidade: d.localidade, uf: d.uf.toUpperCase(), logradouro: d.logradouro, bairro: d.bairro }};
-  }} catch (e) {{}}
-  try {{
-    const r = await fetch(`https://brasilapi.com.br/api/cep/v1/${{encodeURIComponent(cep)}}`);
+    if (!d.erro) return { localidade: d.localidade, uf: d.uf.toUpperCase(), logradouro: d.logradouro, bairro: d.bairro };
+  } catch (e) {}
+  try {
+    const r = await fetch(`https://brasilapi.com.br/api/cep/v1/${encodeURIComponent(cep)}`);
     const d = await r.json();
-    if (r.ok) return {{ localidade: d.city, uf: d.state.toUpperCase(), logradouro: d.street || "", bairro: d.neighborhood || "" }};
-  }} catch (e) {{}}
+    if (r.ok) return { localidade: d.city, uf: d.state.toUpperCase(), logradouro: d.street || "", bairro: d.neighborhood || "" };
+  } catch (e) {}
   return null;
-}}
+}
 
-async function calcularFrete() {{
+async function calcularFrete() {
   const raw = document.getElementById('cep-destino').value.replace(/\D/g, '');
   const btn = document.getElementById('btn-calc');
-  if (raw.length !== 8) {{ alert("CEP inválido"); return; }}
+  if (raw.length !== 8) { alert("CEP inválido"); return; }
   btn.disabled    = true;
   btn.textContent = "...";
 
   const data = await buscarDadosCep(raw);
-  if (!data) {{
+  if (!data) {
     alert("CEP não encontrado");
     btn.disabled    = false;
     btn.textContent = "Localizar";
     return;
-  }}
+  }
 
   const uf = data.uf.replace(/[^A-Z]/g, '').slice(0, 2);   // hard-sanitize UF
-  if      (REGIOES.SUL.includes(uf))                                          {{ freteV = 60,00;  freteD = "SUL R$ 60,00 (3-9 dias)"; }}
-  else if ([...REGIOES.SUDESTE, ...REGIOES['CENTRO-OESTE']].includes(uf))     {{ freteV = 90,00; freteD = "SUDESTE/CO R$ 90,00 (5-15 dias)"; }}
-  else                                                                         {{ freteV = 110,00; freteD = "N/NE R$ 110,00 (10-30 dias)"; }}
+  if      (REGIOES.SUL.includes(uf))                                          { freteV = 60,00;  freteD = "SUL R$ 60,00 (3-9 dias)"; }
+  else if ([...REGIOES.SUDESTE, ...REGIOES['CENTRO-OESTE']].includes(uf))     { freteV = 90,00; freteD = "SUDESTE/CO R$ 90,00 (5-15 dias)"; }
+  else                                                                         { freteV = 110,00; freteD = "N/NE R$ 110,00 (10-30 dias)"; }
 
   // Populate form fields with textContent-safe values
   document.getElementById('f_cidade').value = data.localidade  || '';
@@ -1070,19 +2302,19 @@ async function calcularFrete() {{
   atualizarCarrinho();
   btn.disabled    = false;
   btn.textContent = "Localizar";
-}}
+}
 
 // ─── CHECKOUT ──────────────────────────────────────────────────────────────────
-function abrirCheckout() {{
-  if (freteV <= 0) {{ alert("Calcule o frete primeiro!"); return; }}
+function abrirCheckout() {
+  if (freteV <= 0) { alert("Calcule o frete primeiro!"); return; }
 
   document.getElementById('modalCheckout').style.display = 'block';
-}}
-function fecharCheckout() {{ document.getElementById('modalCheckout').style.display = 'none'; }}
+}
+function fecharCheckout() { document.getElementById('modalCheckout').style.display = 'none'; }
 
-function enviarPedido() {{
+function enviarPedido() {
   // Read and sanitize all form fields
-  const d = {{
+  const d = {
     n:    sanitizarEntrada(document.getElementById('f_nome').value,    120).toUpperCase(),
     cpf:  sanitizarEntrada(document.getElementById('f_cpf').value,     14),
     e:    sanitizarEntrada(document.getElementById('f_end').value,     200).toUpperCase(),
@@ -1091,38 +2323,38 @@ function enviarPedido() {{
     co:   sanitizarEntrada(document.getElementById('f_comp').value,    100).toUpperCase(),
     ci:   sanitizarEntrada(document.getElementById('f_cidade').value,  100).toUpperCase(),
     es:   sanitizarEntrada(document.getElementById('f_estado').value,  2).toUpperCase(),
-    ce:   document.getElementById('cep-destino').value.replace(/\D/g,'').replace(/(\d{{5}})(\d{{3}})/, '$1-$2'),
+    ce:   document.getElementById('cep-destino').value.replace(/\D/g,'').replace(/(\d{5})(\d{3})/, '$1-$2'),
     t:    sanitizarEntrada(document.getElementById('f_tel').value,     20),
     p:    document.getElementById('f_pgto').value === 'Pix' ? 'PIX' : 'CARTÃO DE CRÉDITO',
-  }};
+  };
 
-  if (!d.n || !d.cpf || !d.e || !d.nu || !d.ba || !d.ci || !d.es || !d.t) {{
+  if (!d.n || !d.cpf || !d.e || !d.nu || !d.ba || !d.ci || !d.es || !d.t) {
     alert("Preencha todos os campos obrigatórios!");
     return;
-  }}
+  }
 
   const temSol    = carrinho.some(i => i.nome.toUpperCase().includes("BACTERIOSTATIC WATER"));
   const temBrinde = cupomAtivo && cupomAtivo.nome === "BRUNA5";
-  if (!temSol && !temBrinde) {{
-    if (!confirm("Pedido sem solução de diluição (Bacteriostatic Water). Continuar?")) {{
+  if (!temSol && !temBrinde) {
+    if (!confirm("Pedido sem solução de diluição (Bacteriostatic Water). Continuar?")) {
       fecharCheckout(); return;
-    }}
-  }}
+    }
+  }
 
   let subtotalNormal = 0, subtotalPromo = 0, msgI = "";
-  carrinho.forEach(i => {{
+  carrinho.forEach(i => {
     const vt = i.preco * i.qtd;
-    if (i.promoPct > 0) {{
+    if (i.promoPct > 0) {
       subtotalPromo += vt;
       msgI += "• " + i.qtd + "x " + i.nome.toUpperCase() + " (" + i.espec.toUpperCase() + ")" +
               " [PROMO -" + Math.round(i.promoPct * 100) + "%] - R$ " + vt.toFixed(2) + "%0A";
-    }} else {{
+    } else {
       subtotalNormal += vt;
       const vtFinal = cupomAtivo ? vt - vt * cupomAtivo.desc : vt;
       msgI += "• " + i.qtd + "x " + i.nome.toUpperCase() + " (" + i.espec.toUpperCase() + ")" +
               " - R$ " + vt.toFixed(2) + (cupomAtivo ? " → R$ " + vtFinal.toFixed(2) : "") + "%0A";
-    }}
-  }});
+    }
+  });
 
   const desc  = cupomAtivo ? subtotalNormal * cupomAtivo.desc : 0;
   const total = subtotalNormal + subtotalPromo - desc + freteV;
@@ -1147,35 +2379,23 @@ function enviarPedido() {{
   // Phone number — change to your actual number before deploy
   const WA_PHONE = "17746222523";
   window.open("https://wa.me/" + WA_PHONE + "?text=" + msg, '_blank');
-}}
+}
 
 // ─── INIT ──────────────────────────────────────────────────────────────────────
 gerarDestaques();
 
 // Close modals when clicking the dark overlay (not the box)
-document.getElementById('modalInfo').addEventListener('click', function(e) {{
+document.getElementById('modalInfo').addEventListener('click', function(e) {
   if (e.target === this) fecharInfo();
-}});
-document.getElementById('modalCheckout').addEventListener('click', function(e) {{
+});
+document.getElementById('modalCheckout').addEventListener('click', function(e) {
   if (e.target === this) fecharCheckout();
-}});
+});
 
 // Keyboard accessibility — close modals on Escape
-document.addEventListener('keydown', e => {{
-  if (e.key === 'Escape') {{ fecharInfo(); fecharCheckout(); }}
-}});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { fecharInfo(); fecharCheckout(); }
+});
 </script>
 </body>
-</html>"""
-
-    caminho_saida = os.path.join(diretorio_atual, 'index.html')
-    try:
-        with open(caminho_saida, 'w', encoding='utf-8') as f:
-            f.write(html)
-        print(f"✅ Site gerado com sucesso em: {caminho_saida}")
-    except Exception as e:
-        print(f"❌ Erro ao salvar: {e}")
-
-
-if __name__ == "__main__":
-    gerar_site_vendas_completo()
+</html>
