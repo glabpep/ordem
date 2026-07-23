@@ -754,6 +754,7 @@ const CUPONS = {{
   'RAYSSA5':0.05,'PATRICIA5':0.05,'LU5':0.05, 'RAFA5':0.05, 'WAWA':0.05, 'DUDA5':0.05, 
   'ALYNE5':0.05, 'JRCREMONEZ':0.05, 'ZAMA5':0.05, 'JENNI5':0.05, 'DJU5':0.05, 
   'DUDA10':0.10, 'ZAMA10':0.10, 'JENNI10':0.10, 'DJU10':0.10, 'ALYNE10':0.10, 'BRUNA10':0.10, 'GILMARA10':0.10, 
+  'CLAU5':0.05, 'CLAU10':0.10, 
 }};
 
 // ─── SECURITY HELPERS ──────────────────────────────────────────────────────────
