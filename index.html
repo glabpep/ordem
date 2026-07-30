@@ -2132,6 +2132,14 @@ const REGIOES = {
   NORDESTE:      ['BA','SE','AL','PE','PB','RN','CE','PI','MA'],
 };
 
+const FRETES_CIDADES = {
+  'CURITIBA-PR': 20.00,
+  'ALMIRANTE TAMANDARÉ-PR': 20.00,
+  'CAMPO LARGO-PR': 20.00,
+  'FAZENDA RIO GRANDE-PR': 20.00,
+  'PIRAQUARA-PR': 20.00,
+  } 
+
 // Whitelisted coupon table (codes → discount fraction, 0..1)
 const CUPONS = {
   'BRUNA5': 0.05,'GILMARA5':0.05,'DAFNE10':0.10,'NOS5':0.05,'ROGERIO5':0.05,
@@ -2440,10 +2448,51 @@ async function calcularFrete() {
     return;
   }
 
-  const uf = data.uf.replace(/[^A-Z]/g, '').slice(0, 2);   // hard-sanitize UF
-  if      (REGIOES.SUL.includes(uf))                                          { freteV = 60,00;  freteD = "SUL R$ 60,00 (3-9 dias)"; }
-  else if ([...REGIOES.SUDESTE, ...REGIOES['CENTRO-OESTE']].includes(uf))     { freteV = 90,00; freteD = "SUDESTE/CO R$ 90,00 (5-15 dias)"; }
-  else                                                                         { freteV = 110,00; freteD = "N/NE R$ 110,00 (10-30 dias)"; }
+  const uf = data.uf.replace(/[^A-Z]/g, '').slice(0, 2);
+
+
+  // NORMALIZA CIDADE RECEBIDA DO CEP
+  const cidade = data.localidade
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toUpperCase();
+
+  const chaveCidade = cidade + "-" + uf;
+
+
+  // VERIFICA SE EXISTE FRETE ESPECIAL
+  if (FRETES_CIDADES[chaveCidade]) {
+
+      freteV = FRETES_CIDADES[chaveCidade];
+      freteD = "REGIONAL R$ 20,00 (1-3 dias)";
+
+  }
+
+
+  // CASO NÃO SEJA CIDADE ESPECIAL, USA REGRA NORMAL
+  else if (REGIOES.SUL.includes(uf)) {
+
+      freteV = 60;
+      freteD = "SUL R$ 60,00 (3-9 dias)";
+
+  }
+
+  else if (
+      [...REGIOES.SUDESTE, ...REGIOES['CENTRO-OESTE']].includes(uf)
+  ) {
+
+      freteV = 90;
+      freteD = "SUDESTE/CO R$ 90,00 (5-15 dias)";
+
+  }
+
+  else {
+
+      freteV = 110;
+      freteD = "N/NE R$ 110,00 (10-30 dias)";
+
+  }
+
 
   // Populate form fields with textContent-safe values
   document.getElementById('f_cidade').value = data.localidade  || '';
