@@ -7,105 +7,280 @@ import unicodedata
 import re
 
 
-def sanitizar_texto(texto):
-    """Remove caracteres perigosos para evitar injeção de HTML/JS."""
-    if not isinstance(texto, str):
-        texto = str(texto)
-    # Remove tags HTML e caracteres de controle
-    texto = re.sub(r'<[^>]+>', '', texto)
-    texto = texto.replace('&', '&amp;').replace('"', '&quot;').replace("'", '&#x27;').replace('`', '&#x60;')
-    return texto.strip()
-
-
-def parse_promo(val):
-    """
-    Lê o valor da coluna PROMOÇÃO e retorna um float entre 0 e 1 representando o desconto.
-    Aceita: '10%', '0.10', '10', '', None, NaN.
-    Retorna 0.0 se não houver promoção válida.
-    """
-    if val is None:
-        return 0.0
-    try:
-        if isinstance(val, float) and math.isnan(val):
-            return 0.0
-    except Exception:
-        pass
-    s = str(val).strip().replace(',', '.')
-    if not s or s.lower() in ('nan', 'none', ''):
-        return 0.0
-    s = s.replace('%', '')
-    try:
-        n = float(s)
-        # Se veio como 10, interpreta como 10%
-        if n > 1:
-            n = n / 100.0
-        # Clamp entre 0 e 1
-        n = max(0.0, min(1.0, n))
-        return n
-    except ValueError:
-        return 0.0
-
-
 def gerar_site_vendas_completo():
     diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-
+    
     arquivo_dados = None
-    for nome in ['stock_0202 - NOVA.xlsx', 'stock_2901.xlsx - Plan1.csv']:
+    for nome in ['stock_0202 - NOVAUS.xlsx', 'stock_2901.xlsx - Plan1.csv']:
         caminho = os.path.join(diretorio_atual, nome)
         if os.path.exists(caminho):
             arquivo_dados = caminho
             break
+
     if not arquivo_dados:
         print(f"Erro: Arquivo não encontrado em: {diretorio_atual}")
         return
 
     infos_tecnicas = {
-        
-        "AOD 9604": {"desc": "Análogo Lipolítico do hGH: Focado no isolamento das propriedades de queima de gordura do GH sem induzir efeitos hiperglicêmicos. Aplicado em estudos de obesidade e regeneração de cartilagem.", "cat": "Metabolismo", "icon": "🔥"},
-        "HGH FRAGMENT": {"desc": "Modulador de Lipídios: Parte terminal do GH responsável pela quebra de gordura. Mostra capacidade de inibir a formação de nova gordura e acelerar a lipólise visceral sem alterar a insulina.", "cat": "Metabolismo", "icon": "🔥"},
-        "MOTS-C": {"desc": "Peptídeo Derivado da Mitocôndria: Regulador hormonal do metabolismo sistêmico. Melhora a homeostase da glicose e combate a resistência à insulina via ativação da via AMPK.", "cat": "Metabolismo", "icon": "🔥"},
-        "SLU PP": {"desc": "Agonista Pan-ERR (Pílula do Exercício): Ativa receptores ERRα, β, γ. Aumenta drasticamente a biogênese mitocondrial e a resistência física, comparável ao treino de alta intensidade.", "cat": "Metabolismo", "icon": "🔥"},
-        "CJC-1295": {"desc": "Secretagogo de GH de Longa Duração: Análogo do GHRH que aumenta secreção de GH e IGF-1. Aplicado em antienvelhecimento, melhora da composição corporal e síntese proteica acelerada.", "cat": "Hormônios", "icon": "💉"},
-        "IPAMORELIN": {"desc": "Agonista de Grelina Seletivo: Estimula a liberação pulsátil de GH sem elevar cortisol ou prolactina. Seguro para indução de anabolismo e melhora da density mineral óssea.", "cat": "Hormônios", "icon": "💉"},
-        "CJC-1295 + IPAMORELIN": {"desc": "Sinergia Hormonal Dual: Combinação de GHRH com GHRP. Mimetiza a liberação fisiológica natural, resultando em secreção de GH significativamente maior que o uso isolado.", "cat": "Hormônios", "icon": "💉"},
-        "IGF-1 LR3": {"desc": "Análogo de IGF-1 de Meia-vida Longa: Permanece ativo por até 20 horas. Principal mediador da hiperplasia (criação de novas fibras musculares) e transporte de acesso de aminoácidos.", "cat": "Hormônios", "icon": "💉"},
-        "SERMORELIN": {"desc": "Estimulador de Eixo Natural: Mimetiza o GHRH natural. Promove melhorias na qualidade do sono profundo, vitalidade da pele e recuperação pós-esforço.", "cat": "Hormônios", "icon": "💉"},
-        "BPC-157": {"desc": "Pentadecapeptídeo Gástrico: Acelera a angiogênese e cicatrização. Estudado para cura de rupturas de tendões, ligamentos, danos musculares e tecidos moles.", "cat": "Recuperação", "icon": "🩹"},
-        "TB-500": {"desc": "Timosina Beta-4 Sintética: Essencial para migração celular e reparo de tecidos. Promove formação de novos vasos e reduz inflamação articular e miocárdica.", "cat": "Recuperação", "icon": "🩹"},
-        "TB-500 + BPC": {"desc": "Protocolo de Reparo Total: União sinérgica do TB-500 (sistêmico) com BPC-157 (tecido). Padrão ouro para recuperação de lesões atléticas graves.", "cat": "Recuperação", "icon": "🩹"},
-        "GHK-CU": {"desc": "Complexo Peptídeo-Cobre: Atua na remodelação do DNA e síntese de colágeno I e III. Possui propriedades antioxidantes e anti-inflamatórias para pele e tecidos conectivos.", "cat": "Estética", "icon": "✨"},
-        "GLOW": {"desc": "Bioestimulação Dérmica (GHK-Cu + BPC + TB): Blend estético-regenerativo focado em rejuvenescimento cutâneo, redução de cicatrizes e regeneração da matriz extracelular.", "cat": "Estética", "icon": "✨"},
-        "ARA 290": {"desc": "Agonista de Receptor de Reparo Inato: Derivado da eritropoietina sem efeitos hematológicos. Pesquisado para dor neuropática severa e regeneração nervosa periférica.", "cat": "Recuperação", "icon": "🩹"},
-        "KPV": {"desc": "Tripeptídeo Anti-inflamatório: Inibe vias inflamatórias (NF-κB). Possui propriedades antimicrobianas e é utilizado em estudos sobre dermatite e colite.", "cat": "Imunidade", "icon": "🛡️"},
-        "KLOW": {"desc": "Quarteto de Reparo Profundo (GHK+BPC+TB+KPV): Projetado para sinalização celular máxima em remodelação de tecidos complexos e equilíbrio imunológico.", "cat": "Recuperação", "icon": "🩹"},
-        "TIRZEPATIDE": {"desc": "Agonista Dual GIP/GLP-1: Supera a Semaglutida na perda de peso. Promove saciedade central e melhora drástica na sensibilidade à insulina.", "cat": "Emagrecimento", "icon": "⚖️"},
-        "RETATRUTIDE": {"desc": "Agonista Triplo (GIP/GLP-1/GCGR): Aumenta o gasto calórico basal e a oxidação de gordura no fígado. Promete perdas de peso superiores a 24%.", "cat": "Emagrecimento", "icon": "⚖️"},
-        "SEMAGLUTIDE": {"desc": "Agonista de GLP-1: Retarda o esvaziamento gástrico e sinaliza saciedade ao hipotálamo. Base para tratamento de obesidade e controle glicêmico.", "cat": "Emagrecimento", "icon": "⚖️"},
-        "SELANK": {"desc": "Ansiolítico Regulador: Modula serotonina e norepinefrina. Reduz ansiedade e melhora o foco cognitivo sem o efeito sedativo dos ansiolíticos comuns.", "cat": "Cognitivo", "icon": "🧠"},
-        "SEMAX": {"desc": "Nootrópico Neuroprotetor: Eleva níveis de BDNF e NGF no hipocampo. Aplicado em recuperação pós-AVC e otimização do aprendizado sob estresse.", "cat": "Cognitivo", "icon": "🧠"},
-        "PINEALON": {"desc": "Bioregulador de Cadeia Curta: Atua na expressão gênica neuronal. Restaura o ritmo circadiano e protege contra o estresse oxidativo cerebral.", "cat": "Cognitivo", "icon": "🧠"},
-        "NAD+": {"desc": "Coenzima de Vitalidade: Essencial para reparação do DNA e sirtuínas. Associado à reversão de marcadores de envelhecimento e aumento da energia celular.", "cat": "Longevidade", "icon": "⏳"},
-        "DSIP": {"desc": "Indutor de Sono Delta: Neuromodulador que sincroniza ritmos biológicos, promove sono profundo e mitiga sintomas de estresse emocional.", "cat": "Cognitivo", "icon": "🧠"},
-        "OXYTOCIN": {"desc": "Neuromodulador Social: Regula confiança, redução de medo e ansiedade social. Explorado também na regulação do apetite por carboidratos.", "cat": "Cognitivo", "icon": "🧠"},
-        "EPITHALON": {"desc": "Ativador da Telomerase: Induz o alongamento dos telômeros. Focado na extensão da vida celular e restauração da secreção de melatonina.", "cat": "Longevidade", "icon": "⏳"},
-        "PT-141": {"desc": "Tratamento de Disfunção Sexual: Atua via SNC nos centros de excitação do cérebro. Indicado para desejo sexual hipoativo.", "cat": "Sexual", "icon": "❤️"},
-        "BACTERIOSTATIC WATER": {"desc": "Solvente Bacteriostático: Água com 0,9% de Álcool Benzílico. Impede proliferação bacteriana, permitindo uso seguro por até 30 dias.", "cat": "Acessório", "icon": "💧"},
-        "SS-31": {"desc": "Protetor de Cardiolipina: Previne a formação de radicais livres na mitocôndria e restaura a produção de ATP.", "cat": "Longevidade", "icon": "⏳"},
-        "TESAMORELIN": {"desc": "Redutor de Lipodistrofia: Único aprovado para reduzir gordura visceral abdominal severa.", "cat": "Metabolismo", "icon": "🔥"},
+        "5-AMINO": {
+            "desc": "Inibidor Seletivo de NNMT: Atua bloqueando a enzima nicotinamida N-metiltransferase, o que eleva os níveis de NAD+ e SAM intracelular. Indica eficácia na reversão da obesidade e otimização do gasto energético basal. | Selective NNMT Inhibitor: Acts by blocking the nicotinamide N-methyltransferase enzyme, which elevates intracellular NAD+ and SAM levels. Indicates efficacy in reversing obesity and optimizing basal energy expenditure.",
+            "cat": "Metabolismo | Metabolism",
+            "icon": "🔥"
+        },
+        "AICAR": {
+            "desc": "Ativador de AMPK: Mimetiza o AMP intracelular para ativar a proteína quinase. Investigado por aumentar a captação de glicose muscular, a oxidação de ácidos graxos e a resistência cardiovascular. | AMPK Activator: Mimics intracellular AMP to activate protein kinase. Investigated for increasing muscle glucose uptake, fatty acid oxidation, and cardiovascular endurance.",
+            "cat": "Metabolismo | Metabolism",
+            "icon": "🔥"
+        },
+        "AOD 9604": {
+            "desc": "Análogo Lipolítico do hGH: Focado no isolamento das propriedades de queima de gordura do GH sem induzir efeitos hiperglicêmicos. Aplicado em estudos de obesidade e regeneração de cartilagem. | Lipolytic hGH Analog: Focused on isolating the fat-burning properties of GH without inducing hyperglycemic effects. Applied in obesity and cartilage regeneration studies.",
+            "cat": "Metabolismo | Metabolism",
+            "icon": "🔥"
+        },
+        "HGH FRAGMENT": {
+            "desc": "Modulador de Lipídios: Parte terminal do GH responsável pela quebra de gordura. Mostra capacidade de inibir a formação de nova gordura e acelerar a lipólise visceral sem alterar a insulina. | Lipid Modulator: Terminal part of GH responsible for fat breakdown. Shows ability to inhibit new fat formation and accelerate visceral lipolysis without altering insulin.",
+            "cat": "Metabolismo | Metabolism",
+            "icon": "🔥"
+        },
+        "L-CARNITINE": {
+            "desc": "Cofator de Transporte Mitocondrial: Essencial para o transporte de ácidos graxos para a matriz mitocondrial (β-oxidação). Reduz a fadiga muscular e suporta a performance atlética. | Mitochondrial Transport Cofactor: Essential for the transport of fatty acids to the mitochondrial matrix (β-oxidation). Reduces muscle fatigue and supports athletic performance.",
+            "cat": "Metabolismo | Metabolism",
+            "icon": "🔥"
+        },
+        "MOTS-C": {
+            "desc": "Peptídeo Derivado da Mitocôndria: Regulador hormonal do metabolismo sistêmico. Melhora a homeostase da glicose e combate a resistência à insulina via ativação da via AMPK. | Mitochondrial-Derived Peptide: Hormonal regulator of systemic metabolism. Improves glucose homeostasis and combats insulin resistance via activation of the AMPK pathway.",
+            "cat": "Metabolismo | Metabolism",
+            "icon": "🔥"
+        },
+        "SLU PP": {
+            "desc": "Agonista Pan-ERR (Pílula do Exercício): Ativa receptores ERRα, β, γ. Aumenta drasticamente a biogênese mitocondrial e a resistência física, comparável ao treino de alta intensidade. | Pan-ERR Agonist (Exercise Pill): Activates ERRα, β, γ receptors. Drastically increases mitochondrial biogenesis and physical endurance, comparable to high-intensity training.",
+            "cat": "Metabolismo | Metabolism",
+            "icon": "🔥"
+        },
+        "LIPO C": {
+            "desc": "Mix Lipotrópico Injetável: Composto por Metionina, Inositol e Colina. Atua na exportação de gorduras do fígado e na otimização da mobilização lipídica sistêmica. | Injectable Lipotropic Mix: Composed of Methionine, Inositol, and Choline. Acts on the export of fats from the liver and the optimization of systemic lipid mobilization.",
+            "cat": "Metabolismo | Metabolism",
+            "icon": "🔥"
+        },
+        "CJC-1295": {
+            "desc": "Secretagogo de GH de Longa Duração: Análogo do GHRH que aumenta secreção de GH e IGF-1. Aplicado em antienvelhecimento, melhora da composição corporal e síntese proteica acelerada. | Long-Acting GH Secretagogue: GHRH analog that increases GH and IGF-1 secretion. Applied in anti-aging, improved body composition, and accelerated protein synthesis.",
+            "cat": "Hormônios | Hormones",
+            "icon": "💉"
+        },
+        "IPAMORELIN": {
+            "desc": "Agonista de Grelina Seletivo: Estimula a liberação pulsátil de GH sem elevar cortisol ou prolactina. Seguro para indução de anabolismo e melhora da density mineral óssea. | Selective Ghrelin Agonist: Stimulates pulsatile GH release without elevating cortisol or prolactin. Safe for inducing anabolism and improving bone mineral density.",
+            "cat": "Hormônios | Hormones",
+            "icon": "💉"
+        },
+        "CJC-1295 + IPAMORELIN": {
+            "desc": "Sinergia Hormonal Dual: Combinação de GHRH com GHRP. Mimetiza a liberação fisiológica natural, resultando em secreção de GH significativamente maior que o uso isolado. | Dual Hormonal Synergy: Combination of GHRH with GHRP. Mimics natural physiological release, resulting in significantly higher GH secretion than isolated use.",
+            "cat": "Hormônios | Hormones",
+            "icon": "💉"
+        },
+        "GHRP-6": {
+            "desc": "Peptídeo Liberador de GH: Estimula a hipófise e aumenta a sinalização da fome via grelina. Focado em recuperação de tecidos, aumento de massa bruta e estados catabólicos. | GH-Releasing Peptide: Stimulates the pituitary and increases hunger signaling via ghrelin. Focused on tissue recovery, increased raw mass, and catabolic states.",
+            "cat": "Hormônios | Hormones",
+            "icon": "💉"
+        },
+        "HEXARELIN": {
+            "desc": "Potencializador de Força: Secretagogo potente da classe GHRP. Aumenta a força contrátil cardíaca e muscular, protegendo o miocárdio e promovendo volume fibroso. | Strength Enhancer: Potent secretagogue of the GHRP class. Increases cardiac and muscular contractile strength, protecting the myocardium and promoting fibrous volume.",
+            "cat": "Hormônios | Hormones",
+            "icon": "💉"
+        },
+        "IGF-1 LR3": {
+            "desc": "Análogo de IGF-1 de Meia-vida Longa: Permanece ativo por até 20 horas. Principal mediador da hiperplasia (criação de novas fibras musculares) e transporte de acesso de aminoácidos. | Long-Acting IGF-1 Analog: Remains active for up to 20 hours. Primary mediator of hyperplasia (creation of new muscle fibers) and amino acid transport access.",
+            "cat": "Hormônios | Hormones",
+            "icon": "💉"
+        },
+        "IGF DES": {
+            "desc": "Variante de IGF-1 de Ação Local: Afinidade 10x maior pelos receptores. Ideal para aplicação pós-treino visando recuperação imediata e crescimento muscular localizado. | Local-Acting IGF-1 Variant: 10x greater affinity for receptors. Ideal for post-workout application aiming for immediate recovery and localized muscle growth.",
+            "cat": "Hormônios | Hormones",
+            "icon": "💉"
+        },
+        "SERMORELIN": {
+            "desc": "Estimulador de Eixo Natural: Mimetiza o GHRH natural. Promove melhorias na qualidade do sono profundo, vitalidade da pele e recuperação pós-esforço. | Natural Axis Stimulator: Mimics natural GHRH. Promotes improvements in deep sleep quality, skin vitality, and post-exertion recovery.",
+            "cat": "Hormônios | Hormones",
+            "icon": "💉"
+        },
+        "MK-677": {
+            "desc": "Secretagogo Oral (Ibutamoren): Agonista dos receptores de grelina. Aumenta sustentadamente os níveis de GH e IGF-1, aumentando a massa livre de gordura e densidade óssea. | Oral Secretagogue (Ibutamoren): Ghrelin receptor agonist. Sustainably increases GH and IGF-1 levels, increasing fat-free mass and bone density.",
+            "cat": "Hormônios | Hormones",
+            "icon": "💉"
+        },
+        "BPC-157": {
+            "desc": "Pentadecapeptídeo Gástrico: Acelera a angiogênese e cicatrização. Estudado para cura de rupturas de tendões, ligamentos, danos musculares e tecidos moles. | Gastric Pentadecapeptide: Accelerates angiogenesis and healing. Studied for the healing of tendon ruptures, ligaments, muscle damage, and soft tissues.",
+            "cat": "Recuperação | Recovery",
+            "icon": "🩹"
+        },
+        "BPC-157 ORAL": {
+            "desc": "Modulador Gastrointestinal: Versão estável em suco gástrico. Focado no tratamento de Doença de Crohn, SII, úlceras e restauração da barreira intestinal. | Gastrointestinal Modulator: Stable version in gastric juice. Focused on treating Crohn's Disease, IBS, ulcers, and restoring the intestinal barrier.",
+            "cat": "Recuperação | Recovery",
+            "icon": "🩹"
+        },
+        "TB-500": {
+            "desc": "Timosina Beta-4 Sintética: Essencial para migração celular e reparo de tecidos. Promove formação de novos vasos e reduz inflamação articular e miocárdica. | Synthetic Thymosin Beta-4: Essential for cell migration and tissue repair. Promotes formation of new vessels and reduces joint and myocardial inflammation.",
+            "cat": "Recuperação | Recovery",
+            "icon": "🩹"
+        },
+        "TB-500 + BPC": {
+            "desc": "Protocolo de Reparo Total: União sinérgica do TB-500 (sistêmico) com BPC-157 (tecido). Padrão ouro para recuperação de lesões atléticas graves. | Total Repair Protocol: Synergistic union of TB-500 (systemic) with BPC-157 (tissue). Gold standard for severe athletic injury recovery.",
+            "cat": "Recuperação | Recovery",
+            "icon": "🩹"
+        },
+        "GHK-CU": {
+            "desc": "Complexo Peptídeo-Cobre: Atua na remodelação do DNA e síntese de colágeno I e III. Possui propriedades antioxidantes e anti-inflamatórias para pele e tecidos conectivos. | Copper Peptide Complex: Acts on DNA remodeling and collagen I and III synthesis. Features antioxidant and anti-inflammatory properties for skin and connective tissues.",
+            "cat": "Estética | Aesthetics",
+            "icon": "✨"
+        },
+        "GLOW": {
+            "desc": "Bioestimulação Dérmica (GHK-Cu + BPC + TB): Blend estético-regenerativo focado em rejuvenescimento cutâneo, redução de cicatrizes e regeneração da matriz extracelular. | Dermal Biostimulation (GHK-Cu + BPC + TB): Aesthetic-regenerative blend focused on skin rejuvenation, scar reduction, and extracellular matrix regeneration.",
+            "cat": "Estética | Aesthetics",
+            "icon": "✨"
+        },
+        "ARA 290": {
+            "desc": "Agonista de Receptor de Reparo Inato: Derivado da eritropoietina sem efeitos hematológicos. Pesquisado para dor neuropática severa e regeneração nervosa periférica. | Innate Repair Receptor Agonist: Derived from erythropoietin without hematological effects. Researched for severe neuropathic pain and peripheral nerve regeneration.",
+            "cat": "Recuperação | Recovery",
+            "icon": "🩹"
+        },
+        "KPV": {
+            "desc": "Tripeptídeo Anti-inflamatório: Inibe vias inflamatórias (NF-κB). Possui propriedades antimicrobianas e é utilizado em estudos sobre dermatite e colite. | Anti-inflammatory Tripeptide: Inhibits inflammatory pathways (NF-κB). Possesses antimicrobial properties and is used in studies on dermatitis and colitis.",
+            "cat": "Imunidade | Immunity",
+            "icon": "🛡️"
+        },
+        "LL-37": {
+            "desc": "Peptídeo Antimicrobiano: Parte do sistema imune inato. Neutraliza endotoxinas bacterianas, modula a resposta inflamatória e acelera cicatrização de feridas infectadas. | Antimicrobial Peptide: Part of the innate immune system. Neutralizes bacterial endotoxins, modulates the inflammatory response, and accelerates healing of infected wounds.",
+            "cat": "Imunidade | Immunity",
+            "icon": "🛡️"
+        },
+        "KLOW": {
+            "desc": "Quarteto de Reparo Profundo (GHK+BPC+TB+KPV): Projetado para sinalização celular máxima em remodelação de tecidos complexos e equilíbrio imunológico. | Deep Repair Quartet (GHK+BPC+TB+KPV): Designed for maximum cellular signaling in complex tissue remodeling and immune balance.",
+            "cat": "Recuperação | Recovery",
+            "icon": "🩹"
+        },
+        "TIRZEPATIDE": {
+            "desc": "Agonista Dual GIP/GLP-1: Supera a Semaglutida na perda de peso. Promove saciedade central e melhora drástica na sensibilidade à insulina. | Dual GIP/GLP-1 Agonist: Outperforms Semaglutide in weight loss. Promotes central satiety and drastic improvement in insulin sensitivity.",
+            "cat": "Emagrecimento | Weight Loss",
+            "icon": "⚖️"
+        },
+        "RETATRUTIDE": {
+            "desc": "Agonista Triplo (GIP/GLP-1/GCGR): Aumenta o gasto calórico basal e a oxidação de gordura no fígado. Promete perdas de peso superiores a 24%. | Triple Agonist (GIP/GLP-1/GCGR): Increases basal caloric expenditure and fat oxidation in the liver. Promises weight loss exceeding 24%.",
+            "cat": "Emagrecimento | Weight Loss",
+            "icon": "⚖️"
+        },
+        "SEMAGLUTIDE": {
+            "desc": "Agonista de GLP-1: Retarda o esvaziamento gástrico e sinaliza saciedade ao hipotálamo. Base para tratamento de obesidade e controle glicêmico. | GLP-1 Agonist: Delays gastric emptying and signals satiety to the hypothalamus. Basis for obesity treatment and glycemic control.",
+            "cat": "Emagrecimento | Weight Loss",
+            "icon": "⚖️"
+        },
+        "SELANK": {
+            "desc": "Ansiolítico Regulador: Modula serotonina e norepinefrina. Reduz ansiedade e melhora o foco cognitivo sem o efeito sedativo dos ansiolíticos comuns. | Regulating Anxiolytic: Modulates serotonin and norepinephrine. Reduces anxiety and improves cognitive focus without the sedative effect of common anxiolytics.",
+            "cat": "Cognitivo | Cognitive",
+            "icon": "🧠"
+        },
+        "SEMAX": {
+            "desc": "Nootrópico Neuroprotetor: Eleva níveis de BDNF e NGF no hipocampo. Aplicado em recuperação pós-AVC e otimização do aprendizado sob estresse. | Neuroprotective Nootropic: Elevates BDNF and NGF levels in the hippocampus. Applied in post-stroke recovery and learning optimization under stress.",
+            "cat": "Cognitivo | Cognitive",
+            "icon": "🧠"
+        },
+        "PINEALON": {
+            "desc": "Bioregulador de Cadeia Curta: Atua na expressão gênica neuronal. Restaura o ritmo circadiano e protege contra o estresse oxidativo cerebral. | Short-Chain Bioregulator: Acts on neuronal gene expression. Restores circadian rhythm and protects against cerebral oxidative stress.",
+            "cat": "Cognitivo | Cognitive",
+            "icon": "🧠"
+        },
+        "NAD+": {
+            "desc": "Coenzima de Vitalidade: Essencial para reparação do DNA e sirtuínas. Associado à reversão de marcadores de envelhecimento e aumento da energia celular. | Vitality Coenzyme: Essential for DNA repair and sirtuins. Associated with reversing aging markers and increasing cellular energy.",
+            "cat": "Longevidade | Longevity",
+            "icon": "⏳"
+        },
+        "METHYLENE BLUE": {
+            "desc": "Otimizador Mitocondrial (Azul de Metileno): Transportador alternativo de elétrons. Melhora a memória de curto prazo e protege contra neurodegeneração. | Mitochondrial Optimizer (Methylene Blue): Alternative electron carrier. Improves short-term memory and protects against neurodegeneration.",
+            "cat": "Cognitivo | Cognitive",
+            "icon": "🧠"
+        },
+        "DSIP": {
+            "desc": "Indutor de Sono Delta: Neuromodulador que sincroniza ritmos biológicos, promove sono profundo e mitiga sintomas de estresse emocional. | Delta Sleep-Inducing Peptide: Neuromodulator that synchronizes biological rhythms, promotes deep sleep, and mitigates emotional stress symptoms.",
+            "cat": "Cognitivo | Cognitive",
+            "icon": "🧠"
+        },
+        "OXYTOCIN": {
+            "desc": "Neuromodulador Social: Regula confiança, redução de medo e ansiedade social. Explorado também na regulação do apetite por carboidratos. | Social Neuromodulator: Regulates trust, fear reduction, and social anxiety. Also explored in carbohydrate appetite regulation.",
+            "cat": "Cognitivo | Cognitive",
+            "icon": "🧠"
+        },
+        "EPITHALON": {
+            "desc": "Ativador da Telomerase: Induz o alongamento dos telômeros. Focado na extensão da vida celular e restauração da secreção de melatonina. | Telomerase Activator: Induces telomere lengthening. Focused on cellular life extension and melatonin secretion restoration.",
+            "cat": "Longevidade | Longevity",
+            "icon": "⏳"
+        },
+        "KISSPEPTIN": {
+            "desc": "Regulador de Eixo HPG: Atua no hipotálamo para restaurar a produção natural de testosterona e regular a função reprodutiva de forma fisiológica. | HPG Axis Regulator: Acts in the hypothalamus to restore natural testosterone production and regulate reproductive function physiologically.",
+            "cat": "Hormônios | Hormones",
+            "icon": "💉"
+        },
+        "MELANOTAN 1": {
+            "desc": "Agonista de Melanocortina Seletivo: Estimula a liberação de melanina com alta segurança e proteção contra danos UV. | Selective Melanocortin Agonist: Stimulates melanin release with high safety and protection against UV damage.",
+            "cat": "Estética | Aesthetics",
+            "icon": "✨"
+        },
+        "MELANOTAN 2": {
+            "desc": "Bronzeamento e Libido: Atua no SNC aumentando a pigmentação da pele, elevando o desejo sexual e reduzindo o apetite. | Tanning and Libido: Acts on the CNS increasing skin pigmentation, boosting sexual desire, and reducing appetite.",
+            "cat": "Estética | Aesthetics",
+            "icon": "✨"
+        },
+        "PT-141": {
+            "desc": "Tratamento de Disfunção Sexual: Atua via SNC nos centros de excitação do cérebro. Indicado para desejo sexual hipoativo. | Sexual Dysfunction Treatment: Acts via the CNS on the brain's arousal centers. Indicated for hypoactive sexual desire.",
+            "cat": "Sexual | Sexual",
+            "icon": "❤️"
+        },
+        "VITAMIN B-12": {
+            "desc": "Metilcobalamina de Alta Potência: Essencial para a bainha de mielina, produção de glóbulos vermelhos e prevenção da fadiga neuromuscular. | High-Potency Methylcobalamin: Essential for the myelin sheath, red blood cell production, and neuromuscular fatigue prevention.",
+            "cat": "Suplemento | Supplement",
+            "icon": "💊"
+        },
+        "BACTERIOSTATIC WATER": {
+            "desc": "Solvente Bacteriostático: Água com 0,9% de Álcool Benzílico. Impede proliferação bacteriana, permitindo uso seguro por até 30 dias. | Bacteriostatic Water: Water with 0.9% Benzyl Alcohol. Prevents bacterial proliferation, allowing safe use for up to 30 days.",
+            "cat": "Acessório | Accessory",
+            "icon": "💧"
+        },
+        "SS-31": {
+            "desc": "Protetor de Cardiolipina: Previne a formação de radicais livres na mitocôndria e restaura a produção de ATP. | Cardiolipin Protector: Prevents the formation of free radicals in the mitochondria and restores ATP production.",
+            "cat": "Longevidade | Longevity",
+            "icon": "⏳"
+        },
+        "HYALURONIC ACID 2% + GHK": {
+            "desc": "Arquitetura Extracelular: Une hidratação profunda (HA) com sinalização regenerativa (GHK). | Extracellular Architecture: Combines deep hydration (HA) with regenerative signaling (GHK).",
+            "cat": "Estética | Aesthetics",
+            "icon": "✨"
+        },
+        "HCG": {
+            "desc": "Mimetizador de LH: Sinaliza aos testículos a produção de testosterona. Vital para prevenir atrofia testicular e reinício do eixo hormonal (TPC). | LH Mimetic: Signals the testes to produce testosterone. Vital for preventing testicular atrophy and hormonal axis restart (PCT).",
+            "cat": "Hormônios | Hormones",
+            "icon": "💉"
+        },
+        "HEMP OIL": {
+            "desc": "Suporte Fitocanabinoide: Propriedades analgésicas e anti-inflamatórias. Suporta o sistema endocanabinoide. | Phytocannabinoid Support: Analgesic and anti-inflammatory properties. Supports the endocannabinoid system.",
+            "cat": "Suplemento | Supplement",
+            "icon": "💊"
+        },
+        "TESAMORELIN": {
+            "desc": "Redutor de Lipodistrofia: Único aprovado para reduzir gordura visceral abdominal severa. | Lipodystrophy Reducer: Only one approved to reduce severe abdominal visceral fat.",
+            "cat": "Metabolismo | Metabolism",
+            "icon": "🔥"
+        }
     }
 
     cat_colors = {
-        "Metabolismo":    {"bg": "rgba(255,107,53,0.12)",  "border": "#ff6b35", "text": "#ff6b35"},
-        "Hormônios":      {"bg": "rgba(0,150,255,0.12)",   "border": "#0096ff", "text": "#0096ff"},
-        "Recuperação":    {"bg": "rgba(76,175,80,0.12)",   "border": "#4caf50", "text": "#4caf50"},
-        "Estética":       {"bg": "rgba(233,30,99,0.12)",   "border": "#e91e63", "text": "#e91e63"},
-        "Imunidade":      {"bg": "rgba(156,39,176,0.12)",  "border": "#9c27b0", "text": "#9c27b0"},
-        "Emagrecimento":  {"bg": "rgba(255,193,7,0.12)",   "border": "#ffc107", "text": "#ffc107"},
-        "Cognitivo":      {"bg": "rgba(0,188,212,0.12)",   "border": "#00bcd4", "text": "#00bcd4"},
-        "Longevidade":    {"bg": "rgba(121,85,72,0.12)",   "border": "#c49b68", "text": "#c49b68"},
-        "Sexual":         {"bg": "rgba(244,67,54,0.12)",   "border": "#f44336", "text": "#f44336"},
-        "Suplemento":     {"bg": "rgba(96,125,139,0.12)",  "border": "#78909c", "text": "#78909c"},
-        "Acessório":      {"bg": "rgba(158,158,158,0.12)", "border": "#9e9e9e", "text": "#9e9e9e"},
+        "Metabolismo": {"bg": "rgba(255,107,53,0.12)", "border": "#ff6b35", "text": "#ff6b35"},
+        "Hormônios": {"bg": "rgba(0,150,255,0.12)", "border": "#0096ff", "text": "#0096ff"},
+        "Recuperação": {"bg": "rgba(76,175,80,0.12)", "border": "#4caf50", "text": "#4caf50"},
+        "Estética": {"bg": "rgba(233,30,99,0.12)", "border": "#e91e63", "text": "#e91e63"},
+        "Imunidade": {"bg": "rgba(156,39,176,0.12)", "border": "#9c27b0", "text": "#9c27b0"},
+        "Emagrecimento": {"bg": "rgba(255,193,7,0.12)", "border": "#ffc107", "text": "#ffc107"},
+        "Cognitivo": {"bg": "rgba(0,188,212,0.12)", "border": "#00bcd4", "text": "#00bcd4"},
+        "Longevidade": {"bg": "rgba(121,85,72,0.12)", "border": "#c49b68", "text": "#c49b68"},
+        "Sexual": {"bg": "rgba(244,67,54,0.12)", "border": "#f44336", "text": "#f44336"},
+        "Suplemento": {"bg": "rgba(96,125,139,0.12)", "border": "#78909c", "text": "#78909c"},
+        "Acessório": {"bg": "rgba(158,158,158,0.12)", "border": "#9e9e9e", "text": "#9e9e9e"},
     }
 
     try:
@@ -114,15 +289,10 @@ def gerar_site_vendas_completo():
         else:
             df = pd.read_csv(arquivo_dados)
         df.columns = [str(col).strip() for col in df.columns]
-
+        
         produtos_base = []
         for idx, row in df.iterrows():
-            nome_prod_raw = str(row.get('PRODUTO', 'N/A')).strip()
-            # Sanitize all text from spreadsheet before embedding in HTML/JS
-            nome_prod = sanitizar_texto(nome_prod_raw)
-            volume    = sanitizar_texto(str(row.get('VOLUME', '')))
-            medida    = sanitizar_texto(str(row.get('MEDIDA', '')))
-
+            nome_prod = str(row.get('PRODUTO', 'N/A')).strip()
             info = {"desc": "Informação técnica não disponível.", "cat": "Outro", "icon": "📦"}
             for chave, dados in infos_tecnicas.items():
                 if chave in nome_prod.upper():
@@ -130,142 +300,95 @@ def gerar_site_vendas_completo():
                     break
 
             cat = info["cat"]
-            cc  = cat_colors.get(cat, {"bg": "rgba(158,158,158,0.12)", "border": "#9e9e9e", "text": "#9e9e9e"})
-
-            estoque_raw   = str(row.get('ESTOQUE', row.get('STATUS', ''))).strip().upper()
-            is_available  = "DISPONÍVEL" in estoque_raw
-
-            # ── PROMOÇÃO ────────────────────────────────────────────────────
-            promo_raw   = row.get('PROMOÇÃO', row.get('PROMOCAO', row.get('Promoção', None)))
-            promo_pct   = parse_promo(promo_raw)   # float 0..1
-            preco_orig  = float(row.get('Preço (R$)', 0) or 0)
-            preco_final = round(preco_orig * (1 - promo_pct), 2) if promo_pct > 0 else preco_orig
+            cc = cat_colors.get(cat, {"bg": "rgba(158,158,158,0.12)", "border": "#9e9e9e", "text": "#9e9e9e"})
 
             produtos_base.append({
-                "id":          idx,
-                "nome":        nome_prod,
-                "espec":       f"{volume} {medida}".strip(),
-                "precoOrig":   preco_orig,
-                "preco":       preco_final,   # effective price (discounted)
-                "promoPct":    promo_pct,     # 0 = no promo, e.g. 0.10 = 10% off
-                "info":        info["desc"],
-                "cat":         cat,
-                "icon":        info["icon"],
-                "catBg":       cc["bg"],
-                "catBorder":   cc["border"],
-                "catText":     cc["text"],
-                "available":   is_available,
-                "imagem":      f"imagens_produtos/{nome_prod}.webp",
+                "id": idx,
+                "nome": nome_prod,
+                "espec": f"{row.get('VOLUME', '')} {row.get('MEDIDA', '')}".strip(),
+                "preco": float(row.get('Preço (U$)', 0)),
+                "info": info["desc"],
+                "cat": cat,
+                "icon": info["icon"],
+                "catBg": cc["bg"],
+                "catBorder": cc["border"],
+                "catText": cc["text"],
+                "imagem": f"imagens_produtos/{nome_prod}.webp"
             })
-
         js_produtos = json.dumps(produtos_base, ensure_ascii=False)
-
+        
     except Exception as e:
         print(f"Erro ao ler os dados: {e}")
         return
 
-    # ── Category filter buttons ──────────────────────────────────────────────
-    all_cats = sorted(set(p["cat"] for p in produtos_base))
+    # Build category filter buttons
+    all_cats = sorted(list(set(p["cat"] for p in produtos_base)))
+
     cat_buttons_html = '<button class="cat-btn active" data-cat="all" onclick="filtrarCat(\'all\')">Todos</button>\n'
     for cat in all_cats:
-        cc = cat_colors.get(cat, {"border": "#9e9e9e"})
-        border_color = cc["border"]
-        cat_buttons_html += (
-            f'<button class="cat-btn" data-cat="{cat}" '
-            f'onclick="filtrarCat(\'{cat}\')" '
-            f'style="--cat-color:{border_color}">{cat}</button>\n'
-        )
+        cc = cat_colors.get(cat, {"border": "#9e9e9e", "text": "#9e9e9e"})
+        cat_buttons_html += f'<button class="cat-btn" data-cat="{cat}" onclick="filtrarCat(\'{cat}\')" style="--cat-color:{cc["border"]}">{cat}</button>\n'
 
-    # ── Product cards ────────────────────────────────────────────────────────
+    # Build product table rows
     table_rows = ""
-    for p in produtos_base:
-        idx           = p["id"]
-        produto       = p["nome"]
-        espec         = p["espec"]
-        preco_orig    = p["precoOrig"]
-        preco_final   = p["preco"]
-        promo_pct     = p["promoPct"]
-        cat           = p["cat"]
-        icon          = p["icon"]
-        is_available  = p["available"]
-        estoque_label = "DISPONÍVEL" if is_available else "EM ESPERA"
-        cc            = cat_colors.get(cat, {"bg": "rgba(158,158,158,0.12)", "border": "#9e9e9e", "text": "#9e9e9e"})
-        cc_text       = cc["text"]
-        cc_bg         = cc["bg"]
-        cc_border     = cc["border"]
-
-        # Price display block
-        if promo_pct > 0:
-            pct_label   = f"{round(promo_pct * 100)}% OFF"
-            preco_html  = f'''
-                <div class="pc-price-wrap promo">
-                  <span class="pc-badge-promo">{pct_label}</span>
-                  <span class="pc-price-orig">R$ {preco_orig:,.2f}</span>
-                  <span class="pc-price promo-price">R$ {preco_final:,.2f}</span>
-                </div>'''
-        else:
-            preco_html = f'''
-                <div class="pc-price-wrap">
-                  <span class="pc-price">R$ {preco_orig:,.2f}</span>
-                </div>'''
+    for idx, row in df.iterrows():
+        produto = str(row.get('PRODUTO', 'N/A')).strip()
+        espec = f"{row.get('VOLUME', '')} {row.get('MEDIDA', '')}".strip()
+        preco = row.get('Preço (U$)', 0)
+        estoque_status = str(row.get('ESTOQUE', row.get('STATUS', ''))).strip().upper()
+        
+        is_available = "DISPONÍVEL" in estoque_status
+        
+        info = {"cat": "Outro", "icon": "📦"}
+        for chave, dados in infos_tecnicas.items():
+            if chave in produto.upper():
+                info = dados
+                break
+        cat = info["cat"]
 
         table_rows += f"""
         <div class="product-card" data-cat="{cat}" data-available="{'1' if is_available else '0'}">
             <div class="pc-top">
-                <div class="pc-icon">{icon}</div>
+                <div class="pc-icon">{info["icon"]}</div>
                 <div class="pc-info">
                     <h3 class="pc-name">{produto}</h3>
                     <span class="pc-spec">{espec}</span>
-                    <span class="pc-cat"
-                          style="color:{cc_text};background:{cc_bg};border:1px solid {cc_border};">{cat}</span>
+                    <span class="pc-cat" style="color:var(--cat-text);background:var(--cat-bg);border:1px solid var(--cat-border);" 
+                          data-cat-bg="{cat_colors.get(cat,{}).get('bg','')}" 
+                          data-cat-border="{cat_colors.get(cat,{}).get('border','')}" 
+                          data-cat-text="{cat_colors.get(cat,{}).get('text','')}">{cat}</span>
                 </div>
             </div>
             <div class="pc-bottom">
                 <div class="pc-price-status">
-                    {preco_html}
-                    <span class="pc-status {'st-ok' if is_available else 'st-out'}">{estoque_label}</span>
+                    <span class="pc-price">U$ {preco:,.2f}</span>
+                    <span class="pc-status {'st-ok' if is_available else 'st-out'}">{estoque_status}</span>
                 </div>
                 <div class="pc-actions">
-                    <button class="btn-detail" onclick="abrirInfo({idx})">Detalhes</button>
+                    <button class="btn-detail" onclick="abrirInfo({idx})">DETAILS - Detalhes</button>
                     <button class="btn-cart" onclick="adicionar({idx})" {'disabled' if not is_available else ''}>
-                        {'Adicionar' if is_available else 'Indisponível'}
+                        {'ADD TO CART - Adicionar' if is_available else 'OFF STOCK - Indisponível'}
                     </button>
                 </div>
             </div>
         </div>
 """
 
-    # ════════════════════════════════════════════════════════════════════════
     html = f"""<!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<!--
-  ╔══════════════════════════════════════════════════════════════════╗
-  ║  SECURITY NOTES (server-operator checklist):                     ║
-  ║  • Serve this file over HTTPS only (TLS 1.2+).                   ║
-  ║  • Add Content-Security-Policy header on the web server:          ║
-  ║      default-src 'self'; script-src 'self' 'unsafe-inline';       ║
-  ║      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;║
-  ║      connect-src 'self' https://viacep.com.br                     ║
-  ║        https://brasilapi.com.br https://wa.me;                    ║
-  ║      font-src https://fonts.gstatic.com;                          ║
-  ║      img-src 'self' data:;                                        ║
-  ║  • Add X-Frame-Options: DENY and X-Content-Type-Options: nosniff  ║
-  ║  • The WhatsApp number is hardcoded — change before deploy.        ║
-  ╚══════════════════════════════════════════════════════════════════╝
--->
-<title>G-LAB PEPTIDES — Catálogo</title>
+<title>G-LAB PEPTIDES — Store — Catálogo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{{margin:0;padding:0;box-sizing:border-box}}
 :root{{
-  --bg:#07080a;--surface:#0e1117;--surface2:#161b22;--surface3:#1c2333;
-  --text:#e6edf3;--text2:#8b949e;--accent:#58a6ff;--accent2:#1f6feb;
-  --green:#3fb950;--red:#f85149;--gold:#d29922;--pink:#f778ba;
-  --radius:16px;--font:'Space Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+--bg:#07080a;--surface:#0e1117;--surface2:#161b22;--surface3:#1c2333;
+--text:#e6edf3;--text2:#8b949e;--accent:#58a6ff;--accent2:#1f6feb;
+--green:#3fb950;--red:#f85149;--gold:#d29922;--pink:#f778ba;
+--radius:16px;--font:'Space Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
 }}
 body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden}}
 .grain{{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;
@@ -274,13 +397,14 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
 .glow-orb{{position:fixed;width:600px;height:600px;border-radius:50%;filter:blur(120px);opacity:0.07;pointer-events:none;z-index:0}}
 .glow-1{{top:-200px;left:-100px;background:var(--accent)}}
 .glow-2{{bottom:-200px;right:-100px;background:var(--pink)}}
+
 .wrap{{max-width:1100px;margin:0 auto;padding:20px;position:relative;z-index:1;padding-bottom:240px}}
 .header{{text-align:center;padding:40px 0 20px}}
 .logo-text{{font-size:2.4rem;font-weight:700;letter-spacing:-1px;
   background:linear-gradient(135deg,var(--accent),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}}
 .logo-sub{{font-family:var(--mono);font-size:0.8rem;color:var(--text2);margin-top:4px;letter-spacing:2px;text-transform:uppercase}}
 
-/* ── FEATURED ─────────────────────────────────────── */
+/* FEATURED SECTION */
 .featured-section{{margin:30px 0}}
 .section-title{{font-size:1.1rem;font-weight:600;color:var(--text2);margin-bottom:16px;display:flex;align-items:center;gap:8px}}
 .section-title span{{display:inline-block;width:4px;height:20px;background:linear-gradient(var(--accent),var(--pink));border-radius:2px}}
@@ -289,54 +413,28 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
 .featured-scroll::-webkit-scrollbar-track{{background:var(--surface)}}
 .featured-scroll::-webkit-scrollbar-thumb{{background:var(--accent);border-radius:4px}}
 .feat-card{{min-width:280px;max-width:320px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--surface3);
-  border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;flex-shrink:0;transition:transform 0.3s,border-color 0.3s}}
+  border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;flex-shrink:0;
+  transition:transform 0.3s,border-color 0.3s}}
 .feat-card:hover{{transform:translateY(-4px);border-color:var(--accent)}}
 .feat-card::before{{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--pink))}}
-.feat-card.promo-card::before{{background:linear-gradient(90deg,#ff6b35,#ffc107)}}
 .feat-icon{{font-size:2rem;margin-bottom:12px}}
 .feat-name{{font-size:1.05rem;font-weight:600;margin-bottom:4px}}
 .feat-spec{{font-size:0.75rem;color:var(--text2);font-family:var(--mono)}}
 .feat-desc{{font-size:0.8rem;color:var(--text2);margin-top:10px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}}
-
-/* promo price in featured card */
-.feat-price-wrap{{margin-top:12px}}
-.feat-price-wrap.promo .feat-badge{{display:inline-block;background:linear-gradient(135deg,#ff6b35,#ffc107);color:#000;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px}}
-.feat-price-wrap.promo .feat-orig{{font-size:0.8rem;color:var(--text2);text-decoration:line-through}}
-.feat-price{{font-size:1.2rem;font-weight:700;color:var(--green)}}
-.feat-price-wrap.promo .feat-price{{color:#ffc107}}
-.feat-price-wrap .feat-badge{{display:none}}
-.feat-price-wrap .feat-orig{{display:none}}
-
+.feat-price{{font-size:1.2rem;font-weight:700;color:var(--green);margin-top:12px}}
 .feat-btn{{margin-top:10px;width:100%;padding:10px;border:none;border-radius:10px;font-weight:600;font-family:var(--font);
   cursor:pointer;background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;font-size:0.85rem;transition:opacity 0.2s}}
 .feat-btn:hover{{opacity:0.85}}
 
-/* ── PROMO BADGE in product cards ─────────────────── */
-.pc-price-wrap{{display:flex;flex-direction:column;gap:2px}}
-.pc-badge-promo{{display:inline-block;font-size:0.62rem;font-weight:700;background:linear-gradient(135deg,#ff6b35,#ffc107);
-  color:#000;padding:2px 8px;border-radius:12px;width:fit-content}}
-.pc-price-orig{{font-size:0.78rem;color:var(--text2);text-decoration:line-through}}
-.promo-price{{color:#ffc107 !important}}
 
-/* ── ALERTS ───────────────────────────────────────── */
+
+/* ALERTS */
 .alert-bar{{background:var(--surface);border:1px solid var(--surface3);border-left:4px solid var(--accent);
   padding:14px 18px;border-radius:12px;margin-bottom:14px;font-size:0.85rem;line-height:1.5;color:var(--text2);position:relative}}
 .alert-bar strong{{color:var(--text)}}
 .alert-bar .close-x{{position:absolute;top:10px;right:14px;cursor:pointer;color:var(--text2);font-size:1.1rem}}
-.cert-bar{{background:var(--surface);border:1px solid var(--surface3);border-left:4px solid var(--green);
-  padding:14px 18px;border-radius:12px;margin-bottom:14px;font-size:0.85rem;line-height:1.5;color:var(--text2);
-  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}}
-.cert-bar strong{{color:var(--text)}}
-.btn-cert{{padding:8px 16px;border:none;border-radius:10px;background:var(--green);color:#fff;
-  font-size:0.8rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:opacity 0.2s;white-space:nowrap}}
-.btn-cert:hover{{opacity:0.85}}
-.cert-list{{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:16px 0}}
-.cert-link{{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 10px;
-  background:var(--surface2);border:1px solid var(--surface3);border-radius:12px;color:var(--text);
-  text-decoration:none;font-size:0.85rem;font-weight:600;transition:all 0.2s}}
-.cert-link:hover{{border-color:var(--green);color:var(--green);transform:translateY(-2px)}}
 
-/* ── SEARCH & FILTERS ─────────────────────────────── */
+/* SEARCH & FILTERS */
 .search-area{{margin:24px 0 16px;display:flex;gap:10px;flex-wrap:wrap}}
 .search-input{{flex:1;min-width:200px;padding:12px 16px;border:1px solid var(--surface3);border-radius:12px;
   background:var(--surface);color:var(--text);font-size:0.9rem;font-family:var(--font);outline:none;transition:border-color 0.2s}}
@@ -351,7 +449,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
   font-size:0.75rem;font-family:var(--font);cursor:pointer;white-space:nowrap;transition:all 0.2s}}
 .cat-btn:hover,.cat-btn.active{{border-color:var(--accent);color:var(--accent);background:rgba(88,166,255,0.08)}}
 
-/* ── PRODUCT GRID ─────────────────────────────────── */
+/* PRODUCT GRID */
 .product-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}}
 .product-card{{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius);padding:18px;
   transition:all 0.3s;position:relative;overflow:hidden}}
@@ -379,7 +477,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
 .btn-cart:hover{{background:var(--accent)}}
 .btn-cart:disabled{{background:var(--surface3);color:var(--text2);cursor:not-allowed}}
 
-/* ── CEP ──────────────────────────────────────────── */
+/* CEP */
 .cep-section{{background:var(--surface);border:1px solid var(--surface3);border-radius:var(--radius);padding:20px;margin:24px 0}}
 .cep-section h3{{font-size:0.95rem;margin-bottom:12px}}
 .cep-row{{display:flex;gap:10px}}
@@ -387,7 +485,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
 .cep-row button{{white-space:nowrap}}
 #resultado-frete{{margin-top:10px;font-size:0.85rem;color:var(--accent);font-weight:600}}
 
-/* ── MODAL ────────────────────────────────────────── */
+/* MODAL */
 .modal-overlay{{display:none;position:fixed;z-index:2000;top:0;left:0;width:100%;height:100%;
   background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);overflow-y:auto}}
 .modal-box{{background:var(--surface);border:1px solid var(--surface3);margin:6% auto;padding:28px;
@@ -400,21 +498,22 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
   font-family:var(--font);font-weight:600;cursor:pointer;font-size:0.9rem;transition:background 0.2s}}
 .modal-close:hover{{background:var(--surface2)}}
 
-/* ── WHATSAPP FAB ─────────────────────────────────── */
-.whatsapp-fab{{position:fixed;bottom:94px;right:24px;z-index:950;width:58px;height:58px;border-radius:50%;
-  background:linear-gradient(135deg,#25D366,#128C7E);border:none;color:#fff;
-  cursor:pointer;box-shadow:0 4px 24px rgba(37,211,102,0.35);display:flex;align-items:center;justify-content:center;
-  transition:transform 0.2s;text-decoration:none}}
-.whatsapp-fab:hover{{transform:scale(1.08)}}
-
-
-/* ── CART ─────────────────────────────────────────── */
+/* CART */
 .cart-fab{{position:fixed;bottom:24px;right:24px;z-index:900;width:58px;height:58px;border-radius:50%;
   background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;color:#fff;font-size:1.4rem;
   cursor:pointer;box-shadow:0 4px 24px rgba(88,166,255,0.3);display:none;align-items:center;justify-content:center;transition:transform 0.2s}}
 .cart-fab:hover{{transform:scale(1.08)}}
 .cart-fab .badge{{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:0.65rem;
   width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700}}
+
+
+/* ── WHATSAPP FAB ─────────────────────────────────── */
+.whatsapp-fab{{position:fixed;bottom:94px;right:24px;z-index:950;width:58px;height:58px;border-radius:50%;
+  background:linear-gradient(135deg,#25D366,#128C7E);border:none;color:#fff;
+  cursor:pointer;box-shadow:0 4px 24px rgba(37,211,102,0.35);display:flex;align-items:center;justify-content:center;
+  transition:transform 0.2s;text-decoration:none}}
+.whatsapp-fab:hover{{transform:scale(1.08)}}
+  
 .cart-panel{{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--surface3);
   border-radius:20px 20px 0 0;z-index:1000;display:none;box-shadow:0 -8px 40px rgba(0,0,0,0.4);
   max-height:80vh;overflow-y:auto;padding:20px}}
@@ -426,31 +525,109 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
 .cart-list::-webkit-scrollbar-thumb{{background:var(--surface3);border-radius:4px}}
 .cart-item{{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid var(--surface3);font-size:0.82rem}}
 .cart-item:last-child{{border:none}}
-.cart-item-promo-label{{font-size:0.65rem;color:#ffc107;margin-left:4px}}
 .btn-rm{{background:var(--red);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;font-weight:700;font-size:0.75rem;margin-left:8px}}
 .coupon-row{{display:flex;gap:8px;margin:12px 0}}
 .coupon-row input{{flex:1;padding:10px;border:1px solid var(--surface3);border-radius:10px;background:var(--surface2);color:var(--text);font-family:var(--font);font-size:0.8rem}}
 .coupon-row button{{padding:10px 16px;border:none;border-radius:10px;background:var(--gold);color:#000;font-weight:700;font-size:0.8rem;cursor:pointer}}
-.coupon-note{{font-size:0.72rem;color:var(--text2);margin:-8px 0 8px;line-height:1.4}}
 .ship-row{{display:flex;justify-content:space-between;align-items:center;font-size:0.82rem;color:var(--gold);font-weight:600;margin:6px 0}}
 .discount-line{{display:none;justify-content:space-between;color:var(--gold);font-size:0.85rem;margin:4px 0}}
 .total-row{{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:700;padding-top:10px;border-top:1px solid var(--surface3);margin-top:8px}}
 .btn-checkout{{width:100%;padding:14px;border:none;border-radius:14px;font-weight:700;font-size:0.95rem;
   background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;cursor:pointer;margin-top:10px;font-family:var(--font);transition:opacity 0.2s}}
 .btn-checkout:hover{{opacity:0.85}}
+
 .form-group{{margin-bottom:12px}}
 .form-group input,.form-group select{{width:100%;padding:12px;border:1px solid var(--surface3);border-radius:10px;
   background:var(--surface2);color:var(--text);font-family:var(--font);font-size:0.9rem}}
 .form-group input::placeholder{{color:var(--text2)}}
 .form-row{{display:flex;gap:10px;margin-bottom:12px}}
 .form-row input{{flex:1}}
+
 .no-results{{text-align:center;padding:60px 20px;color:var(--text2)}}
 .no-results span{{font-size:2rem;display:block;margin-bottom:12px}}
+
 @media(max-width:600px){{
   .product-grid{{grid-template-columns:1fr}}
   .logo-text{{font-size:1.8rem}}
   .feat-card{{min-width:240px}}
 }}
+
+.cert-bar{{background:var(--surface);border:1px solid var(--surface3);border-left:4px solid var(--green);
+  padding:14px 18px;border-radius:12px;margin-bottom:14px;font-size:0.85rem;line-height:1.5;color:var(--text2);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}}
+.cert-bar strong{{color:var(--text)}}
+.btn-cert{{padding:8px 16px;border:none;border-radius:10px;background:var(--green);color:#fff;
+  font-size:0.8rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:opacity 0.2s;white-space:nowrap}}
+.btn-cert:hover{{opacity:0.85}}
+.cert-list{{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:16px 0}}
+.cert-link{{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 10px;
+  background:var(--surface2);border:1px solid var(--surface3);border-radius:12px;color:var(--text);
+  text-decoration:none;font-size:0.85rem;font-weight:600;transition:all 0.2s}}
+.cert-link:hover{{border-color:var(--green);color:var(--green);transform:translateY(-2px)}}
+
+
+/* ===== MODAL G-LAB ===== */
+#glab-modal-overlay {{
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; animation: glabFade .3s ease;
+}}
+#glab-modal {{
+  position: relative; width: 100%; max-width: 640px;
+  border-radius: 20px; overflow: hidden;
+  border: 1px solid rgba(220,38,38,0.4);
+  box-shadow: 0 0 60px rgba(220,38,38,0.45);
+  background-color: #0a0a0a;
+  background-image: linear-gradient(rgba(0,0,0,0.82), rgba(0,0,0,0.92)), url('1.png');
+  background-size: cover; background-position: center;
+  color: #fff; padding: 40px 32px;
+  animation: glabZoom .3s ease;
+}}
+#glab-close {{
+  position: absolute; top: 16px; right: 16px;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(255,255,255,0.1); color:#fff;
+  border: none; cursor: pointer; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}}
+#glab-close:hover {{ background: #dc2626; transform: scale(1.1); }}
+.glab-eyebrow {{
+  color:#ef4444; letter-spacing:.3em; font-size:12px;
+  font-weight:600; text-transform:uppercase; text-align:center;
+  margin-bottom: 12px;
+}}
+.glab-title {{
+  text-align:center; font-size: 32px; font-weight: 800;
+  margin: 0 0 8px; letter-spacing:-0.02em;
+}}
+.glab-title span {{ color:#dc2626; }}
+.glab-divider {{ width:64px; height:2px; background:#dc2626; margin: 16px auto 28px; }}
+.glab-list {{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:14px; }}
+.glab-item {{
+  display:flex; gap:14px; padding:16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; transition: all .2s;
+}}
+.glab-item:hover {{ border-color: rgba(220,38,38,0.5); background: rgba(255,255,255,0.07); }}
+.glab-icon {{
+  width:44px; height:44px; border-radius:10px; flex-shrink:0;
+  background: rgba(220,38,38,0.15);
+  display:flex; align-items:center; justify-content:center; font-size:24px;
+}}
+.glab-item h3 {{ margin:0 0 4px; font-size:16px; font-weight:600; }}
+.glab-item p  {{ margin:0; font-size:14px; color: rgba(255,255,255,0.7); line-height:1.5; }}
+.glab-btn {{
+  margin-top: 28px; width:100%; padding: 14px;
+  background:#dc2626; color:#fff; border:none; border-radius:12px;
+  font-weight:600; text-transform:uppercase; letter-spacing:.1em;
+  font-size:14px; cursor:pointer; transition:all .2s;
+}}
+.glab-btn:hover {{ background:#b91c1c; box-shadow: 0 0 30px rgba(220,38,38,0.6); }}
+@keyframes glabFade {{ from{{opacity:0}} to{{opacity:1}} }}
+@keyframes glabZoom {{ from{{opacity:0; transform:scale(.95)}} to{{opacity:1; transform:scale(1)}} }}
 
 /* ===== MODAL G-LAB ===== */
 #glab-modal-overlay {{
@@ -647,99 +824,97 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
 </style>
 </head>
 <body>
+
 <div id="glab-modal-overlay" onclick="if(event.target===this)document.getElementById('glab-modal-overlay').remove()">
   <div id="glab-modal">
     <button id="glab-close" onclick="document.getElementById('glab-modal-overlay').remove()">✕</button>
-    <p class="glab-eyebrow">Bem-vindo à G-LAB</p>
-    <h2 class="glab-title">Por que escolher a <span>G-LAB</span>?</h2>
+    <p class="glab-eyebrow">Bem-vindo à G-LAB / Welcome to G-LAB</p>
+    <h2 class="glab-title">Por que escolher a / Why choose <span>G-LAB</span>?</h2>
     <div class="glab-divider"></div>
     <ul class="glab-list">
       <li class="glab-item">
         <div class="glab-icon">🤝</div>
-        <div><h3>Atendimento Personalizado</h3><p>Suporte dedicado e exclusivo para cada cliente.</p></div>
+        <div><h3>Atendimento Personalizado / Personalized Support</h3><p>Suporte dedicado e exclusivo para cada cliente. / Dedicated and exclusive support for each client.</p></div>
       </li>
       <li class="glab-item">
         <div class="glab-icon">🧬</div>
-        <div><h3>Auxílio nos Protocolos</h3><p>Orientação especializada na montagem do seu protocolo.</p></div>
+        <div><h3>Auxílio nos Protocolos / Protocol Assistance</h3><p>Orientação especializada na montagem do seu protocolo. / Specialized guidance for creating your protocol.</p></div>
       </li>
       <li class="glab-item">
         <div class="glab-icon">💬</div>
-        <div><h3>Acompanhamento Completo</h3><p>Esclarecimento de dúvidas durante todo o tratamento.</p></div>
+        <div><h3>Acompanhamento Completo / Complete Monitoring</h3><p>Esclarecimento de dúvidas durante todo o tratamento / Clarification of questions throughout the treatment.</p></div>
       </li>
       <li class="glab-item">
         <div class="glab-icon">🛡️</div>
-        <div><h3>Compra Garantida</h3><p>Se seu pacote não chegar ou for extraviado, o reembolso é <strong>TOTAL</strong>!</p></div>
+        <div><h3>Compra Garantida / Guaranteed Purchase</h3><p>Se seu pacote não chegar ou for extraviado, o reembolso é <strong>TOTAL</strong>! / If your package doesn't arrive or gets lost, the refund is FULL!</p></div>
       </li>
     </ul>
-    <button class="glab-btn" onclick="document.getElementById('glab-modal-overlay').remove()">Entrar no site ✨</button>
+    <button class="glab-btn" onclick="document.getElementById('glab-modal-overlay').remove()">Entrar no site / Enter the site ✨</button>
   </div>
 </div>
+
+
+
 <div class="grain"></div>
 <div class="glow-orb glow-1"></div>
 <div class="glow-orb glow-2"></div>
+
 <div class="wrap">
   <div class="header">
     <div class="logo-text">G-LAB PEPTIDES</div>
     <div class="logo-sub">Research · Performance · Longevity</div>
   </div>
-  <div class="cert-bar">
-    <div><strong>🔬 Certificados de pureza:</strong> Consulte os laudos de pureza dos nossos peptídeos.</div>
-    <button class="btn-cert" onclick="abrirCertificados()">Ver Certificados</button>
+    <div class="cert-bar">
+  <div><strong>🔬 Certificados de pureza / CERTIFICATES OF PURITY:</strong> Consulte os laudos de pureza dos nossos peptídeos. View the purity reports for our peptides. </div>
+  <button class="btn-cert" onclick="abrirCertificados()">Ver Certificados/View Certificates</button>
   </div>
+
   <div class="reconstituicao-bar">
-    <div><strong>🔬 Reconstituição:</strong> Veja como fazer a reconstituição dos nossos peptídeos.</div>
-    <button class="btn-cert" onclick="abrirReconstituicao()">Ver Reconstituição</button>
+    <div><strong>🔬 Reconstituição/Reconstitution:</strong> Veja como fazer a reconstituição dos nossos peptídeos./Learn how to properly reconstitute our peptides.</div>
+    <button class="btn-cert" onclick="abrirReconstituicao()">Ver Reconstituição/View Reconstitution Guide</button>
   </div>
   <div class="guia-calculo-bar">
-    <div><strong>📊 Guia de Cálculo:</strong> Aprenda a calcular a dosagem correta dos peptídeos.</div>
-    <button class="btn-cert" onclick="abrirGuiaCalculo()">Ver Guia de Cálculo</button>
+    <div><strong>📊 Guia de Cálculo/Dosage Guide:</strong> Aprenda a calcular a dosagem correta dos peptídeos./Learn how to calculate the correct peptide dosage.</div>
+    <button class="btn-cert" onclick="abrirGuiaCalculo()">Ver Guia de Cálculo/View Dosage Guide</button>
+  </div>  
+  <div class="alert-bar">
+    <span class="close-x" onclick="this.parentElement.style.display='none'">&times;</span>
+    <strong>📢 Notice-Aviso:</strong> 
   </div>
   <div class="alert-bar">
     <span class="close-x" onclick="this.parentElement.style.display='none'">&times;</span>
-    <strong>📢 Aviso:</strong> Previsão de chegada de novos itens 30/07/2026. PEDIDOS ACIMA DE R$1.000 ACOMPANHAM DILUENTE. 
-  </div>
-  <div class="alert-bar">
-    <span class="close-x" onclick="this.parentElement.style.display='none'">&times;</span>
-    <strong>⚗️ Importante:</strong> Os produtos são envasados em forma sólida, assim não necessitam de refrigeração para manter as propriedades. O produto deve ser diluído em solução bacteriostática (vendida à parte). Após diluição manter refrigerado!<br><strong>NOME DA SOLUÇÃO:</strong> BACTERIOSTATIC WATER.
+    <strong>⚗️ IMPORTANT- Importante:</strong> Products are filled in solid form, so they do not require refrigeration to maintain their properties. The product must be diluted in a bacteriostatic solution (sold separately). Keep refrigerated after dilution! Os produtos são envasados em forma sólida, assim não necessitam de refrigeração para manter as propriedades. O produto deve ser diluído em solução bacteriostática (vendida à parte). Após diluição manter refrigerado!. <br><strong>NOME DA SOLUÇÃO:</strong> BACTERIOSTATIC WATER.
   </div>
 
   <div class="featured-section">
-    <div class="section-title"><span></span> Destaques do Dia</div>
+    <div class="section-title"><span></span> Daily Highlights - Destaques do Dia</div>
     <div class="featured-scroll" id="featured-scroll"></div>
   </div>
 
-  <div class="cep-section">
-    <h3>🚚 Calcule o Frete</h3>
-    <div class="cep-row">
-      <input type="tel" id="cep-destino" class="search-input" placeholder="00000-000" style="min-width:auto">
-      <button id="btn-calc" onclick="calcularFrete()" class="btn-cart" style="padding:12px 20px;font-size:0.85rem">Localizar</button>
-    </div>
-    <div id="resultado-frete"></div>
-  </div>
 
   <div class="search-area">
-    <input type="text" class="search-input" id="search-input" placeholder="Buscar produto..." oninput="filtrarProdutos()">
-    <button class="toggle-avail" id="toggle-avail" onclick="toggleAvail()">Apenas Disponíveis</button>
+    <input type="text" class="search-input" id="search-input" placeholder="Search products - Buscar produto..." oninput="filtrarProdutos()">
+    <button class="toggle-avail" id="toggle-avail" onclick="toggleAvail()">Only in stock - Apenas Disponíveis</button>
   </div>
   <div class="cat-filters" id="cat-filters">
     {cat_buttons_html}
   </div>
+
   <div class="product-grid" id="product-grid">
     {table_rows}
   </div>
   <div class="no-results" id="no-results" style="display:none">
     <span>🔍</span>
-    Nenhum produto encontrado.
+    No products found - Nenhum produto encontrado.
   </div>
 </div>
 
 <!-- WHATSAPP FAB -->
-<a class="whatsapp-fab" href="https://wa.me/17746222523" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+<a class="whatsapp-fab" href="https://wa.me/17743519845" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
   <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
   </svg>
 </a>
-
 
 <!-- FAB -->
 <button class="cart-fab" id="cart-fab" onclick="toggleCartPanel()">
@@ -748,42 +923,40 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
 
 <!-- CART PANEL -->
 <div class="cart-panel" id="cart-panel">
-  <h3>🛒 Pedido (<span id="cart-count">0</span>)<button onclick="toggleCartPanel()">▾</button></h3>
+  <h3>🛒 Order - Pedido (<span id="cart-count">0</span>)<button onclick="toggleCartPanel()">▾</button></h3>
   <div class="cart-list" id="cart-list"></div>
   <div class="coupon-row">
-    <input type="text" id="coupon-code" placeholder="Cupom de Desconto" maxlength="30">
-    <button onclick="aplicarCupom()">Aplicar</button>
+    <input type="text" id="coupon-code" placeholder="Coupon Code - Cupom de Desconto">
+    <button onclick="aplicarCupom()">Apply - Aplicar</button>
   </div>
-  <p class="coupon-note" id="coupon-note" style="display:none"></p>
   <div id="ship-info-container" class="ship-row" style="display:none">
     <span id="ship-info-text"></span>
     <button class="btn-rm" style="background:rgba(255,255,255,0.15)" onclick="removerFrete()">✖</button>
   </div>
   <div id="discount-row" class="discount-line">
-    <span>Desconto (<span id="discount-name"></span>):</span>
-    <span>- R$ <span id="discount-val">0.00</span></span>
+    <span>Discount - Desconto (<span id="discount-name"></span>):</span>
+    <span>- U$ <span id="discount-val">0.00</span></span>
   </div>
   <div class="total-row">
-    <span>TOTAL GERAL:</span>
-    <span>R$ <span id="total-val">0.00</span></span>
+    <span>SUBTOTAL - TOTAL GERAL:</span>
+    <span>U$ <span id="total-val">0.00</span></span>
   </div>
-  <button class="btn-checkout" onclick="abrirCheckout()">Ir para Pagamento</button>
+  <button class="btn-checkout" onclick="abrirCheckout()">Payments - Pagamento</button>
 </div>
 
 <!-- MODAL INFO -->
-<div class="modal-overlay" id="modalInfo" role="dialog" aria-modal="true" aria-labelledby="info-titulo">
+<div class="modal-overlay" id="modalInfo">
   <div class="modal-box">
     <h2 id="info-titulo"></h2>
     <p id="info-spec" style="font-size:0.8rem;color:var(--text2);font-family:var(--mono);margin-bottom:0"></p>
     <div class="modal-body" id="info-texto"></div>
     <img id="info-imagem" src="" alt="Imagem do Produto"
-      style="width:100%;border-radius:12px;margin:12px 0;display:none;"
-      onerror="this.style.display='none'">
-    <button onclick="fecharInfo()" class="modal-close">Fechar</button>
+      style="width:100%;border-radius:12px;margin:12px 0;display:none;">
+    <button onclick="fecharInfo()" class="modal-close">Close -  Fechar</button>
   </div>
 </div>
 
-<!-- MODAL CERTIFICADOS -->
+
 <div class="modal-overlay" id="modalCertificados" role="dialog" aria-modal="true" aria-labelledby="cert-titulo">
   <div class="modal-box">
     <h2 id="cert-titulo">🔬 Certificados de Pureza</h2>
@@ -826,194 +999,130 @@ body{{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:
 </div>
 
 <!-- MODAL CHECKOUT -->
-
-<div class="modal-overlay" id="modalCheckout" role="dialog" aria-modal="true">
+<div class="modal-overlay" id="modalCheckout">
   <div class="modal-box" style="text-align:left">
-    <h2>📦 Dados de Entrega</h2>
-    <div class="form-group"><input type="text"  id="f_nome"   placeholder="Nome Completo"          maxlength="120"></div>
-    <div class="form-group"><input type="text"  id="f_cpf"    placeholder="CPF"                    maxlength="14"></div>
-    <div class="form-group"><input type="text"  id="f_end"    placeholder="Endereço (Rua/Av)"       maxlength="200"></div>
-    <div class="form-row">
-      <input type="text"  id="f_num"    placeholder="Nº"     style="max-width:100px" maxlength="10">
-      <input type="text"  id="f_bairro" placeholder="Bairro"                         maxlength="100">
+    <div class="modal-box" style="text-align:left">
+    <h2>📦 Delivery Details | Dados de Entrega</h2>
+    <div class="form-group"><input type="text" id="zip-code" placeholder="ZIP Code | Código Postal"></div>
+    <div class="form-group"><input type="text" id="f_nome" placeholder="Full Name | Nome Completo"></div>
+    <div class="form-group"><input type="text" id="f_end" placeholder="Address (Street/Ave) | Endereço (Rua/Av)"></div>
+    <div class="form-row">         
     </div>
-    <div class="form-group"><input type="text"  id="f_comp"   placeholder="Complemento (Opcional)" maxlength="100"></div>
+    <div class="form-group"><input type="text" id="f_comp" placeholder="Complement (Optional) | Complemento (Opcional)"></div>
     <div class="form-row">
-      <input type="text"  id="f_cidade" placeholder="Cidade"                         maxlength="100">
-      <input type="text"  id="f_estado" placeholder="UF"    style="max-width:80px"   maxlength="2">
+      <input type="text" id="f_cidade" placeholder="City | Cidade">
+      <input type="text" id="f_estado" placeholder="State | UF" style="max-width:80px">
     </div>
-    <div class="form-group"><input type="tel"   id="f_tel"    placeholder="WhatsApp"               maxlength="20"></div>
+    <div class="form-group"><input type="tel" id="f_tel" placeholder="WhatsApp"></div>
     <div class="form-group">
       <select id="f_pgto">
-        <option value="Pix">Pix (Aprovação Imediata)</option>
-        <option value="Cartão de crédito">Cartão de Crédito (até 12x)</option>
+        <option value="Zelle">Zelle </option>
+        <option value="Invoice">INVOICE</option>
       </select>
     </div>
-    <button onclick="enviarPedido()" class="btn-checkout" style="margin-top:0">ENVIAR PARA WHATSAPP</button>
-    <button onclick="fecharCheckout()" style="background:none;border:none;width:100%;color:var(--text2);margin-top:14px;cursor:pointer;font-family:var(--font)">Cancelar</button>
+    <button onclick="enviarPedido()" class="btn-checkout" style="margin-top:0">SEND WHATSAPP - ENVIAR PARA WHATSAPP</button>
+    <button onclick="fecharCheckout()" style="background:none;border:none;width:100%;color:var(--text2);margin-top:14px;cursor:pointer;font-family:var(--font)">Close - Cancelar</button>
   </div>
 </div>
 
 <script>
-// ─── DATA (server-rendered, all values sanitized in Python before embed) ───────
+// 1. DADOS E ESTADO
 const PRODUTOS = {js_produtos};
+let carrinho = [];
+let freteV = 0
+let freteD = "Flat Rate: $ 12.00 | Frete Único: $ 12,00";
+let cupomAtivo = null;
+let catAtual = "all";
+let apenasDisp = false;
 
-// ─── STATE ─────────────────────────────────────────────────────────────────────
-let carrinho    = [];
-let freteV      = 0, freteD = "";
-let cupomAtivo  = null;
-let catAtual    = "all";
-let apenasDisp  = false;
+async function buscarDadosZip(zip) {{
+  try {{
+    const r = await fetch(`https://api.zippopotam.us/us/${{zip}}`);
+    const d = await r.json();
+    if (r.ok && d.places && d.places.length > 0) {{
+      return {{
+        localidade: d.places[0]["place name"],
+        uf: d.places[0]["state abbreviation"].toUpperCase(),
+        logradouro: "",
+        bairro: ""
+      }};
+    }}
+  }} catch (e) {{}}
 
-const REGIOES = {{
-  SUL:           ['PR','SC','RS'],
-  SUDESTE:       ['SP','RJ','MG','ES'],
-  'CENTRO-OESTE':['DF','GO','MT','MS'],
-  NORTE:         ['AM','RR','AP','PA','TO','RO','AC'],
-  NORDESTE:      ['BA','SE','AL','PE','PB','RN','CE','PI','MA'],
-}};
+  try {{
+    const r = await fetch(`https://www.zipcodeapi.com/rest/LTruIhU3BvIaOekI0j9OE2rjxjTK6ev2quJ1ikWo0MFQ8H03qgSx8xSW62pzmUwh/info.json/${{zip}}/degrees`);
+    const d = await r.json();
+    if (r.ok) {{
+      return {{
+        localidade: d.city,
+        uf: d.state.toUpperCase(),
+        logradouro: "",
+        bairro: ""
+      }};
+    }}
+  }} catch (e) {{}}
 
-const FRETES_CIDADES = {{
-  'CURITIBA-PR': 20.00,
-  'ALMIRANTE TAMANDARÉ-PR': 20.00,
-  'CAMPO LARGO-PR': 20.00,
-  'FAZENDA RIO GRANDE-PR': 20.00,
-  'PIRAQUARA-PR': 20.00,
-  }} 
-
-// Whitelisted coupon table (codes → discount fraction, 0..1)
-const CUPONS = {{
-  'BRUNA5': 0.05,'GILMARA5':0.05,'DAFNE10':0.10,'NOS5':0.05,'ROGERIO5':0.05,
-  'ANDERSON5':0.05,'JAQUE5':0.05,'CABRAL5':0.05,'KARLINHA5':0.05,'LUD5':0.05,'CASSIA5':0.05,
-  'THAIS5':0.05,'NATAN':0.00000000001,'LIRICY5':0.05,'ANDREAFLEURY':0.05,'ANA5':0.05,
-  '10PRO':0.000000000001,'PRO5':0.05,'WEY5':0.05,'ALE5':0.05,'TRIGUEIRO':0.05,
-  'RAYSSA5':0.05,'PATRICIA5':0.05,'LU5':0.05, 'RAFA5':0.05, 'WAWA':0.05, 'DUDA5':0.05, 
-  'ALYNE5':0.05, 'JRCREMONEZ':0.05, 'ZAMA5':0.05, 'JENNI5':0.05, 'DJU5':0.05, 'CLAU5':0.05, 
-  'GLAB5':0.05, 'BRENDA5':0.05,
-  
-}};
-
-// ─── SECURITY HELPERS ──────────────────────────────────────────────────────────
-/**
- * Safely set element text (never innerHTML) to avoid stored-XSS.
- * All user-facing strings from PRODUTOS already HTML-escaped server-side;
- * here we use textContent for an extra client-side safety net.
- */
-function setText(id, val) {{
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
+  return null;
 }}
 
-function sanitizarEntrada(str, maxLen = 300) {{
-  if (typeof str !== 'string') str = String(str);
-  // Strip anything that looks like a tag or JS protocol
-  str = str.replace(/<[^>]*>/g, '').replace(/javascript:/gi, '').replace(/on\w+=/gi, '');
-  return str.slice(0, maxLen).trim();
-}}
+// 3. FUNÇÃO DE FRETE (FIXA EM 12 DÓLARES)
+async function calcularFrete() {{
+    const campoCep = document.getElementById('zip-code');
+    if(!campoCep) return;
+    const cep = campoCep.value.replace(/\D/g,'');
+    const btn = document.getElementById('btn-calc');
+    
+    if(cep.length !== 5) {{ alert("CEP inválido"); return; }}
+    
+    if(btn) {{ btn.disabled = true; btn.textContent = "..."; }}
 
-// ─── FEATURED ──────────────────────────────────────────────────────────────────
-function gerarDestaques() {{
-  // Only AVAILABLE items appear in featured
-  const avail = PRODUTOS.filter(p => p.available);
-  if (!avail.length) return;
-
-  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-  const shuffled  = [...avail].sort((a, b) => {{
-    const ha = ((a.id + 1) * 2654435761 + dayOfYear * 31) % 4294967296;
-    const hb = ((b.id + 1) * 2654435761 + dayOfYear * 31) % 4294967296;
-    return ha - hb;
-  }});
-  const picks     = shuffled.slice(0, 6);
-  const container = document.getElementById('featured-scroll');
-
-  picks.forEach(p => {{
-    const card = document.createElement('div');
-    card.className = 'feat-card' + (p.promoPct > 0 ? ' promo-card' : '');
-
-    // Build price section safely
-    let priceHTML = '';
-    if (p.promoPct > 0) {{
-      const pctLabel = Math.round(p.promoPct * 100) + '% OFF';
-      priceHTML = `<div class="feat-price-wrap promo">
-        <span class="feat-badge">${{pctLabel}}</span>
-        <span class="feat-orig">R$ ${{p.precoOrig.toFixed(2)}}</span>
-        <span class="feat-price">R$ ${{p.preco.toFixed(2)}}</span>
-      </div>`;
-    }} else {{
-      priceHTML = `<div class="feat-price-wrap">
-        <span class="feat-price">R$ ${{p.preco.toFixed(2)}}</span>
-      </div>`;
+    const data = await buscarDadosZip(cep);
+    
+    if(!data) {{ 
+        alert("CEP não encontrado"); 
+        if(btn) {{ btn.disabled = false; btn.textContent = "Locate"; }}
+        return; 
     }}
 
-    // Use textContent for user-data fields; only controlled strings in innerHTML
-    card.innerHTML = `
-      <div class="feat-icon"></div>
-      <div class="feat-name"></div>
-      <div class="feat-spec"></div>
-      <div class="feat-desc"></div>
-      ${{priceHTML}}
-      <button class="feat-btn">Adicionar ao Carrinho</button>
-    `;
-    card.querySelector('.feat-icon').textContent = p.icon;
-    card.querySelector('.feat-name').textContent = p.nome;
-    card.querySelector('.feat-spec').textContent = p.espec;
-    card.querySelector('.feat-desc').textContent = p.info;
-    card.querySelector('.feat-btn').addEventListener('click', () => adicionar(p.id));
+    freteV = 12; 
+    freteD = "Flat Rate: $ 12.00 | Frete Único: $ 12,00";
 
-    container.appendChild(card);
-  }});
+    document.getElementById('f_cidade').value = data.localidade;
+    document.getElementById('f_estado').value = data.uf;
+    document.getElementById('f_end').value = data.logradouro;
+    document.getElementById('resultado-frete').textContent = '✅ ' + data.localidade + '-' + data.uf + ': ' + freteD;
+    
+    atualizarCarrinho();
+    if(btn) {{ btn.disabled = false; btn.textContent = "Locate"; }}
 }}
 
-// ─── FILTERING ─────────────────────────────────────────────────────────────────
-function filtrarCat(cat) {{
-  catAtual = cat;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
-  filtrarProdutos();
-}}
+// 4. FUNÇÕES DE INTERFACE
 
-function toggleAvail() {{
-  apenasDisp = !apenasDisp;
-  document.getElementById('toggle-avail').classList.toggle('active', apenasDisp);
-  filtrarProdutos();
-}}
 
-function filtrarProdutos() {{
-  const q     = document.getElementById('search-input').value.toLowerCase();
-  const cards = document.querySelectorAll('.product-card');
-  let visible = 0;
-  cards.forEach(c => {{
-    const name      = c.querySelector('.pc-name').textContent.toLowerCase();
-    const cat       = c.dataset.cat;
-    const avail     = c.dataset.available === '1';
-    const matchSearch = !q || name.includes(q);
-    const matchCat    = catAtual === 'all' || cat === catAtual;
-    const matchAvail  = !apenasDisp || avail;
-    const show        = matchSearch && matchCat && matchAvail;
-    c.style.display   = show ? '' : 'none';
-    if (show) visible++;
-  }});
-  document.getElementById('no-results').style.display = visible === 0 ? '' : 'none';
-}}
+function abrirCertificados() {{ document.getElementById('modalCertificados').style.display = 'block'; }}
+function fecharCertificados() {{ document.getElementById('modalCertificados').style.display = 'none'; }}
 
-// ─── MODAL INFO ────────────────────────────────────────────────────────────────
+
 function abrirInfo(id) {{
-  // id comes from our own rendered integer — safe, but still guard
-  const pid = parseInt(id, 10);
-  if (isNaN(pid)) return;
-  const p = PRODUTOS.find(x => x.id === pid);
-  if (!p) return;
-  // Use textContent to avoid XSS even if data were malformed
-  document.getElementById('info-titulo').textContent = p.nome;
-  document.getElementById('info-spec').textContent   = p.espec + ' — ' + p.cat;
-  document.getElementById('info-texto').textContent  = p.info;
-  const img = document.getElementById('info-imagem');
-  // Only allow relative paths (no javascript: or data: URIs)
-  const safeSrc = p.imagem.replace(/[^a-zA-Z0-9_.\/\- ]/g, '');
-  img.src = encodeURI(safeSrc);
-  img.style.display = 'block';
-  document.getElementById('modalInfo').style.display = 'block';
+    const p = PRODUTOS.find(x => x.id === id);
+    if(p) {{
+        document.getElementById('info-titulo').textContent = p.nome;
+        document.getElementById('info-spec').textContent = p.espec + ' — ' + p.cat;
+        document.getElementById('info-texto').textContent = p.info;
+        document.getElementById('info-imagem').src = encodeURI(p.imagem);
+        document.getElementById('info-imagem').style.display = 'block';
+        document.getElementById('modalInfo').style.display = 'block';
+    }}
 }}
+
 function fecharInfo() {{ document.getElementById('modalInfo').style.display = 'none'; }}
+
+function abrirCheckout() {{
+    
+    document.getElementById('modalCheckout').style.display = 'block';
+}}
+
+function fecharCheckout() {{ document.getElementById('modalCheckout').style.display = 'none'; }}
 function abrirCertificados() {{ document.getElementById('modalCertificados').style.display = 'block'; }}
 function fecharCertificados() {{ document.getElementById('modalCertificados').style.display = 'none'; }}
 function abrirReconstituicao() {{ document.getElementById('modalReconstituicao').style.display = 'block'; }}
@@ -1022,326 +1131,222 @@ function abrirGuiaCalculo() {{ document.getElementById('modalGuiaCalculo').style
 function fecharGuiaCalculo() {{ document.getElementById('modalGuiaCalculo').style.display = 'none'; }}
 
 
-// ─── CART ──────────────────────────────────────────────────────────────────────
+// 5. CARRINHO
 function adicionar(id) {{
-  const pid = parseInt(id, 10);
-  if (isNaN(pid)) return;
-  const p = PRODUTOS.find(x => x.id === pid);
-  if (!p || !p.available) return;
-  const ex = carrinho.find(i => i.id === pid);
-  if (ex) ex.qtd += 1; else carrinho.push({{ ...p, qtd: 1 }});
-  atualizarCarrinho();
+    const p = PRODUTOS.find(x => x.id === id);
+    if(p) {{
+        const ex = carrinho.find(i => i.id === id);
+        if(ex) ex.qtd += 1; else carrinho.push({{...p, qtd: 1}});
+        atualizarCarrinho();
+    }}
 }}
 
 function remover(id) {{
-  const pid = parseInt(id, 10);
-  if (isNaN(pid)) return;
-  const ex = carrinho.find(x => x.id === pid);
-  if (ex) {{
-    if (ex.qtd > 1) ex.qtd--;
-    else carrinho = carrinho.filter(x => x.id !== pid);
-  }}
-  if (!carrinho.length) removerFrete();
-  atualizarCarrinho();
-}}
-
-function toggleCartPanel() {{
-  const p = document.getElementById('cart-panel');
-  p.style.display = p.style.display === 'block' ? 'none' : 'block';
+    const ex = carrinho.find(x => x.id === id);
+    if(ex) {{ if(ex.qtd > 1) ex.qtd--; else carrinho = carrinho.filter(x => x.id !== id); }}
+    if(!carrinho.length) removerFrete();
+    atualizarCarrinho();
 }}
 
 function atualizarCarrinho() {{
-  const list     = document.getElementById('cart-list');
-  const panel    = document.getElementById('cart-panel');
-  const fab      = document.getElementById('cart-fab');
-  const totalUn  = carrinho.reduce((a, i) => a + i.qtd, 0);
+    const list = document.getElementById('cart-list');
+    const panel = document.getElementById('cart-panel');
+    const fab = document.getElementById('cart-fab');
+    const totalUn = carrinho.reduce((a,i) => a + i.qtd, 0);
+    
+    // Controle do botão flutuante e contadores
+    if(fab) fab.style.display = carrinho.length ? 'flex' : 'none';
+    document.getElementById('fab-badge').textContent = totalUn;
+    document.getElementById('cart-count').textContent = totalUn;
+    
+    list.innerHTML = '';
+    let subtotal = 0;
 
-  fab.style.display    = carrinho.length ? 'flex' : 'none';
-  document.getElementById('fab-badge').textContent   = totalUn;
-  document.getElementById('cart-count').textContent  = totalUn;
-  if (!carrinho.length) panel.style.display = 'none';
+    // Renderização dos itens
+    carrinho.forEach(item => {{
+        const vt = item.preco * item.qtd;
+        subtotal += vt;
+        list.innerHTML += `<div class="cart-item">
+            <span><strong>${{item.qtd}}x</strong> ${{item.nome}}</span>
+            <span>U$ ${{vt.toFixed(2)}} <button class="btn-rm" onclick="remover(${{item.id}})">−</button></span>
+        </div>`;
+    }});
 
-  list.innerHTML = '';
-  let subtotalNormal = 0;   // items without promo (coupon applies here)
-  let subtotalPromo  = 0;   // items with promo   (coupon does NOT apply)
-
-  carrinho.forEach(item => {{
-    const vt = item.preco * item.qtd;
-    if (item.promoPct > 0) subtotalPromo  += vt;
-    else                    subtotalNormal += vt;
-
-    const row = document.createElement('div');
-    row.className = 'cart-item';
-
-    const left  = document.createElement('span');
-    const right = document.createElement('span');
-
-    const nameSpan = document.createElement('strong');
-    nameSpan.textContent = item.qtd + 'x ';
-    const nameTxt = document.createTextNode(item.nome);
-    left.appendChild(nameSpan);
-    left.appendChild(nameTxt);
-
-    if (item.promoPct > 0) {{
-      const promoLbl = document.createElement('span');
-      promoLbl.className   = 'cart-item-promo-label';
-      promoLbl.textContent = '🏷️ ' + Math.round(item.promoPct * 100) + '% OFF';
-      left.appendChild(promoLbl);
+    // Lógica do Cupom
+    let desc = cupomAtivo ? subtotal * cupomAtivo.desc : 0;
+    const discRow = document.getElementById('discount-row');
+    if(discRow) {{
+        discRow.style.display = cupomAtivo ? 'flex' : 'none';
+        if(cupomAtivo) {{
+            document.getElementById('discount-name').textContent = cupomAtivo.nome;
+            document.getElementById('discount-val').textContent = desc.toFixed(2);
+        }}
     }}
 
-    const priceTxt = document.createTextNode('R$ ' + vt.toFixed(2) + ' ');
-    const rmBtn    = document.createElement('button');
-    rmBtn.className   = 'btn-rm';
-    rmBtn.textContent = '−';
-    rmBtn.addEventListener('click', () => remover(item.id));
-    right.appendChild(priceTxt);
-    right.appendChild(rmBtn);
-
-    row.appendChild(left);
-    row.appendChild(right);
-    list.appendChild(row);
-  }});
-
-  // Coupon only affects non-promo subtotal
-  let desc = 0;
-  const noteEl = document.getElementById('coupon-note');
-  if (cupomAtivo) {{
-    desc = subtotalNormal * cupomAtivo.desc;
-    const hasPromoItems = carrinho.some(i => i.promoPct > 0);
-    if (hasPromoItems && subtotalNormal === 0) {{
-      noteEl.textContent  = '⚠️ Cupom não aplicável: todos os itens já estão em promoção.';
-      noteEl.style.display = 'block';
-    }} else if (hasPromoItems) {{
-      noteEl.textContent  = 'ℹ️ Cupom aplicado apenas aos itens sem promoção.';
-      noteEl.style.display = 'block';
+    // INCLUSÃO DO FRETE FIXO
+    // Definimos os valores caso o carrinho não esteja vazio
+    if (carrinho.length > 0) {{
+        freteV = 12;
+        freteD = "Flat Rate: $ 12.00 | Frete Único: $ 12,00";
     }} else {{
-      noteEl.style.display = 'none';
+        freteV = 0;
+        freteD = "";
     }}
-  }} else {{
-    noteEl.style.display = 'none';
-  }}
 
-  document.getElementById('discount-row').style.display = (cupomAtivo && desc > 0) ? 'flex' : 'none';
-  if (cupomAtivo) {{
-    document.getElementById('discount-name').textContent = cupomAtivo.nome;
-    document.getElementById('discount-val').textContent  = desc.toFixed(2);
-  }}
+    const sc = document.getElementById('ship-info-container');
+    const st = document.getElementById('ship-info-text');
+    
+    if(sc) sc.style.display = freteV > 0 ? 'flex' : 'none';
+    if(st && freteV > 0) st.textContent = '🚚 ' + freteD;
 
-  const sc = document.getElementById('ship-info-container');
-  sc.style.display = freteV > 0 ? 'flex' : 'none';
-  if (freteV > 0) document.getElementById('ship-info-text').textContent = '🚚 ' + freteD;
-
-
-  const total = subtotalNormal + subtotalPromo - desc + freteV;
-  document.getElementById('total-val').textContent = total.toLocaleString('pt-BR', {{minimumFractionDigits:2}});
+    // CÁLCULO TOTAL FINAL
+    const totalFinal = subtotal - desc + freteV;
+    document.getElementById('total-val').textContent = totalFinal.toLocaleString('pt-BR', {{
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2
+    }});
 }}
 
-function removerFrete() {{
-  freteV = 0; freteD = "";
-  document.getElementById('resultado-frete').textContent = "";
-  document.getElementById('cep-destino').value           = "";
-  atualizarCarrinho();
+function removerFrete() {{ freteV=0; freteD=""; document.getElementById('resultado-frete').textContent=""; atualizarCarrinho(); }}
+
+function toggleCartPanel() {{
+    const p = document.getElementById('cart-panel');
+    p.style.display = p.style.display === 'block' ? 'none' : 'block';
 }}
 
-// ─── CUPOM ─────────────────────────────────────────────────────────────────────
+// 6. FILTROS E CUPOM
+function filtrarProdutos() {{
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const cards = document.querySelectorAll('.product-card');
+    let visible = 0;
+    cards.forEach(c => {{
+        const name = c.querySelector('.pc-name').textContent.toLowerCase();
+        const cat = c.dataset.cat;
+        const avail = c.dataset.available === '1';
+        const show = (!q || name.includes(q)) && (catAtual === 'all' || cat === catAtual) && (!apenasDisp || avail);
+        c.style.display = show ? '' : 'none';
+        if(show) visible++;
+    }});
+    document.getElementById('no-results').style.display = visible === 0 ? '' : 'none';
+}}
+
+function filtrarCat(cat) {{
+    catAtual = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+    filtrarProdutos();
+}}
+
+function toggleAvail() {{
+    apenasDisp = !apenasDisp;
+    document.getElementById('toggle-avail').classList.toggle('active', apenasDisp);
+    filtrarProdutos();
+}}
+
 function aplicarCupom() {{
-  // Only accept alphanumeric codes up to 30 chars
-  const raw  = document.getElementById('coupon-code').value;
-  const code = raw.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 30);
-
-  if (CUPONS[code] !== undefined) {{
-    cupomAtivo = {{ nome: code, desc: CUPONS[code] }};
-    alert("✅ Cupom aplicado!");
-  }} else {{
-    cupomAtivo = null;
-    alert("❌ Cupom inválido.");
-  }}
-  atualizarCarrinho();
+    const code = document.getElementById('coupon-code').value.trim().toUpperCase();
+    const cupons = {{'BRUNA5':0.05, 'PRO5':0.05, 'LARI5':0.05,
+    'AMANDA5':0.05,  'MIKA5':0.05, 'PRIME5':0.05, 'WEY5':0.05, 'CASSIA5':0.05, 
+    'LUD5':0.05, 'DANI5':0.05, 'GR26R':0.05, 'THA10':0.10, 'ESTEPHANY5':0.05, 'DAFNE10':0.10, 
+    'GILMARA5':0.05, 'DUDA5': 0.05, 'EMILLY5':0.05, 'CLAU5':0.05, 'BRENDA5':0.05, 'GLAB5':0.05}};
+    
+    if(cupons[code]) {{ cupomAtivo = {{nome:code, desc:cupons[code]}}; alert("Coupon applied - Cupom aplicado!"); }}
+    else {{ cupomAtivo = null; alert("Invalid coupon - Cupom inválido."); }}
+    atualizarCarrinho();
 }}
 
-// ─── FRETE ─────────────────────────────────────────────────────────────────────
-async function buscarDadosCep(cep) {{
-  // Only 8-digit CEPs — already validated by caller
-  try {{
-    const r = await fetch(`https://viacep.com.br/ws/${{encodeURIComponent(cep)}}/json/`);
-    const d = await r.json();
-    if (!d.erro) return {{ localidade: d.localidade, uf: d.uf.toUpperCase(), logradouro: d.logradouro, bairro: d.bairro }};
-  }} catch (e) {{}}
-  try {{
-    const r = await fetch(`https://brasilapi.com.br/api/cep/v1/${{encodeURIComponent(cep)}}`);
-    const d = await r.json();
-    if (r.ok) return {{ localidade: d.city, uf: d.state.toUpperCase(), logradouro: d.street || "", bairro: d.neighborhood || "" }};
-  }} catch (e) {{}}
-  return null;
-}}
-
-async function calcularFrete() {{
-  const raw = document.getElementById('cep-destino').value.replace(/\D/g, '');
-  const btn = document.getElementById('btn-calc');
-  if (raw.length !== 8) {{ alert("CEP inválido"); return; }}
-  btn.disabled    = true;
-  btn.textContent = "...";
-
-  const data = await buscarDadosCep(raw);
-  if (!data) {{
-    alert("CEP não encontrado");
-    btn.disabled    = false;
-    btn.textContent = "Localizar";
-    return;
-  }}
-
-  const uf = data.uf.replace(/[^A-Z]/g, '').slice(0, 2);
 
 
-  // NORMALIZA CIDADE RECEBIDA DO CEP
-  const cidade = data.localidade
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toUpperCase();
 
-  const chaveCidade = cidade + "-" + uf;
-
-
-  // VERIFICA SE EXISTE FRETE ESPECIAL
-  if (FRETES_CIDADES[chaveCidade]) {{
-
-      freteV = FRETES_CIDADES[chaveCidade];
-      freteD = "REGIONAL R$ 20,00 (1-3 dias)";
-
-  }}
-
-
-  // CASO NÃO SEJA CIDADE ESPECIAL, USA REGRA NORMAL
-  else if (REGIOES.SUL.includes(uf)) {{
-
-      freteV = 60;
-      freteD = "SUL R$ 60,00 (3-9 dias)";
-
-  }}
-
-  else if (
-      [...REGIOES.SUDESTE, ...REGIOES['CENTRO-OESTE']].includes(uf)
-  ) {{
-
-      freteV = 90;
-      freteD = "SUDESTE/CO R$ 90,00 (5-15 dias)";
-
-  }}
-
-  else {{
-
-      freteV = 110;
-      freteD = "N/NE R$ 110,00 (10-30 dias)";
-
-  }}
-
-
-  // Populate form fields with textContent-safe values
-  document.getElementById('f_cidade').value = data.localidade  || '';
-  document.getElementById('f_estado').value = uf;
-  document.getElementById('f_end').value    = data.logradouro  || '';
-  document.getElementById('f_bairro').value = data.bairro      || '';
-
-  document.getElementById('resultado-frete').textContent =
-    '✅ ' + (data.localidade || '') + '-' + uf + ': ' + freteD;
-
-  atualizarCarrinho();
-  btn.disabled    = false;
-  btn.textContent = "Localizar";
-}}
-
-// ─── CHECKOUT ──────────────────────────────────────────────────────────────────
-function abrirCheckout() {{
-  if (freteV <= 0) {{ alert("Calcule o frete primeiro!"); return; }}
-
-  document.getElementById('modalCheckout').style.display = 'block';
-}}
-function fecharCheckout() {{ document.getElementById('modalCheckout').style.display = 'none'; }}
-
+// 7. FINALIZAÇÃO E WHATSAPP
 function enviarPedido() {{
-  // Read and sanitize all form fields
-  const d = {{
-    n:    sanitizarEntrada(document.getElementById('f_nome').value,    120).toUpperCase(),
-    cpf:  sanitizarEntrada(document.getElementById('f_cpf').value,     14),
-    e:    sanitizarEntrada(document.getElementById('f_end').value,     200).toUpperCase(),
-    nu:   sanitizarEntrada(document.getElementById('f_num').value,     10),
-    ba:   sanitizarEntrada(document.getElementById('f_bairro').value,  100).toUpperCase(),
-    co:   sanitizarEntrada(document.getElementById('f_comp').value,    100).toUpperCase(),
-    ci:   sanitizarEntrada(document.getElementById('f_cidade').value,  100).toUpperCase(),
-    es:   sanitizarEntrada(document.getElementById('f_estado').value,  2).toUpperCase(),
-    ce:   document.getElementById('cep-destino').value.replace(/\D/g,'').replace(/(\d{{5}})(\d{{3}})/, '$1-$2'),
-    t:    sanitizarEntrada(document.getElementById('f_tel').value,     20),
-    p:    document.getElementById('f_pgto').value === 'Pix' ? 'PIX' : 'CARTÃO DE CRÉDITO',
-  }};
+    // 1. Coleta dos dados do formulário
+    const d = {{
+        ce: document.getElementById('zip-code').value.trim(),
+        n: document.getElementById('f_nome').value.trim().toUpperCase(),
+        e: document.getElementById('f_end').value.trim().toUpperCase(),
+        co: document.getElementById('f_comp').value.trim().toUpperCase(),
+        ci: document.getElementById('f_cidade').value.trim().toUpperCase(),
+        es: document.getElementById('f_estado').value.trim().toUpperCase(),
+        t: document.getElementById('f_tel').value.trim(),
+        p: document.getElementById('f_pgto').value.toUpperCase()
+    }};
 
-  if (!d.n || !d.cpf || !d.e || !d.nu || !d.ba || !d.ci || !d.es || !d.t) {{
-    alert("Preencha todos os campos obrigatórios!");
-    return;
-  }}
-
-  const temSol    = carrinho.some(i => i.nome.toUpperCase().includes("BACTERIOSTATIC WATER"));
-  const temBrinde = cupomAtivo && cupomAtivo.nome === "BRUNA5";
-  if (!temSol && !temBrinde) {{
-    if (!confirm("Pedido sem solução de diluição (Bacteriostatic Water). Continuar?")) {{
-      fecharCheckout(); return;
+    // Validação básica
+    if(!d.n || !d.e || !d.t) {{ 
+        alert("Please fill in all required fields | Preencha os campos obrigatórios!"); 
+        return; 
     }}
-  }}
 
-  let subtotalNormal = 0, subtotalPromo = 0, msgI = "";
-  carrinho.forEach(i => {{
-    const vt = i.preco * i.qtd;
-    if (i.promoPct > 0) {{
-      subtotalPromo += vt;
-      msgI += "• " + i.qtd + "x " + i.nome.toUpperCase() + " (" + i.espec.toUpperCase() + ")" +
-              " [PROMO -" + Math.round(i.promoPct * 100) + "%] - R$ " + vt.toFixed(2) + "%0A";
-    }} else {{
-      subtotalNormal += vt;
-      const vtFinal = cupomAtivo ? vt - vt * cupomAtivo.desc : vt;
-      msgI += "• " + i.qtd + "x " + i.nome.toUpperCase() + " (" + i.espec.toUpperCase() + ")" +
-              " - R$ " + vt.toFixed(2) + (cupomAtivo ? " → R$ " + vtFinal.toFixed(2) : "") + "%0A";
+    // 2. Montagem da lista de itens
+    let sub = 0;
+    let msgI = "";
+    carrinho.forEach(i => {{
+        const vt = i.preco * i.qtd;
+        sub += vt;
+        let linha = `• ${{i.qtd}}x ${{i.nome.toUpperCase()}} (${{i.espec.toUpperCase()}}) - U$ ${{vt.toFixed(2)}}`;
+        if(cupomAtivo) {{
+            const vDesconto = vt - (vt * cupomAtivo.desc);
+            linha += ` → U$ ${{vDesconto.toFixed(2)}}`;
+        }}
+        msgI += linha + "%0A";
+    }});
+
+    let desc = cupomAtivo ? sub * cupomAtivo.desc : 0;
+
+    // 3. Montagem da Mensagem Final
+    let msg = "*NOVO PEDIDO G-LAB*%0A";
+    msg += "*CLIENTE:*%0A";
+    msg += "• *NOME:* " + d.n + "%0A";
+    msg += "• *WHATSAPP:* " + d.t + "%0A";
+    msg += "• *END:* " + d.e + ", " + "%0A";
+    
+    if(d.co) msg += "• *COMPL:* " + d.co + "%0A";
+    
+    msg += "• *CIDADE:* " + d.ci + "-" + d.es + "%0A";
+    msg += "• *ZIP CODE:* " + d.ce + "%0A";
+    msg += "• *PGTO:* " + d.p + "%0A";
+    
+    msg += "*ITENS:*%0A" + msgI;
+    
+    msg += "%0A🚚 *FRETE:* " + freteD.toUpperCase();
+
+    if(cupomAtivo) {{
+        msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-U$ " + desc.toFixed(2) + ")";
     }}
-  }});
-
-  const desc  = cupomAtivo ? subtotalNormal * cupomAtivo.desc : 0;
-  const total = subtotalNormal + subtotalPromo - desc + freteV;
-
-  let msg = "*NOVO PEDIDO G-LAB*%0A%0A*CLIENTE:*%0A";
-  msg += "• *NOME:* "     + encodeURIComponent(d.n)   + "%0A";
-  msg += "• *CPF:* "      + encodeURIComponent(d.cpf) + "%0A";
-  msg += "• *WHATSAPP:* " + encodeURIComponent(d.t)   + "%0A";
-  msg += "• *END:* "      + encodeURIComponent(d.e)   + ", " + encodeURIComponent(d.nu) + "%0A";
-  msg += "• *BAIRRO:* "   + encodeURIComponent(d.ba)  + "%0A";
-  if (d.co) msg += "• *COMPL:* " + encodeURIComponent(d.co) + "%0A";
-  msg += "• *CIDADE:* "   + encodeURIComponent(d.ci)  + "-"  + encodeURIComponent(d.es) + "%0A";
-  msg += "• *CEP:* "      + encodeURIComponent(d.ce)  + "%0A";
-  msg += "• *PGTO:* "     + encodeURIComponent(d.p)   + "%0A%0A";
-  msg += "*ITENS:*%0A"    + msgI;
-  if (cupomAtivo && desc > 0)
-    msg += "%0A🏷️ *CUPOM:* " + cupomAtivo.nome + " (-R$ " + desc.toFixed(2) + ") (apenas itens s/ promoção)";
-  msg += "%0A🚚 *FRETE:* " + freteD.toUpperCase();
-  msg += "%0A%0A*TOTAL: R$ " + total.toFixed(2) + "*";
-
+    
+    if (d.p === "ZELLE") {{
+        if (!confirm("You have selected Zelle. Here is the Zelle key for the transfer: +1 (774) 351-9845 Don't forget to send the proof of payment along with your order! Você selecionou Zelle. Segue a chave zelle para a transferência: +1 (774) 351-9845 Não esqueça de enviar o comprovante junto com o pedido!")) {{
+            return; // Cancela o envio se o usuário clicar em 'Cancel - Cancelar'
+        }}
+    }}
   
-  // Phone number — change to your actual number before deploy
-  const WA_PHONE = "17746222523";
-  window.open("https://wa.me/" + WA_PHONE + "?text=" + msg, '_blank');
+    msg += "%0A*TOTAL: U$ " + (sub - desc + freteV).toFixed(2) + "*";
+
+    msg += "%0A%0A*Zelle key for the transfer - Chave zelle para a transferência: +1 (774) 351-9845*";
+
+    // 4. Envio
+    window.open("https://wa.me/+17743519845?text=" + msg, '_blank');
 }}
 
-// ─── INIT ──────────────────────────────────────────────────────────────────────
+function gerarDestaques() {{
+    const picks = PRODUTOS.slice(0, 6);
+    const container = document.getElementById('featured-scroll');
+    if(!container) return;
+    container.innerHTML = picks.map(p => `
+        <div class="feat-card">
+            <div class="feat-icon">${{p.icon}}</div>
+            <div class="feat-name">${{p.nome}}</div>
+            <div class="feat-price">U$ ${{p.preco.toFixed(2)}}</div>
+        </div>
+    `).join('');
+}}
+
+// INIT
 gerarDestaques();
+filtrarProdutos();
 
-// Close modals when clicking the dark overlay (not the box)
-document.getElementById('modalInfo').addEventListener('click', function(e) {{
-  if (e.target === this) fecharInfo();
-}});
-document.getElementById('modalCheckout').addEventListener('click', function(e) {{
-  if (e.target === this) fecharCheckout();
-}});
+document.getElementById('zip-code').addEventListener('blur', calcularFrete);
 
-// Keyboard accessibility — close modals on Escape
-document.addEventListener('keydown', e => {{
-  if (e.key === 'Escape') {{ fecharInfo(); fecharCheckout(); }}
-}});
 </script>
 </body>
 </html>"""
@@ -1350,10 +1355,9 @@ document.addEventListener('keydown', e => {{
     try:
         with open(caminho_saida, 'w', encoding='utf-8') as f:
             f.write(html)
-        print(f"✅ Site gerado com sucesso em: {caminho_saida}")
+        print(f"✅ Site gerado em: {caminho_saida}")
     except Exception as e:
-        print(f"❌ Erro ao salvar: {e}")
-
+        print(f"❌ Erro: {e}")
 
 if __name__ == "__main__":
     gerar_site_vendas_completo()
