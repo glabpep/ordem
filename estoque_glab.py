@@ -825,7 +825,7 @@ img{max-width:100%;display:block}
 <div class="ticker"><div class="ticker-inner">
   <span class="red">● G-LAB PEPTIDES</span><span>PUREZA >99%</span>
   <span class="red">● ENVIO NACIONAL</span><span>PAGAMENTO PIX</span>
-  <span class="red">● FRETE GRÁTIS ACIMA DE R$1.500</span>
+  <span class="red">● FRETE GRÁTIS ACIMA DE R$2.000</span>
   <span>BRINDE ACIMA DE R$1.000: BACTERIOSTATIC WATER POR ITEM</span>
   <span class="red">● SUPORTE WHATSAPP</span>
 </div></div>
@@ -1472,6 +1472,7 @@ function enviarPedido(){
     ce:  $("cep-destino").value.replace(/\D/g,"").replace(/(\d{5})(\d{3})/, "$1-$2"),
     t:   sanitizarEntrada($("f_tel").value,     20),
     p:   $("f_pgto").value === "Pix" ? "PIX" : "CART\u00c3O DE CR\u00c9DITO",
+    cupom: ($("cupomInput").value || "").trim().toUpperCase()
   };
   const err = $("identErr");
   const falhar = m => { if (err) err.textContent = m; else alert(m); };
@@ -1510,6 +1511,7 @@ function enviarPedido(){
   msg += `\u2022 *CIDADE:* ${d.ci}-${d.es}\n`;
   msg += `\u2022 *CEP:* ${d.ce}\n`;
   msg += `\u2022 *PGTO:* ${d.p}\n`;
+  msg += `\n*cupom:* ${cup || "NENHUM"}\n`;
   msg += `\n*ITENS:*\n`;
   for (const [id, q] of Object.entries(cart)){
     const p = PRODUCTS.find(x => x.id === +id);
