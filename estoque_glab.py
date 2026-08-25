@@ -865,10 +865,10 @@ img{max-width:100%;display:block}
       <h2>Por que escolher a <span style="color:var(--red)">G-LAB</span>?</h2>
       <div class="welcome-rule"></div>
       <ul class="welcome-list">
-        <li><span class="wi">🤝</span><span><span class="wt">Atendimento Personalizado</span><span class="wd">Suporte dedicado e exclusivo para cada cliente.</span></span></li>
-        <li><span class="wi">🧬</span><span><span class="wt">Auxílio nos Protocolos</span><span class="wd">Orientação especializada na montagem do seu protocolo.</span></span></li>
-        <li><span class="wi">💬</span><span><span class="wt">Acompanhamento Completo</span><span class="wd">Esclarecimento de dúvidas durante todo o tratamento.</span></span></li>
-        <li><span class="wi">🛡️</span><span><span class="wt">Compra Garantida</span><span class="wd">Se seu pacote não chegar ou for extraviado, o reembolso é <b>TOTAL</b>!</span></span></li>
+        <li><span class="wi">🤝</span><span><span class="wt">Atendimento Personalizado: </span><span class="wd">Suporte dedicado e exclusivo para cada cliente.</span></span></li>
+        <li><span class="wi">🧬</span><span><span class="wt">Auxílio nos Protocolos: </span><span class="wd">Orientação especializada na montagem do seu protocolo.</span></span></li>
+        <li><span class="wi">💬</span><span><span class="wt">Acompanhamento Completo: </span><span class="wd">Esclarecimento de dúvidas durante todo o tratamento.</span></span></li>
+        <li><span class="wi">🛡️</span><span><span class="wt">Compra Garantida: </span><span class="wd">Se seu pacote não chegar ou for extraviado, o reembolso é <b>TOTAL</b>!</span></span></li>
       </ul>
     </div>
     <button class="btn-enter" onclick="closeModal('welcome')">Entrar no site ✨</button>
