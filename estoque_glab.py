@@ -59,39 +59,99 @@ CATEGORY_COLORS = {
 
 PRODUTOS_PADRAO = [
     # (nome, espec, preco_orig, preco, promo_pct, cat, icon, disponivel, info)
-    ("AOD 9604", "5 mg", 220, 220, 0, "Metabolismo", "🔥", True, "Análogo Lipolítico do hGH: foca no isolamento das propriedades de queima de gordura do GH sem induzir efeitos hiperglicêmicos."),
-    ("HGH FRAGMENT 176-191", "5 mg", 240, 240, 0, "Metabolismo", "🔥", True, "Modulador de Lipídios: parte terminal do GH responsável pela quebra de gordura."),
-    ("MOTS-C", "10 mg", 380, 380, 0, "Metabolismo", "🔥", True, "Peptídeo derivado da mitocôndria: regulador do metabolismo sistêmico via AMPK."),
-    ("SLU PP 332", "10 mg", 520, 520, 0, "Metabolismo", "🔥", True, "Agonista Pan-ERR (Pílula do Exercício): aumenta biogênese mitocondrial."),
-    ("TESAMORELIN", "5 mg", 340, 340, 0, "Metabolismo", "🔥", True, "Único aprovado para reduzir gordura visceral abdominal severa."),
-    ("CJC-1295", "5 mg", 260, 260, 0, "Hormônios", "💉", True, "Secretagogo de GH de longa duração — aumenta GH e IGF-1."),
-    ("IPAMORELIN", "5 mg", 240, 240, 0, "Hormônios", "💉", True, "Agonista de grelina seletivo — libera GH sem elevar cortisol."),
-    ("CJC-1295 + IPAMORELIN", "10 mg", 420, 420, 0, "Hormônios", "💉", True, "Sinergia GHRH + GHRP: mimetiza liberação fisiológica natural de GH."),
-    ("IGF-1 LR3", "1 mg", 480, 480, 0, "Hormônios", "💉", True, "Análogo de IGF-1 de meia-vida longa — hiperplasia muscular."),
-    ("SERMORELIN", "5 mg", 220, 220, 0, "Hormônios", "💉", True, "Mimetiza o GHRH natural — melhora sono profundo e vitalidade."),
-    ("BPC-157", "5 mg", 260, 260, 0, "Recuperação", "🩹", True, "Pentadecapeptídeo gástrico — acelera cicatrização de tendões, ligamentos e músculos."),
-    ("TB-500", "5 mg", 320, 320, 0, "Recuperação", "🩹", True, "Timosina Beta-4 sintética — reparo de tecidos e angiogênese."),
-    ("TB-500 + BPC", "10 mg", 520, 520, 0, "Recuperação", "🩹", True, "Protocolo de reparo total — padrão-ouro para lesões atléticas graves."),
-    ("ARA 290", "5 mg", 380, 380, 0, "Recuperação", "🩹", True, "Derivado da eritropoietina — dor neuropática e regeneração nervosa."),
-    ("KLOW", "10 mg", 560, 560, 0, "Recuperação", "🩹", True, "Quarteto de reparo profundo (GHK+BPC+TB+KPV)."),
-    ("GHK-CU", "50 mg", 340, 340, 0, "Estética", "✨", True, "Complexo peptídeo-cobre — remodelação do DNA e síntese de colágeno."),
-    ("GLOW", "10 mg", 460, 460, 0, "Estética", "✨", True, "Bioestimulação dérmica (GHK-Cu + BPC + TB) — rejuvenescimento cutâneo."),
-    ("KPV", "5 mg", 260, 260, 0, "Imunidade", "🛡️", True, "Tripeptídeo anti-inflamatório — inibe NF-κB."),
-    ("TIRZEPATIDE", "10 mg", 780, 780, 0, "Emagrecimento", "⚖️", True, "Agonista dual GIP/GLP-1 — supera a semaglutida na perda de peso."),
-    ("RETATRUTIDE", "10 mg", 940, 940, 0, "Emagrecimento", "⚖️", True, "Agonista triplo (GIP/GLP-1/GCGR) — perdas de peso >24%."),
-    ("SEMAGLUTIDE", "5 mg", 620, 620, 0, "Emagrecimento", "⚖️", True, "Agonista de GLP-1 — retarda esvaziamento gástrico."),
-    ("SELANK", "5 mg", 280, 280, 0, "Cognitivo", "🧠", True, "Ansiolítico regulador — modula serotonina e norepinefrina."),
-    ("SEMAX", "5 mg", 300, 300, 0, "Cognitivo", "🧠", True, "Nootrópico neuroprotetor — eleva BDNF e NGF."),
-    ("PINEALON", "5 mg", 320, 320, 0, "Cognitivo", "🧠", True, "Bioregulador de cadeia curta — restaura ritmo circadiano."),
-    ("DSIP", "5 mg", 280, 280, 0, "Cognitivo", "🧠", True, "Indutor de sono delta — sincroniza ritmos biológicos."),
-    ("OXYTOCIN", "5 mg", 240, 240, 0, "Cognitivo", "🧠", False, "Neuromodulador social — regula confiança e ansiedade social."),
-    ("NAD+", "500 mg", 460, 460, 0, "Longevidade", "⏳", True, "Coenzima de vitalidade — reparação do DNA e sirtuínas."),
-    ("EPITHALON", "10 mg", 360, 360, 0, "Longevidade", "⏳", True, "Ativador da telomerase — extensão da vida celular."),
-    ("SS-31", "5 mg", 420, 420, 0, "Longevidade", "⏳", True, "Protetor de cardiolipina — restaura produção de ATP."),
-    ("PT-141", "10 mg", 260, 260, 0, "Sexual", "❤️", True, "Tratamento de disfunção sexual — atua no SNC."),
-    ("BACTERIOSTATIC WATER", "30 ml", 45, 45, 0, "Acessório", "💧", True, "Água bacteriostática 0,9% álcool benzílico — solvente para reconstituição."),
-]
+    ("AOD 9604", "5 mg", 220, 220, 0, "Metabolismo", "🔥", True,
+     "Análogo Lipolítico do hGH: reproduz exclusivamente o fragmento C,terminal do hormônio do crescimento responsável pela lipólise, ativando os receptores beta,3 adrenérgicos nos adipócitos e estimulando a quebra dos triglicerídeos em ácidos graxos livres. Por não ativar o receptor completo do GH, não interfere na glicemia nem no IGF,1 , resultando em uma ação de queima de gordura extremamente seletiva e direcionada."),
 
+    ("HGH FRAGMENT 176,191", "5 mg", 240, 240, 0, "Metabolismo", "🔥", True,
+     "Modulador de Lipídios: corresponde à porção final da cadeia do GH, isolada justamente por concentrar o potencial de mobilização de gordura. Atua estimulando a lipólise diretamente no tecido adiposo e inibindo a lipogênese (formação de nova gordura), favorecendo a redução de gordura corporal sem carregar as demais funções metabólicas do hormônio completo."),
+
+    ("MOTS,C", "10 mg", 380, 380, 0, "Metabolismo", "🔥", True,
+     "Peptídeo derivado do DNA mitocondrial: age ativando a via da AMPK (proteína quinase ativada por AMP), um dos principais sensores energéticos da célula, o que melhora a captação de glicose pelos músculos, otimiza a oxidação de gordura e reduz a resistência metabólica , seus níveis se elevam naturalmente durante o exercício físico intenso, reforçando seu papel como regulador metabólico sistêmico."),
+
+    ("SLU PP 332", "10 mg", 520, 520, 0, "Metabolismo", "🔥", True,
+     "Agonista Pan,ERR, apelidado de 'Pílula do Exercício': ativa simultaneamente os três receptores relacionados a estrogênio (ERRα, ERRβ e ERRγ), reprogramando o metabolismo muscular para funcionar como se estivesse em treino constante. O resultado é o aumento da biogênese mitocondrial, maior capacidade oxidativa das fibras musculares e ganhos expressivos de resistência física e queima energética, mesmo sem esforço físico correspondente."),
+
+    ("TESAMORELIN", "5 mg", 340, 340, 0, "Metabolismo", "🔥", True,
+     "Análogo estabilizado do GHRH (hormônio liberador de GH): liga,se aos receptores hipofisários de GHRH, estimulando a hipófise a liberar GH de forma pulsátil e fisiológica. O aumento resultante de GH e IGF,1 direciona preferencialmente a lipólise para a gordura visceral , aquela que se acumula ao redor dos órgãos internos ,, tornando,o referência absoluta nessa frente específica do metabolismo."),
+
+    ("CJC,1295", "5 mg", 260, 260, 0, "Hormônios", "💉", True,
+     "Secretagogo de GH de longa duração: é um análogo do GHRH modificado com ligação à albumina sérica, o que prolonga drasticamente sua meia,vida. Isso mantém o estímulo contínuo à hipófise para liberar GH, elevando também o IGF,1 de forma sustentada por dias após cada aplicação , ideal para quem busca um efeito hormonal prolongado e estável, sem os picos e quedas de secretagogos de ação curta."),
+
+    ("IPAMORELIN", "5 mg", 240, 240, 0, "Hormônios", "💉", True,
+     "Agonista seletivo do receptor de grelina (GHSR): mimetiza a ação da grelina para provocar um pico expressivo e rápido de liberação de GH pela hipófise. Sua alta seletividade faz com que estimule apenas a via do GH, sem ativar significativamente a liberação de cortisol, prolactina ou ACTH , evitando efeitos colaterais comuns a secretagogos menos específicos."),
+
+    ("CJC,1295 + IPAMORELIN", "10 mg", 420, 420, 0, "Hormônios", "💉", True,
+     "Sinergia GHRH + GHRP: combina dois mecanismos complementares , o CJC,1295 prolonga a liberação basal de GH via receptores de GHRH, enquanto o Ipamorelin provoca picos agudos via receptores de grelina. Juntos, amplificam,se mutuamente, reproduzindo com precisão o padrão fisiológico natural de secreção pulsátil de GH e potencializando os níveis de IGF,1 muito além do que cada peptídeo alcançaria isoladamente."),
+
+    ("IGF,1 LR3", "1 mg", 480, 480, 0, "Hormônios", "💉", True,
+     "Análogo de IGF,1 com meia,vida estendida: possui uma substituição de aminoácidos que reduz drasticamente sua afinidade pelas proteínas de ligação (IGFBPs), mantendo,o circulante e biologicamente ativo por muito mais tempo. Atua diretamente nos receptores de IGF,1 das células musculares, ativando vias de sinalização (como PI3K/Akt) que promovem hiperplasia e hipertrofia das fibras musculares."),
+
+    ("SERMORELIN", "5 mg", 220, 220, 0, "Hormônios", "💉", True,
+     "Mimetiza o GHRH natural: corresponde aos primeiros 29 aminoácidos do hormônio liberador de GH, mantendo plena atividade biológica ao se ligar aos receptores hipofisários e estimular a liberação endógena de GH de forma fisiológica e pulsátil , associado a melhora do sono de ondas lentas (sono profundo), disposição e vitalidade geral."),
+
+    ("BPC,157", "5 mg", 260, 260, 0, "Recuperação", "🩹", True,
+     "Pentadecapeptídeo de origem gástrica: atua estimulando a angiogênese (formação de novos vasos sanguíneos) via aumento da expressão do VEGFR2, além de modular a via do óxido nítrico e promover a migração de fibroblastos para a região lesionada. Essa combinação acelera a formação de tecido de granulação e favorece a recuperação de tendões, ligamentos, músculos e da mucosa gastrointestinal , um dos nomes mais respeitados da recuperação tecidual."),
+
+    ("TB,500", "5 mg", 320, 320, 0, "Recuperação", "🩹", True,
+     "Versão sintética da Timosina Beta,4: atua sequestrando a actina G, o que regula a formação do citoesqueleto celular e facilita a migração de células reparadoras até o local da lesão. Também estimula a angiogênese e reduz a formação excessiva de tecido cicatricial (fibrose), criando as condições ideais para uma regeneração tecidual mais completa e funcional."),
+
+    ("TB,500 + BPC", "10 mg", 520, 520, 0, "Recuperação", "🩹", True,
+     "Protocolo de reparo total: une os dois mecanismos mais respeitados da recuperação tecidual , a angiogênese e migração celular promovidas pelo TB,500 com a estimulação vascular e modulação de óxido nítrico do BPC,157. A ação combinada potencializa cada etapa do processo regenerativo, sendo considerado o padrão,ouro por quem busca uma resposta completa contra lesões atléticas graves."),
+
+    ("ARA 290", "5 mg", 380, 380, 0, "Recuperação", "🩹", True,
+     "Derivado não hematopoiético da eritropoietina: liga,se ao receptor heteromérico de reparo tecidual (formado por EPOR e CD131), ativando vias de sobrevivência celular sem estimular a produção de glóbulos vermelhos. Essa ativação seletiva favorece a regeneração de pequenas fibras nervosas e possui forte associação com a redução da dor neuropática, despertando interesse crescente também para inflamação, lipedema e saúde da pele."),
+
+    ("KLOW", "10 mg", 560, 560, 0, "Recuperação", "🩹", True,
+     "Quarteto de reparo profundo (GHK,Cu + BPC,157 + TB,500 + KPV): reúne quatro mecanismos distintos e complementares , remodelação de colágeno, angiogênese, migração celular e controle inflamatório , em um único blend, potencializando a recuperação de tecidos em múltiplas frentes simultaneamente."),
+
+    ("GHK,CU", "50 mg", 340, 340, 0, "Estética", "✨", True,
+     "Complexo peptídeo,cobre: atua ativando genes ligados à remodelação tecidual e à síntese de colágeno tipo I e III, além de estimular a produção de glicosaminoglicanos e metaloproteinases que regulam a renovação da matriz extracelular. Esse conjunto de ações resulta em benefícios expressivos para a firmeza, recuperação e aparência da pele."),
+
+    ("GLOW", "10 mg", 460, 460, 0, "Estética", "✨", True,
+     "Bioestimulação dérmica avançada (GHK,Cu + BPC,157 + TB,500): combina a remodelação de colágeno e renovação da matriz extracelular do GHK,Cu com os mecanismos de angiogênese e migração celular do BPC,157 e TB,500, somando diferentes vias de ação para potencializar a recuperação e o rejuvenescimento da pele."),
+
+    ("KPV", "5 mg", 260, 260, 0, "Imunidade", "🛡️", True,
+     "Tripeptídeo derivado da α,MSH: atravessa facilmente as membranas celulares e atua inibindo a translocação do NF,κB para o núcleo, bloqueando uma das principais vias de sinalização inflamatória do organismo. Essa ação reduz a produção de citocinas pró,inflamatórias, com destaque especial para o suporte à saúde intestinal e ao controle de processos inflamatórios generalizados."),
+
+    ("TIRZEPATIDE", "10 mg", 780, 780, 0, "Emagrecimento", "⚖️", True,
+     "Agonista dual GIP/GLP,1: ativa simultaneamente os receptores de GIP e GLP,1, dois hormônios incretínicos que atuam de forma complementar no controle glicêmico e do apetite. Essa dupla ativação retarda o esvaziamento gástrico, aumenta a saciedade e melhora a sensibilidade à insulina , um dos peptídeos mais estudados da atualidade, com resultados de perda de peso extraordinários que superam os da semaglutida."),
+
+    ("RETATRUTIDE", "10 mg", 940, 940, 0, "Emagrecimento", "⚖️", True,
+     "Agonista triplo (GIP/GLP,1/GCGR): além de ativar os receptores de GIP e GLP,1, também estimula o receptor de glucagon (GCGR), aumentando o gasto energético basal e a oxidação de gordura, ao mesmo tempo em que reduz o apetite. Essa tripla ação simultânea entrega perdas de peso que ultrapassam 24%, representando o mais avançado perfil de resultados da categoria."),
+
+    ("SEMAGLUTIDE", "5 mg", 620, 620, 0, "Emagrecimento", "⚖️", True,
+     "Agonista de GLP,1 consolidado: liga,se aos receptores de GLP,1 no hipotálamo e no trato gastrointestinal, retardando o esvaziamento gástrico e prolongando a sensação de saciedade, além de melhorar a secreção de insulina dependente de glicose , resultados de perda de peso expressivos e melhora do controle metabólico entre os mais documentados da categoria."),
+
+    ("SELANK", "5 mg", 280, 280, 0, "Cognitivo", "🧠", True,
+     "Ansiolítico regulador: análogo sintético da tuftsina, atua modulando a atividade da serotonina e da norepinefrina no sistema nervoso central, além de influenciar a expressão de BDNF. Esse conjunto de ações produz efeito calmante comparável a compostos ansiolíticos de referência, contribuindo também para a redução do cansaço mental e melhora da atividade cognitiva."),
+
+    ("SEMAX", "5 mg", 300, 300, 0, "Cognitivo", "🧠", True,
+     "Nootrópico neuroprotetor: fragmento sintético do hormônio adrenocorticotrófico (ACTH) sem atividade hormonal, que atua elevando os níveis de BDNF e NGF , fatores essenciais para a plasticidade e sobrevivência neuronal. Também demonstra atuação na modulação da resposta inflamatória do sistema nervoso, favorecendo a proteção do tecido neural."),
+
+    ("PINEALON", "5 mg", 320, 320, 0, "Cognitivo", "🧠", True,
+     "Bioregulador peptídico de cadeia curta: composto por apenas três aminoácidos, penetra facilmente a barreira hematoencefálica e atua regulando a expressão gênica em neurônios, favorecendo a síntese proteica ligada à renovação celular do sistema nervoso. Voltado à modulação do envelhecimento celular, com resultados experimentais promissores na restauração do ritmo circadiano."),
+
+    ("DSIP", "5 mg", 280, 280, 0, "Cognitivo", "🧠", True,
+     "Indutor de sono delta: atua no sistema nervoso central modulando a atividade de neurotransmissores ligados às ondas lentas do sono (ondas delta), promovendo a sensação de sono profundo e o aumento do tempo total de descanso, além de contribuir para a sincronização dos ritmos biológicos."),
+
+    ("OXYTOCIN", "5 mg", 240, 240, 0, "Cognitivo", "🧠", False,
+     "Neuromodulador social por excelência: liga,se a receptores específicos distribuídos em regiões,chave do cérebro, como a amígdala, modulando circuitos ligados à confiança, vínculo social e ansiedade. Também demonstra atuação analgésica, reduzindo a intensidade e o desconforto de estímulos dolorosos , um verdadeiro hormônio do bem,estar."),
+
+    ("NAD+", "500 mg", 460, 460, 0, "Longevidade", "⏳", True,
+     "Coenzima essencial da vitalidade celular: participa diretamente das reações de oxirredução na produção de ATP nas mitocôndrias, além de servir como substrato obrigatório para as sirtuínas (proteínas ligadas à longevidade) e para as enzimas PARP, responsáveis pela reparação do DNA , um dos pilares mais estudados da longevidade celular."),
+
+    ("EPITHALON", "10 mg", 360, 360, 0, "Longevidade", "⏳", True,
+     "Ativador da telomerase: tetrapeptídeo que atua estimulando a atividade da enzima telomerase, responsável por preservar o comprimento dos telômeros e retardar a senescência celular. Também está associado à regulação da produção de melatonina pela glândula pineal, reforçando seu papel na sincronização do ciclo do sono e na longevidade."),
+
+    ("SS,31", "5 mg", 420, 420, 0, "Longevidade", "⏳", True,
+     "Protetor de cardiolipina: peptídeo de penetração celular que se concentra especificamente na membrana mitocondrial interna, ligando,se à cardiolipina para estabilizar sua estrutura. Isso otimiza o funcionamento da cadeia transportadora de elétrons, restaura a produção eficiente de ATP e reduz a formação de radicais livres , com excelente perfil de tolerabilidade."),
+
+    ("PT,141", "10 mg", 260, 260, 0, "Sexual", "❤️", True,
+     "Ativador do desejo sexual via sistema nervoso central: atua como agonista dos receptores de melanocortina (MC3R e MC4R) no hipotálamo, ativando diretamente as vias neurais responsáveis pelo desejo sexual , diferente de mecanismos vasculares periféricos, sua ação começa no cérebro, com resultados consistentes no aumento da libido e na redução do desconforto associado à baixa resposta sexual."),
+
+    ("BACTERIOSTATIC WATER", "30 ml", 45, 45, 0, "Acessório", "💧", True,
+     "Água bacteriostática 0,9% álcool benzílico: o conservante bacteriostático inibe o crescimento microbiano na solução, permitindo múltiplas extrações do mesmo frasco com segurança , solvente de referência para reconstituição, garantindo estabilidade e pureza na preparação de qualquer peptídeo da G-lab."),
+]
 # Emoji específico por produto (chave = nome normalizado por _norm_nome).
 # Representa a função principal estudada de cada peptídeo.
 ICONES_PRODUTO = {
