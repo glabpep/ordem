@@ -95,7 +95,7 @@ PRODUTOS_PADRAO = [
     ("TB,500", "5 mg", 320, 320, 0, "Recuperação", "🩹", True,
      "Versão sintética da Timosina Beta,4: atua sequestrando a actina G, o que regula a formação do citoesqueleto celular e facilita a migração de células reparadoras até o local da lesão. Também estimula a angiogênese e reduz a formação excessiva de tecido cicatricial (fibrose), criando as condições ideais para uma regeneração tecidual mais completa e funcional."),
 
-    ("TB,500 + BPC", "10 mg", 520, 520, 0, "Recuperação", "🩹", True,
+    ("TB,500 + BPC BLEND", "10 mg", 520, 520, 0, "Recuperação", "🩹", True,
      "Protocolo de reparo total: une os dois mecanismos mais respeitados da recuperação tecidual , a angiogênese e migração celular promovidas pelo TB,500 com a estimulação vascular e modulação de óxido nítrico do BPC,157. A ação combinada potencializa cada etapa do processo regenerativo, sendo considerado o padrão,ouro por quem busca uma resposta completa contra lesões atléticas graves."),
 
     ("ARA 290", "5 mg", 380, 380, 0, "Recuperação", "🩹", True,
@@ -146,11 +146,17 @@ PRODUTOS_PADRAO = [
     ("SS,31", "5 mg", 420, 420, 0, "Longevidade", "⏳", True,
      "Protetor de cardiolipina: peptídeo de penetração celular que se concentra especificamente na membrana mitocondrial interna, ligando,se à cardiolipina para estabilizar sua estrutura. Isso otimiza o funcionamento da cadeia transportadora de elétrons, restaura a produção eficiente de ATP e reduz a formação de radicais livres , com excelente perfil de tolerabilidade."),
 
-    ("PT,141", "10 mg", 260, 260, 0, "Sexual", "❤️", True,
+    ("PT,141 BREMELANOTIDE", "10 mg", 260, 260, 0, "Sexual", "❤️", True,
      "Ativador do desejo sexual via sistema nervoso central: atua como agonista dos receptores de melanocortina (MC3R e MC4R) no hipotálamo, ativando diretamente as vias neurais responsáveis pelo desejo sexual , diferente de mecanismos vasculares periféricos, sua ação começa no cérebro, com resultados consistentes no aumento da libido e na redução do desconforto associado à baixa resposta sexual."),
 
     ("BACTERIOSTATIC WATER", "30 ml", 45, 45, 0, "Acessório", "💧", True,
      "Água bacteriostática 0,9% álcool benzílico: o conservante bacteriostático inibe o crescimento microbiano na solução, permitindo múltiplas extrações do mesmo frasco com segurança , solvente de referência para reconstituição, garantindo estabilidade e pureza na preparação de qualquer peptídeo da G-lab."),
+
+    ("BACTERIOSTATIC WATER", "10 ml", 45, 45, 0, "Acessório", "💧", True,
+     "Água bacteriostática 0,9% álcool benzílico: o conservante bacteriostático inibe o crescimento microbiano na solução, permitindo múltiplas extrações do mesmo frasco com segurança , solvente de referência para reconstituição, garantindo estabilidade e pureza na preparação de qualquer peptídeo da G-lab."),
+
+    ("CAGRILINTIDE", "10 mg", 780, 780, 0, "Emagrecimento", "⚖️", True,
+     "Agonista do receptor de melanocortina 4 (MC4R): atua no hipotálamo, promovendo a saciedade e reduzindo o apetite, com resultados experimentais positivos na perda de peso e na melhora da composição corporal.")
 ]
 # Emoji específico por produto (chave = nome normalizado por _norm_nome).
 # Representa a função principal estudada de cada peptídeo.
