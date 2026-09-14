@@ -471,7 +471,7 @@ CUPONS = {
       '10PRO':0.000000000001,'PRO5':0.05,'WEY5':0.05,'ALE5':0.05,'TRIGUEIRO':0.05,
       'RAYSSA5':0.05,'PATRICIA5':0.05,'LU5':0.05, 'RAFA5':0.05, 'WAWA':0.05, 'DUDA5':0.05, 
       'ALYNE5':0.05, 'JRCREMONEZ':0.05, 'ZAMA5':0.05, 'JENNI5':0.05, 'DJU5':0.05, 'CLAU5':0.05, 
-      'GLAB5':0.05, 'BRENDA5':0.05,
+      'GLAB5':0.05, 'BRENDA5':0.05, 'GL5':0.05, 
 }
 
 REGIOES = {
@@ -1570,32 +1570,59 @@ function enviarPedido(){
   const total = sub - desc + frete;
 
   const pct = COUPONS[cup] || 0;
-  let msg = `*NOVO PEDIDO G-LAB*\n\n`;
-  msg += `*CLIENTE:*\n`;
-  msg += `\u2022 *NOME:* ${d.n}\n`;
-  msg += `\u2022 *CPF:* ${d.cpf}\n`;
-  msg += `\u2022 *WHATSAPP:* ${d.t}\n`;
-  msg += `\u2022 *END:* ${d.e} - N${d.nu}\n`;
-  msg += `\u2022 *BAIRRO:* ${d.ba}\n`;
-  if (d.co) msg += `\u2022 *COMPL:* ${d.co}\n`;
-  msg += `\u2022 *CIDADE:* ${d.ci}-${d.es}\n`;
-  msg += `\u2022 *CEP:* ${d.ce}\n`;
-  msg += `\u2022 *PGTO:* ${d.p}\n`;
-  msg += `\n*cupom:* ${cup || "NENHUM"}\n`;
-  msg += `\n*ITENS:*\n`;
-  for (const [id, q] of Object.entries(cart)){
+  let msg = `*NOVO PEDIDO G-LAB*\n\n*CLIENTE:*\n`;
+
+  msg += `• *NOME:* ${d.n}\n`;
+  msg += `• *CPF:* ${String(d.cpf || "").replace(/\D/g, "")}\n`;
+  msg += `• *WHATSAPP:* ${d.t}\n`;
+  msg += `• *END:* ${d.e}, ${d.nu}\n`;
+  msg += `• *BAIRRO:* ${d.ba}\n`;
+
+  if (d.co) msg += `• *COMPL:* ${d.co}\n`;
+
+  msg += `• *CIDADE:* ${d.ci}-${d.es}\n`;
+  msg += `• *CEP:* ${d.ce}\n`;
+  msg += `• *PGTO:* ${d.p}\n\n`;
+
+  msg += `*ITENS:*\n`;
+
+  for (const [id, q] of Object.entries(cart)) {
     const p = PRODUCTS.find(x => x.id === +id);
     const bruto = p.preco * q;
-    msg += `\u2022 ${q}x ${p.nome} (${p.espec}) - ${brl(bruto)}`;
-    if (pct > 0) msg += ` - COM DESCONTO ${brl(bruto * (1 - pct))}`;
+
+    msg += `• ${q}x ${p.nome} (${p.espec}) - ${brl(bruto)}`;
+
+    if (pct > 0) {
+      msg += ` - COM DESCONTO ${brl(bruto * (1 - pct))}`;
+    }
+
     msg += `\n`;
   }
+
   const bq = brindeQtd();
-  if (bq > 0){
-    msg += `\u2022 ${bq}x ${BACT_WATER.nome} ${BACT_WATER.espec} - BRINDE\n`;
+
+  if (bq > 0) {
+    msg += `• ${bq}x ${BACT_WATER.nome} ${BACT_WATER.espec} - BRINDE\n`;
   }
-  msg += `\n\ud83d\ude9a *FRETE:* ${frete === 0 ? "GR\u00c1TIS" : (freteInfo.regiao + " " + brl(frete) + (freteInfo.prazo ? " (" + freteInfo.prazo.toUpperCase() + ")" : ""))}\n`;
-  msg += `\n*TOTAL: ${brl(total)}*`;
+
+  msg += `\n*cupom:* ${cup || "NENHUM"}\n`;
+
+  msg += `\n🚚 *FRETE:* ${
+    frete === 0
+      ? "GRÁTIS"
+      : (
+          freteInfo.regiao +
+          " " +
+          brl(frete) +
+          (
+            freteInfo.prazo
+              ? " (" + freteInfo.prazo.toUpperCase() + ")"
+              : ""
+          )
+        )
+  }\n`;
+
+msg += `\n*TOTAL: ${brl(total)}*`;
 
 
   __enviouZap = true;
