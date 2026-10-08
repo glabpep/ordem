@@ -6,9 +6,6 @@ import base64
 import re
 from pathlib import Path
 
-# =====================================================================
-# 1) CONFIGURAÇÃO
-# =====================================================================
 BASE_DIR       = Path(__file__).parent.resolve()
 IMG_DIR        = BASE_DIR / "imagens_produtos"
 # --- planilha: detecta automaticamente o .xlsx da pasta -------------
@@ -33,17 +30,8 @@ OUTPUT_IMG_DIR = OUTPUT_DIR / "imagens_produtos"
 WHATSAPP_NUM   = "17746222523"   # ajuste para o número real
 FRETE_GRATIS   = 2000.0            # frete grátis acima deste valor
 BRINDE_LIMITE  = 1000.0            # a partir daqui, ganha bacteriostatic water por item
-
-# ---------------------------------------------------------------------
-# RASTREIO DE CLIENTES (Google Sheets via Apps Script)
-# Cole aqui a URL do Web App publicado (arquivo apps_script_glab.gs).
-# Deixe "" para desativar o rastreio.
-# ---------------------------------------------------------------------
 ANALYTICS_URL  = ""
 
-# =====================================================================
-# 2) BASE DE PRODUTOS (mesmos 31 peptídeos do site original)
-# =====================================================================
 CATEGORY_COLORS = {
     "Metabolismo":   "#ff3b30",
     "Hormônios":     "#ff5252",
@@ -158,6 +146,8 @@ PRODUTOS_PADRAO = [
     ("CAGRILINTIDE", "10 mg", 780, 780, 0, "Emagrecimento", "⚖️", True,
      "Agonista do receptor de melanocortina 4 (MC4R): atua no hipotálamo, promovendo a saciedade e reduzindo o apetite, com resultados experimentais positivos na perda de peso e na melhora da composição corporal.")
 ]
+
+
 # Emoji específico por produto (chave = nome normalizado por _norm_nome).
 # Representa a função principal estudada de cada peptídeo.
 ICONES_PRODUTO = {
@@ -200,9 +190,6 @@ ICONES_PRODUTO = {
 
 
 
-# =====================================================================
-# 3) LEITURA DO EXCEL (disponibilidade + descontos + preços)
-# =====================================================================
 COL_ALIASES = {
     "produto":   ["produto", "nome", "peptideo", "peptídeo", "item", "descricao", "descrição"],
     "volume":    ["volume", "qtd", "quantidade", "espec", "tamanho"],
@@ -352,10 +339,6 @@ def carregar_excel(path: Path):
     print(f"\u2713  Excel lido: {len(dados)} produtos.")
     return dados
 
-
-# =====================================================================
-# 4) MAPEAMENTO DE IMAGENS (pasta imagens_produtos/)
-# =====================================================================
 IMG_EXTS = (".webp", ".png", ".jpg", ".jpeg", ".avif")
 
 
@@ -393,9 +376,6 @@ def encontrar_imagem(nome: str, espec: str) -> str:
     return f"imagens_produtos/{melhor.name}" if melhor else ""
 
 
-# =====================================================================
-# 5) MONTAGEM DA LISTA FINAL DE PRODUTOS
-# =====================================================================
 def montar_produtos(dados_planilha: list):
     """Monta o catálogo exclusivamente pelas linhas da planilha.
 
@@ -461,9 +441,6 @@ def montar_produtos(dados_planilha: list):
     return produtos
 
 
-# =====================================================================
-# 6) CUPONS E REGIÕES 
-# =====================================================================
 CUPONS = {
     'BRUNA5': 0.05,'GILMARA5':0.05,'DAFNE10':0.10,'NOS5':0.05,'ROGERIO5':0.05,
       'ANDERSON5':0.05,'JAQUE5':0.05,'CABRAL5':0.05,'KARLINHA5':0.05,'LUD5':0.05,'CASSIA5':0.05,
@@ -494,9 +471,6 @@ _RMC = [
 ]
 FRETES_CIDADES = {f"{c}-PR": 20.0 for c in _RMC}
 
-# =====================================================================
-# 7) TEMPLATE HTML (SPA embutida)
-# =====================================================================
 HTML_TEMPLATE = r"""<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -799,7 +773,7 @@ img{max-width:100%;display:block}
 </header>
 
 <!-- WHATSAPP FLUTUANTE (duvidas) -->
-<a class="wa-fab" id="waFab" href="https://wa.me/17746222523?text=Ol%C3%A1%21%20Tenho%20uma%20d%C3%BAvida%20sobre%20os%20pept%C3%ADdeos%20da%20G-LAB."
+<a class="wa-fab" id="waFab" href="https://wa.me/?text=Ol%C3%A1%21%20Tenho%20uma%20d%C3%BAvida%20sobre%20os%20pept%C3%ADdeos%20da%20G-LAB."
    target="_blank" rel="noopener" aria-label="Falar no WhatsApp" title="Tire suas dúvidas no WhatsApp"
    onclick="try{track('clicou_whatsapp_duvida')}catch(e){}">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.03c-.24.68-1.4 1.3-1.94 1.35-.5.05-1.13.07-1.82-.11-.42-.11-.96-.29-1.65-.59-2.9-1.25-4.79-4.17-4.94-4.37-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.02-2.42.27-.29.58-.36.78-.36h.56c.18 0 .42-.07.66.5.24.58.82 2.01.89 2.15.07.14.12.31.02.5-.09.19-.14.31-.28.48-.14.17-.29.37-.42.5-.14.14-.28.29-.12.57.16.29.71 1.17 1.52 1.9 1.05.93 1.93 1.22 2.2 1.36.27.14.43.12.59-.07.16-.19.68-.79.86-1.06.18-.27.36-.22.6-.13.24.09 1.53.72 1.79.85.26.14.43.21.5.33.07.12.07.68-.17 1.36z"/></svg>
@@ -1009,10 +983,6 @@ img{max-width:100%;display:block}
       <a href="certificados/4.pdf" target="_blank" rel="noopener">🔬 Certificado 4</a>
       <a href="certificados/5.pdf" target="_blank" rel="noopener">🔬 Certificado 5</a>
       <a href="certificados/6.pdf" target="_blank" rel="noopener">🔬 Certificado 6</a>
-      <a href="certificados/7.pdf" target="_blank" rel="noopener">🔬 Certificado 7</a>
-      <a href="certificados/8.pdf" target="_blank" rel="noopener">🔬 Certificado 8</a>
-      <a href="certificados/9.pdf" target="_blank" rel="noopener">🔬 Certificado 9</a>
-      <a href="certificados/10.pdf" target="_blank" rel="noopener">🔬 Certificado 10</a>
     </div>
   </div>
 </div>
@@ -1253,10 +1223,20 @@ function cartUnitsTotal(){
   return Object.values(cart).reduce((s,q) => s+q, 0);
 }
 function isBrinde(){
-  return cartSubtotal() >= BRINDE_LIMITE && cartUnitsTotal() > 0;
+  return cartSubtotal() >= BRINDE_LIMITE && cartUnitsElegiveisBrinde() > 0;
+}
+function semBrinde(p){
+  const n = (p && p.nome || "").toUpperCase();
+  return n.includes("BACTERIOSTATIC") || n.includes("CASE");
+}
+function cartUnitsElegiveisBrinde(){
+  return Object.entries(cart).reduce((s,[id,q]) => {
+    const p = PRODUCTS.find(x => x.id === +id);
+    return s + (p && !semBrinde(p) ? q : 0);
+  }, 0);
 }
 function brindeQtd(){
-  return isBrinde() ? cartUnitsTotal() : 0;
+  return isBrinde() ? cartUnitsElegiveisBrinde() : 0;
 }
 function updateCart(){
   const n = cartUnitsTotal();
@@ -1390,7 +1370,7 @@ function calcTotals(){
   const cup = ($("cupomInput").value || "").trim().toUpperCase();
   const desc = COUPONS[cup] ? sub * COUPONS[cup] : 0;
   const freteBruto = freteInfo ? freteInfo.valor : 0;
-  const frete = (sub >= FRETE_GRATIS && freteInfo) ? 0 : freteBruto;
+  const frete = ((sub - desc) >= FRETE_GRATIS && freteInfo) ? 0 : freteBruto;
   const total = sub - desc + frete;
   $("totals").innerHTML = `
     <div class="row"><span>Subtotal</span><span>${brl(sub)}</span></div>
@@ -1566,63 +1546,36 @@ function enviarPedido(){
   const sub = cartSubtotal();
   const cup = ($("cupomInput").value || "").trim().toUpperCase();
   const desc = COUPONS[cup] ? sub * COUPONS[cup] : 0;
-  const frete = sub >= FRETE_GRATIS ? 0 : freteInfo.valor;
+  const frete = (sub - desc) >= FRETE_GRATIS ? 0 : freteInfo.valor;
   const total = sub - desc + frete;
 
   const pct = COUPONS[cup] || 0;
-  let msg = `*NOVO PEDIDO G-LAB*\n\n*CLIENTE:*\n`;
-
-  msg += `• *NOME:* ${d.n}\n`;
-  msg += `• *CPF:* ${String(d.cpf || "").replace(/\D/g, "")}\n`;
-  msg += `• *WHATSAPP:* ${d.t}\n`;
-  msg += `• *END:* ${d.e}, ${d.nu}\n`;
-  msg += `• *BAIRRO:* ${d.ba}\n`;
-
-  if (d.co) msg += `• *COMPL:* ${d.co}\n`;
-
-  msg += `• *CIDADE:* ${d.ci}-${d.es}\n`;
-  msg += `• *CEP:* ${d.ce}\n`;
-  msg += `• *PGTO:* ${d.p}\n\n`;
-
-  msg += `*ITENS:*\n`;
-
-  for (const [id, q] of Object.entries(cart)) {
+  let msg = `*NOVO PEDIDO G-LAB*\n\n`;
+  msg += `*CLIENTE:*\n`;
+  msg += `\u2022 *NOME:* ${d.n}\n`;
+  msg += `\u2022 *CPF:* ${d.cpf}\n`;
+  msg += `\u2022 *WHATSAPP:* ${d.t}\n`;
+  msg += `\u2022 *END:* ${d.e} - N${d.nu}\n`;
+  msg += `\u2022 *BAIRRO:* ${d.ba}\n`;
+  if (d.co) msg += `\u2022 *COMPL:* ${d.co}\n`;
+  msg += `\u2022 *CIDADE:* ${d.ci}-${d.es}\n`;
+  msg += `\u2022 *CEP:* ${d.ce}\n`;
+  msg += `\u2022 *PGTO:* ${d.p}\n`;
+  msg += `\n*ITENS:*\n`;
+  msg += `\n*cupom:* ${cup || "NENHUM"}\n`;
+  for (const [id, q] of Object.entries(cart)){
     const p = PRODUCTS.find(x => x.id === +id);
     const bruto = p.preco * q;
-
-    msg += `• ${q}x ${p.nome} (${p.espec}) - ${brl(bruto)}`;
-
-    if (pct > 0) {
-      msg += ` - COM DESCONTO ${brl(bruto * (1 - pct))}`;
-    }
-
+    msg += `\u2022 ${q}x ${p.nome} (${p.espec}) - ${brl(bruto)}`;
+    if (pct > 0) msg += ` - COM DESCONTO ${brl(bruto * (1 - pct))}`;
     msg += `\n`;
   }
-
   const bq = brindeQtd();
-
-  if (bq > 0) {
-    msg += `• ${bq}x ${BACT_WATER.nome} ${BACT_WATER.espec} - BRINDE\n`;
+  if (bq > 0){
+    msg += `\u2022 ${bq}x ${BACT_WATER.nome} ${BACT_WATER.espec} - BRINDE\n`;
   }
-
-  msg += `\n*cupom:* ${cup || "NENHUM"}\n`;
-
-  msg += `\n🚚 *FRETE:* ${
-    frete === 0
-      ? "GRÁTIS"
-      : (
-          freteInfo.regiao +
-          " " +
-          brl(frete) +
-          (
-            freteInfo.prazo
-              ? " (" + freteInfo.prazo.toUpperCase() + ")"
-              : ""
-          )
-        )
-  }\n`;
-
-msg += `\n*TOTAL: ${brl(total)}*`;
+  msg += `\n\ud83d\ude9a *FRETE:* ${frete === 0 ? "GR\u00c1TIS" : (freteInfo.regiao + " " + brl(frete) + (freteInfo.prazo ? " (" + freteInfo.prazo.toUpperCase() + ")" : ""))}\n`;
+  msg += `\n*TOTAL: ${brl(total)}*`;
 
 
   __enviouZap = true;
@@ -1785,9 +1738,6 @@ calcRender();
 </html>
 """
 
-# =====================================================================
-# 8) GERAÇÃO
-# =====================================================================
 def _forcar_remocao(func, path, _exc):
     """Tenta remover arquivo/pasta somente-leitura (Windows/OneDrive)."""
     try:
