@@ -144,7 +144,10 @@ PRODUTOS_PADRAO = [
      "Água bacteriostática 0,9% álcool benzílico: o conservante bacteriostático inibe o crescimento microbiano na solução, permitindo múltiplas extrações do mesmo frasco com segurança , solvente de referência para reconstituição, garantindo estabilidade e pureza na preparação de qualquer peptídeo da G-lab."),
 
     ("CAGRILINTIDE", "10 mg", 780, 780, 0, "Emagrecimento", "⚖️", True,
-     "Agonista do receptor de melanocortina 4 (MC4R): atua no hipotálamo, promovendo a saciedade e reduzindo o apetite, com resultados experimentais positivos na perda de peso e na melhora da composição corporal.")
+     "Agonista do receptor de melanocortina 4 (MC4R): atua no hipotálamo, promovendo a saciedade e reduzindo o apetite, com resultados experimentais positivos na perda de peso e na melhora da composição corporal."),
+
+    ("SERUM + GHK-CU 100 MG", "30 ml", 560, 560, 0, "Estética", "✨", True,
+     "Blend de rejuvenescimento dérmico: combina o efeito remodelador do GHK-Cu com um veículo sérico que potencializa a penetração cutânea, promovendo firmeza, elasticidade e hidratação da pele, além de estimular a síntese de colágeno e a renovação celular.")
 ]
 
 
@@ -186,6 +189,7 @@ ICONES_PRODUTO = {
     "CASE": "📦",
     "CBL 514": "🔥",
     "BPC": "🩹",
+    "SERUM + GHK-CU 100 MG": "✨",
 }
 
 
