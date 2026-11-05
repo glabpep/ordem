@@ -147,7 +147,11 @@ PRODUTOS_PADRAO = [
      "Agonista do receptor de melanocortina 4 (MC4R): atua no hipotálamo, promovendo a saciedade e reduzindo o apetite, com resultados experimentais positivos na perda de peso e na melhora da composição corporal."),
 
     ("SERUM + GHK-CU 100 MG", "30 ml", 560, 560, 0, "Estética", "✨", True,
-     "Blend de rejuvenescimento dérmico: combina o efeito remodelador do GHK-Cu com um veículo sérico que potencializa a penetração cutânea, promovendo firmeza, elasticidade e hidratação da pele, além de estimular a síntese de colágeno e a renovação celular.")
+     "Blend de rejuvenescimento dérmico: combina o efeito remodelador do GHK-Cu com um veículo sérico que potencializa a penetração cutânea, promovendo firmeza, elasticidade e hidratação da pele, além de estimular a síntese de colágeno e a renovação celular."),
+    
+    ("AHK, CU", "50 mg", 420, 420, 0, "Estética", "✨", True,
+     "Blend de rejuvenescimento dérmico: atua na estimulação da síntese de colágeno e na renovação celular, promovendo firmeza, elasticidade e hidratação da pele.")
+
 ]
 
 
@@ -155,6 +159,7 @@ PRODUTOS_PADRAO = [
 # Representa a função principal estudada de cada peptídeo.
 ICONES_PRODUTO = {
     "AOD 9604": "🔥",
+    "AHK CU": "✨",
     "HGH FRAGMENT 176 191": "🔥",
     "MOTS C": "⚡",
     "SLU PP": "🏃",
