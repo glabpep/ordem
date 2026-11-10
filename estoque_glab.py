@@ -27,7 +27,7 @@ OUTPUT_DIR     = BASE_DIR / "site_glab"
 OUTPUT_HTML    = OUTPUT_DIR / "index.html"
 OUTPUT_IMG_DIR = OUTPUT_DIR / "imagens_produtos"
 
-WHATSAPP_NUM   = "17746222523"   # ajuste para o número real
+WHATSAPP_NUM   = ""   # ajuste para o número real
 FRETE_GRATIS   = 2000.0            # frete grátis acima deste valor
 BRINDE_LIMITE  = 1000.0            # a partir daqui, ganha bacteriostatic water por item
 ANALYTICS_URL  = ""
@@ -152,10 +152,10 @@ PRODUTOS_PADRAO = [
     ("AHK, CU", "50 mg", 420, 420, 0, "Estética", "✨", True,
      "Blend de rejuvenescimento dérmico: atua na estimulação da síntese de colágeno e na renovação celular, promovendo firmeza, elasticidade e hidratação da pele."),
 
-    ("5 AMINO", "50 mg", 320, 320, 0, "Metabolismo", "🧬", True,
+    ("5, AMINO", "50 mg", 320, 320, 0, "Metabolismo", "🧬", True,
      "É uma molécula estudada principalmente por seu efeito sobre o metabolismo e o controle do armazenamento de gordura. Ela pode alterar o metabolismo energético das células. Pode influenciar a utilização e o armazenamento de gordura, favorecer mudanças na composição corporal. Pode também interferir em processos metabólicos relacionados ao tecido adiposo."),
 
-    ("ACE 031", "1 mg", 560, 560, 0, "Hormônios", "💪", True,
+    ("ACE, 031", "1 mg", 560, 560, 0, "Hormônios", "💪", True,
      "Proteína experimental que atua como receptor-isca (ActRIIB), ligando-se à miostatina e a outras proteínas que limitam o crescimento muscular. Seu mecanismo busca reduzir esses sinais inibitórios, favorecendo o aumento da massa muscular e da massa magra.")
 
 ]
@@ -368,29 +368,31 @@ def _listar_imagens():
 _IMGS = None
 
 
+from urllib.parse import quote
+
 def encontrar_imagem(nome: str, espec: str) -> str:
-    """Casa o produto com o arquivo da pasta imagens_produtos/ (ex.: 'AOD 9604 5 MG.webp')."""
     global _IMGS
     if _IMGS is None:
         _IMGS = _listar_imagens()
-        print(f"\u2713  Imagens encontradas: {len(_IMGS)}")
+        print(f"✓  Imagens encontradas: {len(_IMGS)}")
     if not _IMGS:
         return ""
-    tokens = [t for t in _norm_nome(nome).split() if t]
-    num = "".join(c for c in str(espec) if c.isdigit())
-    melhor, melhor_score = None, 0
-    for f in _IMGS:
-        fname = _norm_nome(f.stem)
-        ftok = fname.split()
-        score = sum(2 if t in ftok else (1 if t in fname else 0) for t in tokens)
-        if score == 0:
-            continue
-        if num and num in ftok:
-            score += 3
-        score += 1 if len(ftok) == len(tokens) else 0
-        if score > melhor_score:
-            melhor, melhor_score = f, score
-    return f"imagens_produtos/{melhor.name}" if melhor else ""
+    alvo_full = _norm_nome(f"{nome} {espec}")
+    alvo_nome = _norm_nome(nome)
+    mapa = {_norm_nome(f.stem): f for f in _IMGS}
+
+    f = mapa.get(alvo_full) or mapa.get(alvo_nome)
+    if not f:
+        tokens = alvo_full.split()
+        cands = [(k, v) for k, v in mapa.items()
+                 if all(t in k.split() for t in tokens)]
+        if cands:
+            f = min(cands, key=lambda kv: len(kv[0].split()))[1]
+    if not f:
+        print(f"⚠  SEM FOTO: '{nome} {espec}' (esperado: '{alvo_full}')")
+        return ""
+    return "imagens_produtos/" + quote(f.name)
+
 
 
 def montar_produtos(dados_planilha: list):
