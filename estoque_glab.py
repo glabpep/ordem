@@ -27,7 +27,7 @@ OUTPUT_DIR     = BASE_DIR / "site_glab"
 OUTPUT_HTML    = OUTPUT_DIR / "index.html"
 OUTPUT_IMG_DIR = OUTPUT_DIR / "imagens_produtos"
 
-WHATSAPP_NUM   = ""   # ajuste para o número real
+WHATSAPP_NUM   = "17746222523"   # ajuste para o número real
 FRETE_GRATIS   = 2000.0            # frete grátis acima deste valor
 BRINDE_LIMITE  = 1000.0            # a partir daqui, ganha bacteriostatic water por item
 ANALYTICS_URL  = ""
