@@ -150,7 +150,13 @@ PRODUTOS_PADRAO = [
      "Blend de rejuvenescimento dérmico: combina o efeito remodelador do GHK-Cu com um veículo sérico que potencializa a penetração cutânea, promovendo firmeza, elasticidade e hidratação da pele, além de estimular a síntese de colágeno e a renovação celular."),
     
     ("AHK, CU", "50 mg", 420, 420, 0, "Estética", "✨", True,
-     "Blend de rejuvenescimento dérmico: atua na estimulação da síntese de colágeno e na renovação celular, promovendo firmeza, elasticidade e hidratação da pele.")
+     "Blend de rejuvenescimento dérmico: atua na estimulação da síntese de colágeno e na renovação celular, promovendo firmeza, elasticidade e hidratação da pele."),
+
+    ("5 AMINO", "50 mg", 320, 320, 0, "Metabolismo", "🧬", True,
+     "É uma molécula estudada principalmente por seu efeito sobre o metabolismo e o controle do armazenamento de gordura. Ela pode alterar o metabolismo energético das células. Pode influenciar a utilização e o armazenamento de gordura, favorecer mudanças na composição corporal. Pode também interferir em processos metabólicos relacionados ao tecido adiposo."),
+
+    ("ACE 031", "1 mg", 560, 560, 0, "Hormônios", "💪", True,
+     "Proteína experimental que atua como receptor-isca (ActRIIB), ligando-se à miostatina e a outras proteínas que limitam o crescimento muscular. Seu mecanismo busca reduzir esses sinais inibitórios, favorecendo o aumento da massa muscular e da massa magra.")
 
 ]
 
@@ -159,6 +165,7 @@ PRODUTOS_PADRAO = [
 # Representa a função principal estudada de cada peptídeo.
 ICONES_PRODUTO = {
     "AOD 9604": "🔥",
+    "ACE 031": "💪",
     "AHK CU": "✨",
     "HGH FRAGMENT 176 191": "🔥",
     "MOTS C": "⚡",
@@ -195,6 +202,7 @@ ICONES_PRODUTO = {
     "CBL 514": "🔥",
     "BPC": "🩹",
     "SERUM + GHK-CU 100 MG": "✨",
+    "5 AMINO": "🧬",
 }
 
 
