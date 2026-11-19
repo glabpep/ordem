@@ -156,7 +156,13 @@ PRODUTOS_PADRAO = [
      "É uma molécula estudada principalmente por seu efeito sobre o metabolismo e o controle do armazenamento de gordura. Ela pode alterar o metabolismo energético das células. Pode influenciar a utilização e o armazenamento de gordura, favorecer mudanças na composição corporal. Pode também interferir em processos metabólicos relacionados ao tecido adiposo."),
 
     ("ACE, 031", "1 mg", 560, 560, 0, "Hormônios", "💪", True,
-     "Proteína experimental que atua como receptor-isca (ActRIIB), ligando-se à miostatina e a outras proteínas que limitam o crescimento muscular. Seu mecanismo busca reduzir esses sinais inibitórios, favorecendo o aumento da massa muscular e da massa magra.")
+     "Proteína experimental que atua como receptor-isca (ActRIIB), ligando-se à miostatina e a outras proteínas que limitam o crescimento muscular. Seu mecanismo busca reduzir esses sinais inibitórios, favorecendo o aumento da massa muscular e da massa magra."),
+
+    ("GLUTATHIONE", "1500 mg", 320, 320, 0, "Metabolismo", "🛡️", True,
+     "Antioxidante endógeno: atua neutralizando radicais livres e espécies reativas de oxigênio, protegendo as células contra o estresse oxidativo. Além disso, participa da desintoxicação hepática e da regeneração de outros antioxidantes, como a vitamina C e a vitamina E."),
+
+    ("CARDIOGEN", "20 mg", 560, 560, 0, "Longevidade", "🫀", True,
+     "Peptídeo cardioprotetor: atua promovendo a sobrevivência celular e a regeneração do tecido cardíaco após lesões. Ele pode melhorar a função cardíaca e reduzir o dano oxidativo no coração, contribuindo para a saúde cardiovascular.")
 
 ]
 
@@ -203,6 +209,8 @@ ICONES_PRODUTO = {
     "BPC": "🩹",
     "SERUM + GHK-CU 100 MG": "✨",
     "5 AMINO": "🧬",
+    "GLUTATHIONE": "🛡️",
+    "CARDIOGEN": "🫀",
 }
 
 
@@ -1577,7 +1585,7 @@ function enviarPedido(){
   let msg = `*NOVO PEDIDO G-LAB*\n\n`;
   msg += `*CLIENTE:*\n`;
   msg += `\u2022 *NOME:* ${d.n}\n`;
-  msg += `\u2022 *CPF:* ${d.cpf}\n`;
+  msg += `\u2022 *CPF:* ${d.cpf.replace(/\D/g, "")}\n`;
   msg += `\u2022 *WHATSAPP:* ${d.t}\n`;
   msg += `\u2022 *END:* ${d.e} - N${d.nu}\n`;
   msg += `\u2022 *BAIRRO:* ${d.ba}\n`;
@@ -1590,7 +1598,7 @@ function enviarPedido(){
   for (const [id, q] of Object.entries(cart)){
     const p = PRODUCTS.find(x => x.id === +id);
     const bruto = p.preco * q;
-    msg += `\u2022 ${q}x ${p.nome} (${p.espec}) - ${brl(bruto)}`;
+    msg += `\u2022 ${q}x ${p.nome} ${p.espec.toUpperCase()} (${p.espec.toUpperCase()}) - ${brl(bruto)}`;
     if (pct > 0) msg += ` - COM DESCONTO ${brl(bruto * (1 - pct))}`;
     msg += `\n`;
   }
